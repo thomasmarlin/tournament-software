@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<script src="jquery-2.1.4.min.js"></script>
+<script src="angular.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="ui-bootstrap-tpls-0.14.3.min.js.css"></script>
+<script src="sos.js"></script>
+<script src="AddPlayerController.js"></script>
+<script src="CreateGameController.js"></script>
+<script src="AssignWinnerController.js"></script>
+
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+
+
+<div ng-app="sosApp" ng-controller="sos" style="margin:20px">
+
+  <h1>SWCCG Event: Match Play Championship 2015</h1>
+
+  <hr>
+
+  <div style="border-radius:5px; background-color:#EEEEEE; padding:20px">
+    <div style="position:relative;">
+      <h2>Players</h2>
+      <div style="position:absolute; top:0; bottom:0; right:0; left:0;">
+        <button class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="addPlayer()">Add Player</button>
+      </div>
+    </div>
+
+    <div ng-if="data.players.length == 0" style="margin:50px">
+      <h3 style="font-style:italic; color:gray">Click 'Add Player' to add players...</h3>
+    </div>
+
+    <div ng-if="data.players.length > 0">
+      <!-- Headers -->
+      <div ng-repeat="player in data.players" style="border:thin solid black; margin-top:5px; border-radius:4px;">
+        <div style="margin:10px">
+          <div class="row">
+
+            <div class="col-xs-2">
+              <div class="glyphicon glyphicon-user" style="font-size: 2.5em;"></div>
+            </div>
+
+            <div class="col-xs-4">
+              <div>{{player.name}}</div>
+              <div>SoS: {{player.sos}}</div>
+            </div>
+
+            <div class="col-xs-4">
+              <div>Victory Points: {{player.vp}}</div>
+              <div>Record: {{player.wins}}-{{player.losses}}</div>
+            </div>
+
+            <div class="col-xs-2">
+              <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" ng-click="deletePlayer(player)" class="glyphicon glyphicon-remove"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div style="border-radius:5px; background-color:#EEEEEE; padding:20px">
+    <div style="position:relative">
+      <h2>Games</h2>
+      <div style="position:absolute; top:0; bottom:0; right:0; left:0;">
+        <button class="btn btn-default" style="float:right; margin-right:20px;" data-ng-click="newRound()">New Round</button>
+        <button class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="createGame()">Create Game</button>
+      </div>
+    </div>
+    <ul class="nav nav-tabs">
+      <li class="active"> <a href='#round1' data-toggle='tab'>Round 1</a> </li>
+        <li ng-repeat='round in data.rounds' ng-if="round.num > 1">
+            <a href='#round{{round.num}}' data-toggle='tab'>Round {{round.num}}</a>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+
+        <!-- Games from this current round -->
+        <div ng-repeat='round in data.rounds' id="round{{round.num}}" class="tab-pane fade in active">
+          <div ng-if="data.games.length == 0" style="margin:50px">
+            <h3 style="font-style:italic; color:gray">Click 'Create Game' to add a new game...</h3>
+
+          </div>
+
+          <div ng-if="data.games.length > 0">
+            <!-- Headers -->
+            <div style="margin-left:20px; margin-right:20px">
+              <div class="row" >
+                  <div class="col-xs-6">
+                    <h5>Players</h5>
+                  </div>
+                  <div class="col-xs-6">
+                    <h5>Winner</h5>
+                  </div>
+              </div>
+            </div>
+
+            <div ng-repeat="game in data.games" style="margin-left:20px; margin-right:20px" ng-if='game.round.num == round.num'>
+
+                <div>
+
+                    <!-- Games Table -->
+                    <div class="row" style="border:thin solid black;padding-bottom:5px;" ng-style="game.winner ? {'background-color': '#AAFFAA'} : {'background-color': '#FFAAAA'} ">
+
+                        <div class="col-xs-6" style="margin-top:5px">
+                            <div>{{game.player1.name}}</div>
+                            <div>{{game.player2.name}}</div>
+                        </div>
+                        <div class="col-xs-6" style="margin-top:5px">
+
+                            <div ng-if="game.winner">
+                                <div>{{game.winner.name}}</div>
+                                <button ng-click="addResult(game)">Change</button>
+                                <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
+                            </div>
+
+                            <div ng-if="!game.winner">
+                                <button ng-click="addResult(game)">Add Result</button>
+                                <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <div style="margin:20px">
+    <button class="btn btn-default" style="float:right; margin-left:10px" data-ng-click="saveData()">Save Data</button>
+    <button class="btn btn-default" style="float:right; margin-left:10px" data-ng-click="loadData()">Load Data</button>
+    <div style="clear:both"></div>
+  </div>
+
+
+</div>
+</html>
