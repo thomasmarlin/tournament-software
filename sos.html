@@ -105,9 +105,9 @@
       </div>
       <ul class="nav nav-tabs">
         <li class="active"> <a href='#round1' data-toggle='tab'>Round 1</a> </li>
-          <li ng-repeat='round in currentEvent.rounds' ng-if="round.num > 1">
-              <a href='#round{{round.num}}' data-toggle='tab'>Round {{round.num}}</a>
-          </li>
+        <li ng-repeat='round in currentEvent.rounds' ng-if="round.num > 1">
+            <a href='#round{{round.num}}' data-toggle='tab'>Round {{round.num}}</a>
+        </li>
       </ul>
 
       <div class="tab-content">
@@ -169,8 +169,7 @@
     <hr>
 
     <div style="margin:20px">
-      <button class="btn btn-default" style="float:right; margin-left:10px" data-ng-click="saveData()">Save Data</button>
-      <button class="btn btn-default" style="float:right; margin-left:10px" data-ng-click="loadData()">Load Data</button>
+      <button class="btn btn-success" style="float:right; margin-left:10px" data-ng-click="saveData()">Save Data</button>
       <div style="clear:both"></div>
     </div>
   </div>
