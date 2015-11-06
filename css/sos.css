@@ -1,0 +1,14 @@
+.choiceBox {
+  border: thin solid #dadada;
+  border-radius:5px;
+}
+
+.leftChoiceBox {
+  border-right: thin solid #dadada;
+}
+
+.choiceContainer {
+  padding:20px;
+  /*border: thin solid #dadada;*/
+  border-radius:5px;
+}

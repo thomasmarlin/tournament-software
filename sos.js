@@ -2,7 +2,17 @@
 var sosApp = angular.module('sosApp', ['ui.bootstrap']);
 sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
 
-  var blankData = {
+  $scope.allEvents = [];
+  $scope.currentEvent = null;
+
+  function loadAllEvents() {
+    loadData();
+  }
+
+  loadAllEvents();
+
+  var newEventData = {
+    name: "",
     players: [],
     games: [],
     rounds: [
@@ -13,15 +23,33 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
   };
 
   function getNewBlankData() {
-    return JSON.parse(JSON.stringify(blankData));
+    return JSON.parse(JSON.stringify(newEventData));
   }
 
-  $scope.data = getNewBlankData();
+
+  function createEventWithName(name) {
+    var newEvent = getNewBlankData();;
+    newEvent.name = name;
+    $scope.currentEvent = newEvent;
+  }
+
+  function loadEventWithName(eventName) {
+    console.log("loading event: " + eventName);
+    for (var i = 0; i < $scope.allEvents.length; i++) {
+      var evt = $scope.allEvents[i];
+      if (evt.name == eventName) {
+        $scope.currentEvent = JSON.parse(JSON.stringify(evt));
+        return;
+      }
+    }
+
+    alert("Failed to load event. The event is not present in the system.");
+  }
 
   $scope.newRound = function() {
 
     var newRoundNum = $scope.getCurrentRound().num + 1;
-    $scope.data.rounds.push({
+    $scope.currentEvent.rounds.push({
       num: newRoundNum
     });
 
@@ -31,7 +59,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
   }
 
   $scope.getCurrentRound = function() {
-    return $scope.data.rounds[$scope.data.rounds.length-1];
+    return $scope.currentEvent.rounds[$scope.currentEvent.rounds.length-1];
   }
 
   $scope.addPlayer = function() {
@@ -39,7 +67,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
         template: "<form><div style='margin:20px'>"+
                     "<h2>Create Player</h2>" +
                     "<div>Player Name</div>" +
-                    "<input ng-model='newPlayerName' placeholder='ex: John Smith' style='width:100%'>" +
+                    "<input ng-model='newPlayerName' placeholder='ex: John Smith' style='width:100%' autofocus>" +
                     "<hr>" +
                     "<div>" +
                     "  <button class='btn btn-success btn-default' style='float:right' ng-click='okClick()'>OK</button>" +
@@ -64,6 +92,68 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     );
   }
 
+  $scope.createEvent = function() {
+    var modalDialog = $modal.open({
+        template: "<form><div style='margin:20px'>"+
+                    "<h2>Create Event</h2>" +
+                    "<div>Event Name</div>" +
+                    "<input ng-model='evtName' placeholder='ex: 2015 MPC' style='width:100%' autofocus>" +
+                    "<hr>" +
+                    "<div>" +
+                    "  <button class='btn btn-success btn-default' style='float:right' ng-click='okClick()'>OK</button>" +
+                    "  <button class='btn btn-fatal' style='float:right;margin-right:5px;' ng-click='cancelClick()'>Cancel</button>" +
+                    "  <div style='clear:both'></div>" +
+                    "</div>" +
+                  "</div></form>",
+        controller: 'CreateEventController',
+        scope: $scope
+      });
+
+    modalDialog.result.then(
+      // Success
+      function(name) {
+          console.log("Creating event with name: " + name);
+          createEventWithName(name);
+      },
+      // Cancelled
+      function() {
+          console.log("Create Event : Cancelled");
+      }
+    );
+  }
+
+  $scope.loadEvent = function() {
+    var modalDialog = $modal.open({
+        template: "<form><div style='margin:20px'>"+
+                    "<h2>Load Existing Event</h2>" +
+                    "<select class='input-sm' data-ng-model='tmp.eventNameToLoad' style='min-width:200px' autofocus>" +
+                    "  <option value='-- Select Event --'>-- Select Event --</option>" +
+                    "  <option ng-repeat='evt in allEvents'>{{evt.name}}</option>" +
+                    "</select>" +
+                    "<hr>" +
+                    "<div>" +
+                    "  <button class='btn btn-success btn-default' style='float:right' ng-click='okClick()'>OK</button>" +
+                    "  <button class='btn btn-fatal' style='float:right;margin-right:5px;' ng-click='cancelClick()'>Cancel</button>" +
+                    "  <div style='clear:both'></div>" +
+                    "</div>" +
+                  "</div></form>",
+        controller: 'LoadEventController',
+        scope: $scope
+      });
+
+    modalDialog.result.then(
+      // Success
+      function(name) {
+          console.log("Loading event with name: " + name);
+          loadEventWithName(name);
+      },
+      // Cancelled
+      function() {
+          console.log("Loading Event : Cancelled");
+      }
+    );
+  }
+
 
   var createEditGameHtml = "<form><div style='margin:20px'>"+
               "<h2>Create / Edit Game</h2>" +
@@ -72,22 +162,22 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
                 "<div class='col-xs-6'>" +
                   "" +
                   "<div>Player 1</div>" +
-                  "<select ng-model='player1' ng-options='player.name for player in data.players track by player.id'>" +
+                  "<select ng-model='player1' ng-options='player.name for player in currentEvent.players track by player.id' autofocus>" +
                   "</select>" +
                   "" +
                   "<div>Player 2</div>" +
-                  "<select ng-model='player2' ng-options='player.name for player in data.players track by player.id'>" +
+                  "<select ng-model='player2' ng-options='player.name for player in currentEvent.players track by player.id'>" +
                   "</select>" +
 
                 "</div>" +
 
                 "<div class='col-xs-6'>" +
                   "<div>Round</div>" +
-                  "<select ng-model='round' ng-options='roundObj.num for roundObj in data.rounds track by roundObj.num'>" +
+                  "<select ng-model='round' ng-options='roundObj.num for roundObj in currentEvent.rounds track by roundObj.num'>" +
                   "</select>" +
                   "" +
                   "<div>Winner</div>" +
-                  "<select ng-model='winner'  ng-options='player.name for player in data.players track by player.id'>" +
+                  "<select ng-model='winner'  ng-options='player.name for player in currentEvent.players track by player.id'>" +
                   "</select>" +
                 "</div>" +
 
@@ -137,10 +227,10 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
       function(updatedGame) {
           console.log("Game Updated  : " + JSON.stringify(updatedGame));
 
-          for (var i = 0; i < $scope.data.games.length; i++) {
-            var game = $scope.data.games[i];
+          for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+            var game = $scope.currentEvent.games[i];
             if (game.id == updatedGame.id) {
-              $scope.data.games[i] = updatedGame;
+              $scope.currentEvent.games[i] = updatedGame;
             }
           }
 
@@ -192,15 +282,15 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
   }
 
   function updateVictoryPoints() {
-    for (var i = 0; i < $scope.data.players.length; i++){
-      var player = $scope.data.players[i];
+    for (var i = 0; i < $scope.currentEvent.players.length; i++){
+      var player = $scope.currentEvent.players[i];
       player.wins = 0;
       player.losses = 0;
       player.vp = 0;
       player.opponentsPlayed = [];
 
-      for (var j = 0; j < $scope.data.games.length; j++) {
-        var game = $scope.data.games[j];
+      for (var j = 0; j < $scope.currentEvent.games.length; j++) {
+        var game = $scope.currentEvent.games[j];
 
         // Only look at the game if someone one (not in-progress games)
         if (game.winner) {
@@ -227,8 +317,8 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     }
 
     // Update SOS for each player
-    for (var i = 0; i < $scope.data.players.length; i++) {
-      var player = $scope.data.players[i];
+    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
+      var player = $scope.currentEvent.players[i];
       updateSosForPlayer(player);
     }
   }
@@ -240,8 +330,8 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     for (var i = 0; i < currentPlayer.opponentsPlayed.length; i++) {
       var opponent = currentPlayer.opponentsPlayed[i];
 
-      for (var j = 0; j < $scope.data.players.length; j++) {
-        var player = $scope.data.players[j];
+      for (var j = 0; j < $scope.currentEvent.players.length; j++) {
+        var player = $scope.currentEvent.players[j];
         if (peopleEqual(player, opponent)) {
 
           var adjustedVictoryPoints = player.vp;
@@ -264,23 +354,64 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     currentPlayer.sos = sos;
   }
 
-  $scope.loadData = function(){
-    var dataString = localStorage.data;
-    $scope.data = JSON.parse(dataString);
-
-    updateVictoryPoints();
-  }
 
   $scope.saveData = function(){
-    localStorage.setItem("data", JSON.stringify($scope.data));
+
+    var eventAdded = false;
+    var eventName = $scope.currentEvent.name;
+    for (var i = 0; i < $scope.allEvents.length; i++) {
+      var evt = $scope.allEvents[i];
+      if (evt.name == $scope.currentEvent.name) {
+        $scope.allEvents[i] = $scope.currentEvent;
+        eventAdded = true;
+      }
+    }
+
+    if (!eventAdded) {
+      $scope.allEvents.push($scope.currentEvent);
+    }
+
+    saveData($scope.allEvents);
   }
 
-  $scope.clearData = function(){
-    localStorage.setItem("data", getNewBlankData());
+  $scope.clearAllData = function(){
+    if (confirm("This will wipe out all data from all events. Are you sure?")) {
+      console.log("wiping out the world!");
+      localStorage.setItem("allEvents", null);
+      localStorage.setItem("data", null);
+    } else {
+      console.log("Whew...that was close.")
+    }
+  }
+
+  function loadData() {
+
+    var data = localStorage.data;
+    var allEvents = [];
+
+    try {
+      if (data) {
+        var parsedData = JSON.parse(data);
+        if (parsedData) {
+          allEvents = parsedData.allEvents;
+        }
+      }
+    } catch(ex) {
+      console.log("Error loading stored data!");
+    }
+    $scope.allEvents = allEvents;
+  }
+
+  function saveData(events) {
+    var storableData = {
+      allEvents: JSON.parse(JSON.stringify(events))
+    };
+    var eventsString = JSON.stringify(storableData);
+    localStorage.setItem('data', eventsString);
   }
 
   function playerAdded(playerName){
-    $scope.data.players.push({
+    $scope.currentEvent.players.push({
       id: generateGUID(),
       name: playerName
     });
@@ -288,15 +419,20 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
 
   function gameCreated(newGame){
     newGame.id = generateGUID();
-    $scope.data.games.push(newGame);
+    $scope.currentEvent.games.push(newGame);
     updateVictoryPoints();
   }
 
   $scope.deleteGame = function(gameToDelete) {
-    for (var i = 0; i < $scope.data.games.length; i++) {
-      var game = $scope.data.games[i];
+
+    if (!confirm("This game will be deleted and cannot be undone. Are you sure?")) {
+      return;
+    }
+
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
       if (game.id == gameToDelete.id) {
-        $scope.data.games.splice(i, 1);
+        $scope.currentEvent.games.splice(i, 1);
         console.log("Game deleted");
         break;
       }
@@ -305,8 +441,8 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
   }
 
   $scope.deletePlayer = function(playerToDelete) {
-    for (var i = 0; i < $scope.data.games.length; i++) {
-      var game = $scope.data.games[i];
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
       if ((peopleEqual(game.player1, playerToDelete)) ||
           (peopleEqual(game.player2, playerToDelete)) ||
           (peopleEqual(game.winner, playerToDelete))) {
@@ -315,10 +451,10 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
       }
     }
 
-    for (var i = 0; i < $scope.data.players.length; i++) {
-      var player = $scope.data.players[i];
+    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
+      var player = $scope.currentEvent.players[i];
       if (peopleEqual(player, playerToDelete)) {
-        $scope.data.players.splice(i, 1);
+        $scope.currentEvent.players.splice(i, 1);
         break;
       }
     }
