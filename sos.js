@@ -39,6 +39,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
       var evt = $scope.allEvents[i];
       if (evt.name == eventName) {
         $scope.currentEvent = JSON.parse(JSON.stringify(evt));
+        updateVictoryPoints();
         return;
       }
     }
@@ -252,7 +253,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     } else if (p2 == null) {
       return false;
     } else if (p1.id == p2.id) {
-      console.log("PeopleEqual!");
+      //console.log("PeopleEqual!");
       return true;
     } else {
       return false;
@@ -314,6 +315,8 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
           console.log("Game doesn't have a winner!");
         }
       }
+
+      console.log("Victory Points for Player: " + player.name + " : " + player.vp);
     }
 
     // Update SOS for each player
@@ -323,34 +326,67 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     }
   }
 
+
+  /* SOS Calculations from the SWCCG Tournament Guide:
+
+  9. Strength of Schedule: Strength of Schedule is the recommended scoring method for
+     breaking ties at the end of a Swiss tournament that has more than 8 participants.
+     The calculation method is as follows:
+      •For all of your opponents: Calculate their total victory points, and then
+       calculate the total number of games they played. Divide the total VP by the
+       total number of games played; this is your Strength of Schedule score.
+
+      •If a player has fewer than .5 victory points per game played, adjust that
+       players victory point total so it is equal to .5 VP/GP
+
+      •In the case of two or more players having equal Strength of Schedules,
+       drop each player’s lowest opponent until the tie is resolved.
+
+   */
+
   function updateSosForPlayer(currentPlayer) {
+    console.log("Updating SOS for player: " + currentPlayer.name + " Number of opponents: " + currentPlayer.opponentsPlayed.length);
 
     var opponentsVictoryPoints = 0;
     var opponentsGamesPlayed = 0;
     for (var i = 0; i < currentPlayer.opponentsPlayed.length; i++) {
       var opponent = currentPlayer.opponentsPlayed[i];
+      console.log("  - analyzing opponent: " + opponent.name);
 
       for (var j = 0; j < $scope.currentEvent.players.length; j++) {
         var player = $scope.currentEvent.players[j];
         if (peopleEqual(player, opponent)) {
 
           var adjustedVictoryPoints = player.vp;
+
+          // Tournament Guide:
+          // "If a player has fewer than .5 victory points per game played, adjust that players victory point total so it is equal to .5 VP/GP"
           var playerVictoryPointToGamePlayedRatio = (player.vp / (player.wins + player.losses));
           if (playerVictoryPointToGamePlayedRatio < 0.5) {
-              adjustedVictoryPoints = 0.5 / (player.wins + player.losses);
-              console.log("Player: " + JSON.stringify(player) + " has ratio < 0.5. Updating vp to: " + adjustedVictoryPoints);
+
+              // Need to make this:  (VP / played) = 0.5
+              // VP = 0.5 * played
+              adjustedVictoryPoints = 0.5 * (player.wins + player.losses);
+              console.log("    ...player has (VP / GP) ratio < 0.5. Updating vp to: " + adjustedVictoryPoints);
           }
 
+
+          console.log("    ...Adding victory points : " + adjustedVictoryPoints);
+          console.log("    ...Adding games played : " + (player.wins + player.losses));
           opponentsVictoryPoints += adjustedVictoryPoints;
           opponentsGamesPlayed += (player.wins + player.losses);
         }
       }
     }
 
+    //console.log("  - Opponents VP: " + opponentsVictoryPoints);
+    //console.log("  - Opponents GamesPlayed: " + opponentsGamesPlayed);
+
     var sos = opponentsVictoryPoints / opponentsGamesPlayed;
     if (opponentsGamesPlayed == 0) {
       sos = "";
     }
+    console.log("  - Totals: Opponents' VP: " + opponentsVictoryPoints + " Opponents' GP: " + opponentsGamesPlayed + ".  Calculated SOS: " + sos);
     currentPlayer.sos = sos;
   }
 
