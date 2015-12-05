@@ -23,6 +23,17 @@ sosApp.controller('CreateGameController', ['$scope', '$modalInstance', '$timeout
     $modalInstance.close(newGame);
   }
 
+  $scope.getPlayers = function() {
+    var players = [];
+    if ($scope.playerDark) {
+      players.push($scope.playerDark);
+    }
+    if ($scope.playerLight) {
+      players.push($scope.playerLight);
+    }
+    return players;
+  }
+
   $scope.cancelClick = function() {
     $scope.newPlayerName = null;
     $modalInstance.dismiss(null);

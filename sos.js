@@ -725,19 +725,21 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
                   "<div>Player (LS)</div>" +
                   "<select ng-model='playerLight' ng-options='player.name for player in currentEvent.players track by player.id'>" +
                   "</select>" +
-
-                "</div>" +
-
-                "<div class='col-xs-6'>" +
+                  "" +
                   "<div>Round</div>" +
                   "<select ng-model='round' ng-options='roundObj.num for roundObj in currentEvent.rounds track by roundObj.num'>" +
                   "</select>" +
                   "" +
+                "</div>" +
+
+                "<div class='col-xs-6'>" +
+                  "" +
                   "<div>Winner</div>" +
-                  "<select ng-model='winner'  ng-options='player.name for player in currentEvent.players track by player.id'>" +
+                  "<select ng-model='winner' ng-options='player.name for player in getPlayers() track by player.id'>" +
                   "</select>" +
                   "<div>Differential</div>" +
                   "<input ng-model='diff'>" +
+                  "" +
                 "</div>" +
 
               "</div>" +
