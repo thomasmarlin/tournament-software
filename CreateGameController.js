@@ -3,19 +3,21 @@ var sosApp = angular.module('sosApp');
 sosApp.controller('CreateGameController', ['$scope', '$modalInstance', '$timeout', function($scope, $modalInstance, $timeout) {
 
   $scope.winner = null;
-  $scope.player1 = null;
-  $scope.player2 = null;
+  $scope.playerDark = null;
+  $scope.playerLight = null;
   $scope.vp = 2;
   $scope.round = $scope.getCurrentRound();
+  $scope.diff = $scope.diff;
 
   $scope.okClick = function() {
 
     var newGame = {
-      player1: $scope.player1,
-      player2: $scope.player2,
+      playerDark: $scope.playerDark,
+      playerLight: $scope.playerLight,
       winner: $scope.winner,
       vp: 2,
-      round: $scope.round
+      round: $scope.round,
+      diff: parseInt($scope.diff)
     };
 
     $modalInstance.close(newGame);

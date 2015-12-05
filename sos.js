@@ -2,6 +2,29 @@
 var sosApp = angular.module('sosApp', ['ui.bootstrap']);
 sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
 
+  var Logger = new function() {
+    this.calculation = function(str) {
+      console.log("CALC: " + str);
+    };
+    this.decision = function(str) {
+      console.log("DECISION: " + str);
+    };
+    this.action = function(str) {
+      console.log("ACTION: " + str);
+    };
+    this.log = function(str) {
+      console.log("INFO: " + str);
+    };
+    this.err = function(str) {
+      console.error(str);
+    };
+  };
+
+  var FORMAT = {
+    SOS: "SOS",
+    DIFF: "DIFF"
+  };
+
   $scope.allEvents = [];
   $scope.currentEvent = null;
 
@@ -15,11 +38,8 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     name: "",
     players: [],
     games: [],
-    rounds: [
-      {
-        num: 1
-      }
-    ]
+    rounds: [],
+    mode: FORMAT.SOS
   };
 
   function getNewBlankData() {
@@ -27,19 +47,30 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
   }
 
 
-  function createEventWithName(name) {
+  function createEventWithName(name, mode) {
     var newEvent = getNewBlankData();;
     newEvent.name = name;
+    newEvent.mode = mode;
     $scope.currentEvent = newEvent;
   }
 
+  function clickFirstRound() {
+    setTimeout(function(){
+      var roundNum = getCurrentRoundNumber();
+      jQuery('a[href="#round' + roundNum + '"]').click();
+    }, 0);
+  }
+
   function loadEventWithName(eventName) {
-    console.log("loading event: " + eventName);
+    Logger.action("loading event: " + eventName);
     for (var i = 0; i < $scope.allEvents.length; i++) {
       var evt = $scope.allEvents[i];
       if (evt.name == eventName) {
         $scope.currentEvent = JSON.parse(JSON.stringify(evt));
         updateVictoryPoints();
+
+        clickFirstRound();
+
         return;
       }
     }
@@ -49,18 +80,467 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
 
   $scope.newRound = function() {
 
-    var newRoundNum = $scope.getCurrentRound().num + 1;
+    var newRoundNum = getCurrentRoundNumber() + 1;
     $scope.currentEvent.rounds.push({
       num: newRoundNum
     });
 
-    setTimeout(function(){
-      jQuery('a[href="#round' + newRoundNum + '"]').click();
-    }, 0);
+    updateVictoryPoints();
+    newMatchups();
+
+    clickFirstRound();
+  };
+
+  function isOddRound() {
+    return getCurrentRoundNumber() % 2;
   }
 
+  function hasPlayedSameAllegiance(player1, p1Dark, player2) {
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
+
+      if (p1Dark) {
+        if (peopleEqual(game.playerDark, player1) && peopleEqual(game.playerLight, player2)) {
+          return true;
+        }
+      }
+
+      if (!p1Dark) {
+        if (peopleEqual(game.playerLight, player1) && peopleEqual(game.playerDark, player2)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+
+  // Fisher-Yates (aka Knuth) Shuffle
+  // http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+  function shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex ;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+  }
+
+  function sortPlayersByScore(players) {
+    players.sort(personSortHelper);
+  }
+
+  function personSortHelper(playerA, playerB) {
+    if (playerA.vp > playerB.vp) {
+      return -1;
+    } else if (playerA.vp < playerB.vp) {
+      return 1;
+    } else {
+      if ($scope.currentEvent.mode == FORMAT.DIFF) {
+        if (playerA.diff > playerB.diff) {
+          return -1;
+        } else if (playerA.diff < playerB.diff) {
+          return 1;
+        } else {
+          return 0;
+        }
+      } else if ($scope.currentEvent.mode == FORMAT.SOS) {
+        if (playerA.sos > playerB.sos) {
+          return -1;
+        } else if (playerA.sos < playerB.sos) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    }
+  }
+
+
+  function buildPilesSequential(players, darkPile, lightPile) {
+    var randBetweenZeroAndOne = Math.random();
+    Logger.action("Choosing starting allegiance: " + randBetweenZeroAndOne);
+
+    var putDarkPile = true;
+    if (randBetweenZeroAndOne > 0.5) {
+      putDarkPile = false;
+      Logger.decision("First command card to light pile!");
+    } else {
+      putDarkPile = true;
+      Logger.decision("First command card to dark pile!");
+    }
+
+    for (var i = 0; i < players.length; i++) {
+      if (putDarkPile) {
+        darkPile.push(players[i]);
+      } else {
+        lightPile.push(players[i]);
+      }
+      putDarkPile = !putDarkPile;
+    }
+
+    Logger.log("Separated into piles. Dark: " + darkPile.length + " Light: " + lightPile.length);
+  }
+
+  function wasLastGameDark(player) {
+    var lastRound = getCurrentRoundNumber() - 1;
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
+      if (game.round.num == lastRound) {
+        if (peopleEqual(game.playerDark, player)) {
+          return true;
+        }
+
+        if (peopleEqual(game.playerLight, player)) {
+          return false;
+        }
+      }
+    }
+
+    // TODO: This shouldn't happen should it?
+    Logger.error("Couldn't determine last round (" + lastRound + ") for player: " + JSON.stringify(player))
+    return false;
+  }
+
+  function buildPilesSwapAllegience(players, darkPile, lightPile) {
+    for (var i = 0; i < players.length; i++) {
+      var player = players[i];
+      if (wasLastGameDark(player)) {
+        lightPile.push(player);
+      } else {
+        darkPile.push(player);
+      }
+    }
+  }
+
+
+  function buildPiles(players, darkPile, lightPile) {
+    // On the odd rounds, just push them into piles one-one-one-one, etc
+    if (isOddRound()) {
+      buildPilesSequential(players, darkPile, lightPile);
+    } else {
+      // This is an even round, so make sure people swap allegiances from last game
+      buildPilesSwapAllegience(players, darkPile, lightPile);
+    }
+
+  };
+
+
+  function getNextPlayer(pile) {
+    if (pile.length == 0) {
+      return null;
+    }
+    return pile[0];
+  }
+
+  function getPlayerByeCount(player) {
+    var byeCount = 0;
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
+      if (peopleEqual(game.playerDark, player) && (isByePlayer(game.playerLight))) {
+        byeCount++;
+      }
+      if (peopleEqual(game.playerLight, player) && (isByePlayer(game.playerDark))) {
+        byeCount++;
+      }
+    }
+    return byeCount;
+  }
+
+  function getWorstPlayerWithByeCount(pile, desiredByCount) {
+    for (var i = pile.length-1; i >= 0; i--) {
+      var player = pile[i];
+      if (desiredByCount == getPlayerByeCount(player)) {
+        return player;
+      }
+    }
+
+    return null;
+  }
+
+  function getByePlayer() {
+    return {
+      name: "BYE",
+      isByePlayer: true,
+      vp: 0,
+      sos: 0.5,
+      wins: 0,
+      losses: 1
+    }
+  }
+
+  function isByePlayer(player) {
+    return player && player.hasOwnProperty('isByePlayer') && player.isByePlayer;
+  }
+
+
+  function assignByes(darkPile, lightPile, warningsExist) {
+
+    Logger.log("Assigning Byes...");
+
+    var currentRound = $scope.getCurrentRound();
+
+    var minPlayerByeCount = 0;
+    var byeAssigned = false;
+    while (!byeAssigned) {
+
+      var idealPile = darkPile;
+      var backupPile = lightPile;
+
+      if (darkPile.length == lightPile.length) {
+        byeAssigned = true;
+        continue;
+
+        // No byes necessary!
+        Logger.decision("No byes necessary!");
+
+      } else if (darkPile.length > lightPile.length) {
+
+        Logger.decision("Dark pile has more players. Trying to assign bye to dark...")
+        idealPile = darkPile;
+        backupPile = lightPile;
+
+      } else if (lightPile.length > darkPile.length) {
+
+        Logger.decision("Light pile has more players. Trying to assign bye to light...");
+        idealPile = lightPile;
+        backupPile = darkPile;
+      }
+
+      var downgradedPlayers = [];
+      var candidatePlayer = getWorstPlayerWithByeCount(idealPile, minPlayerByeCount);
+      if (candidatePlayer) {
+        if (idealPile === darkPile) {
+          addNewGame(candidatePlayer, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile);
+          byeAssigned = true;
+          Logger.decision("Lowest-rank dark player is getting a bye: " + JSON.stringify(candidatePlayer));
+        } else {
+          addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, darkPile, lightPile);
+          byeAssigned = true;
+          Logger.decision("Lowest-rank dark player is getting a bye: " + JSON.stringify(candidatePlayer));
+        }
+      }
+
+      if (!byeAssigned) {
+        // Try the other pile!
+        var candidatePlayer = getWorstPlayerWithByeCount(backupPile, minPlayerByeCount);
+        if (candidatePlayer) {
+          if (backupPile === darkPile) {
+            addNewGame(candidatePlayer, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile);
+            byeAssigned = true;
+            Logger.decision("Lowest-rank dark player is getting a bye: " + JSON.stringify(candidatePlayer));
+          } else {
+            addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, darkPile, lightPile);
+            byeAssigned = true;
+            Logger.decision("Lowest-rank dark player is getting a bye: " + JSON.stringify(candidatePlayer));
+          }
+        }
+      }
+
+      if (!byeAssigned) {
+        // Apparently, everybody has a bye count of minPlayerByeCount.  See who has the next-fewest byes
+        Logger.log("Everyone has a bye count of : " + minPlayerByeCount);
+        minPlayerByeCount++;
+      }
+    }
+
+    Logger.log("Bye Assignment complete: " + byeAssigned);
+  }
+
+  function newMatchups() {
+
+    var currentRound = $scope.getCurrentRound();
+    var currentRoundNum = currentRound.num;
+    Logger.decision("Generating matchups for round: " + currentRoundNum);
+
+    var allPlayerList = [];
+    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
+      var player = $scope.currentEvent.players[i];
+      allPlayerList.push(player);
+    }
+
+    // Always shuffle the player list first
+    allPlayerList = shuffle(allPlayerList);
+
+    // Sort Players by their scores
+    sortPlayersByScore(allPlayerList);
+
+    // Sort players into 2 piles (dark and light)
+    var darkPile = [];
+    var lightPile = [];
+    buildPiles(allPlayerList, darkPile, lightPile);
+
+
+    // Set a warning flag for the worst-case scenarios
+    var warningsExist = false;
+    var downgradedPlayers = [];
+
+    assignByes(darkPile, lightPile);
+
+    // Now the tricky part...pulling cards off the 2 piles and making sure nobody has the same matchup again
+    // Get the first card off of each pile
+    while (darkPile.length > 0 || lightPile.length > 0) {
+
+      // Get the next available players from the pile
+      var playerDark = getNextPlayer(darkPile);
+      var playerLight = getNextPlayer(lightPile);
+      if (playerDark == null) {
+
+        // Light side gets a bye!
+        Logger.error("Light side getting an extra bye!  This should not happen I don't think!");
+        addNewGame(getByePlayer(), playerLight, currentRound, downgradedPlayers, darkPile, lightPile);
+        warningsExist = true;
+
+      } else if (playerLight == null) {
+
+        // Dark gets a bye!
+        Logger.error("Dark side getting an extra bye!  This should not happen I don't think!");
+        addNewGame(playerDark, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile);
+        warningsExist = true;
+
+      } else {
+
+        // We have 2 opponents.  Let's make sure they are ok
+        if (!hasPlayedSameAllegiance(playerDark, true, playerLight)) {
+
+          // Sweet! Haven't played this matchup yet.  Commit it!
+          addNewGame(playerDark, playerLight, currentRound, downgradedPlayers, darkPile, lightPile);
+
+        } else {
+
+          // They've already played this matchup...see if the reverse is OK
+          if (!hasPlayedSameAllegiance(playerLight, true, playerDark)) {
+
+            // No problem!  They haven't played this match yet
+            // Just swap allegiances for this matchup
+            addNewGame(playerLight, playerDark, currentRound, downgradedPlayers, darkPile, lightPile);
+
+          } else {
+
+            // Bummer...they've already played both sides against eachother.
+            // Pick the lower ranking of the two players and drop them down in the rankings 1 spot.
+            var lowerRankedPlayer = getLowerRankedPlayer(playerDark, playerLight);
+            if (downgradedPlayers.indexOf(lowerRankedPlayer) == -1) {
+
+              // Haven't tried to downgrade this guy yet!...downgrade him now and try again
+              if (peopleEqual(lowerRankedPlayer, playerDark)) {
+                downgradePlayerRanking(playerDark, darkPile);
+              } else if (peopleEqual(lowerRankedPlayer,playerLight)) {
+                downgradePlayerRanking(playerLight, lightPile);
+              }
+              downgradedPlayers.push(lowerRankedPlayer);
+
+            } else {
+
+              // Ruh Roh...The players have already played eachother AND downgrading players didn't help.
+              // Go ahead and create this game as-is and fire up a warning after we've finished.
+              Logger.error("Ruh Roh...The players have already played eachother AND downgrading players didn't help... Compromising for now.");
+              warningsExist = true;
+              addNewGame(playerDark, playerLight, currentRound, downgradedPlayers, darkPile, lightPile);
+
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function downgradePlayer1Ranking(playerToMoveDown, pile) {
+    Logger.decision("Trying to move player down a ranking: " + playerToMoveDown.name);//JSON.stringify(playerToMoveDown));
+
+    for (var i = 0; i < pile.length; i++) {
+      var pilePlayer = pile[i];
+      if (peopleEqual(pilePlayer,playerToMoveDown)) {
+        if (pile.length > (i+1)) {
+          pile[i] = pile[i+1];
+          pile[i+1] = playerToMoveDown;
+          Logger.log("Succesfully downgraded player...");
+        } else {
+          Logger.error("*sigh....nobody to swap places with...");
+          return false;
+        }
+      }
+    }
+  }
+
+  function getLowerRankedPlayer(playerA, playerB) {
+    if (personSortHelper(playerA, playerB) < 0) {
+      return playerA;
+    }
+    return playerB;
+  }
+
+  function addNewGame(playerDark, playerLight, round, downgradedPlayers, darkPile, lightPile) {
+    Logger.decision("Creating game for round " + getCurrentRoundNumber() + ". Dark: " + playerDark.name + " Light: " + playerLight.name);
+
+    var winner = null;
+    if (isByePlayer(playerDark)) {
+      winner = playerLight;
+    }
+    if (isByePlayer(playerLight)) {
+      winner = playerDark;
+    }
+
+    var game = {
+      playerDark: playerDark,
+      playerLight: playerLight,
+      winner: winner,
+      vp: 2,
+      round: round,
+      diff: 0
+    };
+
+    // Also, now that we have a good matchup, clear out the past state
+    removePlayerFromPiles(playerDark, darkPile, lightPile);
+    removePlayerFromPiles(playerLight, darkPile, lightPile);
+    downgradedPlayers.splice(0, downgradedPlayers.length);
+
+    // Store the new game!
+    gameCreated(game);
+    updateVictoryPoints();
+  }
+
+  function removeFromPile(player, pile) {
+    var index = pile.indexOf(player);
+    if (index != -1) {
+      pile.splice(index, 1);
+    }
+  }
+
+  function removePlayerFromPiles(player, darkPile, lightPile) {
+    removeFromPile(player, darkPile);
+    removeFromPile(player, lightPile);
+  }
+
+
   $scope.getCurrentRound = function() {
+    if ($scope.currentEvent.rounds.length == 0) {
+      return {
+        num: 0
+      };
+    }
     return $scope.currentEvent.rounds[$scope.currentEvent.rounds.length-1];
+  }
+
+  function getCurrentRoundNumber() {
+    return $scope.getCurrentRound().num;
+    /*
+    var currentRound = $scope.getCurrentRound();
+    if (currentRound) {
+      return currentRound.num;
+    }
+    return 0;
+    */
   }
 
   $scope.addPlayer = function() {
@@ -83,12 +563,12 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     modalDialog.result.then(
       // Success
       function(selectedPerson) {
-          console.log("Select person : " + JSON.stringify(selectedPerson));
+          Logger.action("Added Player : " + JSON.stringify(selectedPerson));
           playerAdded(selectedPerson);
       },
       // Cancelled
       function() {
-          console.log("Select person : Cancelled");
+          Logger.log("Select person : Cancelled");
       }
     );
   }
@@ -98,7 +578,10 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
         template: "<form><div style='margin:20px'>"+
                     "<h2>Create Event</h2>" +
                     "<div>Event Name</div>" +
-                    "<input ng-model='evtName' placeholder='ex: 2015 MPC' style='width:100%' autofocus>" +
+                    "<input ng-model='creatingEventData.name' placeholder='ex: 2015 MPC' style='width:100%' autofocus>" +
+                    "<label><input type='radio' ng-model='creatingEventData.mode' value='SOS'>  SOS  </label>" +
+                    "<div style='width:30px'></div>" +
+                    "<label><input type='radio' ng-model='creatingEventData.mode' value='DIFF'>  DIFF  </label>" +
                     "<hr>" +
                     "<div>" +
                     "  <button class='btn btn-success btn-default' style='float:right' ng-click='okClick()'>OK</button>" +
@@ -112,13 +595,13 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
 
     modalDialog.result.then(
       // Success
-      function(name) {
-          console.log("Creating event with name: " + name);
-          createEventWithName(name);
+      function(evtData) {
+          Logger.action("Creating event with name: " + evtData.name + " mode: " + evtData.mode);
+          createEventWithName(evtData.name, evtData.mode);
       },
       // Cancelled
       function() {
-          console.log("Create Event : Cancelled");
+          Logger.log("Create Event : Cancelled");
       }
     );
   }
@@ -129,7 +612,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
                     "<h2>Load Existing Event</h2>" +
                     "<select class='input-sm' data-ng-model='tmp.eventNameToLoad' style='min-width:200px' autofocus>" +
                     "  <option value='-- Select Event --'>-- Select Event --</option>" +
-                    "  <option ng-repeat='evt in allEvents'>{{evt.name}}</option>" +
+                    "  <option ng-repeat='evt in allEvents track by $index'>{{evt.name}}</option>" +
                     "</select>" +
                     "<hr>" +
                     "<div>" +
@@ -145,12 +628,12 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     modalDialog.result.then(
       // Success
       function(name) {
-          console.log("Loading event with name: " + name);
+          Logger.action("Loading event with name: " + name);
           loadEventWithName(name);
       },
       // Cancelled
       function() {
-          console.log("Loading Event : Cancelled");
+          Logger.log("Loading Event : Cancelled");
       }
     );
   }
@@ -162,12 +645,12 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
 
                 "<div class='col-xs-6'>" +
                   "" +
-                  "<div>Player 1</div>" +
-                  "<select ng-model='player1' ng-options='player.name for player in currentEvent.players track by player.id' autofocus>" +
+                  "<div>Player (DS)</div>" +
+                  "<select ng-model='playerDark' ng-options='player.name for player in currentEvent.players track by player.id' autofocus>" +
                   "</select>" +
                   "" +
-                  "<div>Player 2</div>" +
-                  "<select ng-model='player2' ng-options='player.name for player in currentEvent.players track by player.id'>" +
+                  "<div>Player (LS)</div>" +
+                  "<select ng-model='playerLight' ng-options='player.name for player in currentEvent.players track by player.id'>" +
                   "</select>" +
 
                 "</div>" +
@@ -180,6 +663,8 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
                   "<div>Winner</div>" +
                   "<select ng-model='winner'  ng-options='player.name for player in currentEvent.players track by player.id'>" +
                   "</select>" +
+                  "<div>Differential</div>" +
+                  "<input ng-model='diff'>" +
                 "</div>" +
 
               "</div>" +
@@ -203,13 +688,13 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     modalDialog.result.then(
       // Success
       function(newGame) {
-          console.log("Game Created  : " + JSON.stringify(newGame));
+          Logger.action("Manual Game Created  : " + JSON.stringify(newGame));
           gameCreated(newGame);
           updateVictoryPoints();
       },
       // Cancelled
       function() {
-          console.log("Game creation : Cancelled");
+          Logger.log("Game creation : Cancelled");
       }
     );
   }
@@ -226,7 +711,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     modalDialog.result.then(
       // Success
       function(updatedGame) {
-          console.log("Game Updated  : " + JSON.stringify(updatedGame));
+          Logger.action("Manual Game Updated  : " + JSON.stringify(updatedGame));
 
           for (var i = 0; i < $scope.currentEvent.games.length; i++) {
             var game = $scope.currentEvent.games[i];
@@ -240,7 +725,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
       },
       // Cancelled
       function() {
-          console.log("Game Update : Cancelled");
+          Logger.log("Game Update : Cancelled");
       }
     );
   }
@@ -253,7 +738,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     } else if (p2 == null) {
       return false;
     } else if (p1.id == p2.id) {
-      //console.log("PeopleEqual!");
+      //Logger.log("PeopleEqual!");
       return true;
     } else {
       return false;
@@ -261,9 +746,9 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
   }
 
   function getOpponentInGame(currentPlayer, game) {
-    var opponent = game.player1;
-    if (peopleEqual(currentPlayer, game.player1)) {
-      opponent = game.player2;
+    var opponent = game.playerDark;
+    if (peopleEqual(currentPlayer, game.playerDark)) {
+      opponent = game.playerLight;
     }
     return opponent;
   }
@@ -289,6 +774,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
       player.losses = 0;
       player.vp = 0;
       player.opponentsPlayed = [];
+      player.diff = 0;
 
       for (var j = 0; j < $scope.currentEvent.games.length; j++) {
         var game = $scope.currentEvent.games[j];
@@ -297,7 +783,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
         if (game.winner) {
 
           // See if the current player played in this game
-          if (peopleEqual(player, game.player1) || peopleEqual(player, game.player2)) {
+          if (peopleEqual(player, game.playerDark) || peopleEqual(player, game.playerLight)) {
 
             // Add to list of opponents (if not in the list already)
             var opponent = getOpponentInGame(player, game);
@@ -307,16 +793,18 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
             if (peopleEqual(player, game.winner)) {
               player.vp += game.vp;
               player.wins += 1;
+              player.diff += parseInt(game.diff);
             } else {
               player.losses += 1;
+              player.diff -= parseInt(game.diff);
             }
           }
         } else {
-          console.log("Game doesn't have a winner!");
+          Logger.calculation("Game doesn't have a winner!");
         }
       }
 
-      console.log("Victory Points for Player: " + player.name + " : " + player.vp);
+      Logger.calculation("Victory Points for Player: " + player.name + " : " + player.vp);
     }
 
     // Update SOS for each player
@@ -345,13 +833,14 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
    */
 
   function updateSosForPlayer(currentPlayer) {
-    console.log("Updating SOS for player: " + currentPlayer.name + " Number of opponents: " + currentPlayer.opponentsPlayed.length);
+    Logger.log("Updating SOS for player: " + currentPlayer.name + " Number of opponents: " + currentPlayer.opponentsPlayed.length);
 
     var opponentsVictoryPoints = 0;
     var opponentsGamesPlayed = 0;
     for (var i = 0; i < currentPlayer.opponentsPlayed.length; i++) {
       var opponent = currentPlayer.opponentsPlayed[i];
-      console.log("  - analyzing opponent: " + opponent.name);
+
+      Logger.calculation("  - analyzing opponent: " + opponent.name);
 
       for (var j = 0; j < $scope.currentEvent.players.length; j++) {
         var player = $scope.currentEvent.players[j];
@@ -367,26 +856,26 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
               // Need to make this:  (VP / played) = 0.5
               // VP = 0.5 * played
               adjustedVictoryPoints = 0.5 * (player.wins + player.losses);
-              console.log("    ...player has (VP / GP) ratio < 0.5. Updating vp to: " + adjustedVictoryPoints);
+              Logger.calculation("    ...player has (VP / GP) ratio < 0.5. Updating vp to: " + adjustedVictoryPoints);
           }
 
 
-          console.log("    ...Adding victory points : " + adjustedVictoryPoints);
-          console.log("    ...Adding games played : " + (player.wins + player.losses));
+          Logger.calculation("    ...Adding victory points : " + adjustedVictoryPoints);
+          Logger.calculation("    ...Adding games played : " + (player.wins + player.losses));
           opponentsVictoryPoints += adjustedVictoryPoints;
           opponentsGamesPlayed += (player.wins + player.losses);
         }
       }
     }
 
-    //console.log("  - Opponents VP: " + opponentsVictoryPoints);
-    //console.log("  - Opponents GamesPlayed: " + opponentsGamesPlayed);
+    //Logger.log("  - Opponents VP: " + opponentsVictoryPoints);
+    //Logger.log("  - Opponents GamesPlayed: " + opponentsGamesPlayed);
 
     var sos = opponentsVictoryPoints / opponentsGamesPlayed;
     if (opponentsGamesPlayed == 0) {
       sos = "";
     }
-    console.log("  - Totals: Opponents' VP: " + opponentsVictoryPoints + " Opponents' GP: " + opponentsGamesPlayed + ".  Calculated SOS: " + sos);
+    Logger.calculation("  - Totals: Opponents' VP: " + opponentsVictoryPoints + " Opponents' GP: " + opponentsGamesPlayed + ".  Calculated SOS: " + sos);
     currentPlayer.sos = sos;
   }
 
@@ -412,11 +901,11 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
 
   $scope.clearAllData = function(){
     if (confirm("This will wipe out all data from all events. Are you sure?")) {
-      console.log("wiping out the world!");
+      Logger.action("wiping out the world!");
       localStorage.setItem("allEvents", null);
       localStorage.setItem("data", null);
     } else {
-      console.log("Whew...that was close.")
+      Logger.log("Whew...that was close.")
     }
   }
 
@@ -433,7 +922,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
         }
       }
     } catch(ex) {
-      console.log("Error loading stored data!");
+      Logger.error("Error loading stored data!");
     }
     $scope.allEvents = allEvents;
   }
@@ -469,7 +958,7 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
       var game = $scope.currentEvent.games[i];
       if (game.id == gameToDelete.id) {
         $scope.currentEvent.games.splice(i, 1);
-        console.log("Game deleted");
+        Logger.action("Game deleted");
         break;
       }
     }
@@ -479,8 +968,8 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
   $scope.deletePlayer = function(playerToDelete) {
     for (var i = 0; i < $scope.currentEvent.games.length; i++) {
       var game = $scope.currentEvent.games[i];
-      if ((peopleEqual(game.player1, playerToDelete)) ||
-          (peopleEqual(game.player2, playerToDelete)) ||
+      if ((peopleEqual(game.playerDark, playerToDelete)) ||
+          (peopleEqual(game.playerLight, playerToDelete)) ||
           (peopleEqual(game.winner, playerToDelete))) {
             alert("Can't delete player. Player has already played a game.");
             return;

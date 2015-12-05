@@ -6,19 +6,21 @@ sosApp.controller('AssignWinnerController', ['$scope', '$modalInstance', '$timeo
   $scope.gameToOpen = $scope.gameToOpen;
 
   $scope.winner = $scope.gameToOpen.winner;
-  $scope.player1 = $scope.gameToOpen.player1;
-  $scope.player2 = $scope.gameToOpen.player2;
+  $scope.playerDark = $scope.gameToOpen.playerDark;
+  $scope.playerLight = $scope.gameToOpen.playerLight;
   $scope.vp = $scope.gameToOpen.vp;
   $scope.round = $scope.gameToOpen.round;
+  $scope.diff = $scope.gameToOpen.diff;
 
   $scope.okClick = function() {
 
     var edittedGame = {
       id: $scope.gameToOpen.id,
-      player1: $scope.player1,
-      player2: $scope.player2,
+      playerDark: $scope.playerDark,
+      playerLight: $scope.playerLight,
       winner: $scope.winner,
       vp: 2,
+      diff: $scope.diff,
       round: $scope.round
     }
     $modalInstance.close(edittedGame);

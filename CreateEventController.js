@@ -2,10 +2,13 @@
 var sosApp = angular.module('sosApp');
 sosApp.controller('CreateEventController', ['$scope', '$modalInstance', '$timeout', function($scope, $modalInstance, $timeout) {
 
-  $scope.evtName = "";
+  $scope.creatingEventData = {
+    name: "",
+    mode: "SOS"
+  };
 
   $scope.okClick = function() {
-    $modalInstance.close($scope.evtName);
+    $modalInstance.close($scope.creatingEventData);
   }
 
   $scope.cancelClick = function() {

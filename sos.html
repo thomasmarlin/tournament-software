@@ -76,6 +76,10 @@
               <div class="col-xs-4">
                 <div>{{player.name}}</div>
                 <div>SoS: {{player.sos}}</div>
+                <div>Diff:
+                  <span ng-if="player.diff >= 0" style="color:green"> ({{player.diff}}) </span>
+                  <span ng-if="player.diff < 0" style="color:red"> ({{player.diff}}) </span>
+                </div>
               </div>
 
               <div class="col-xs-4">
@@ -104,8 +108,8 @@
         </div>
       </div>
       <ul class="nav nav-tabs">
-        <li class="active"> <a href='#round1' data-toggle='tab'>Round 1</a> </li>
-        <li ng-repeat='round in currentEvent.rounds' ng-if="round.num > 1">
+        <!--<li class="active"> <a href='#round1' data-toggle='tab'>Round 1</a> </li> -->
+        <li ng-repeat='round in currentEvent.rounds' ng-class="{active: round.num == 1 && currentEvent.rounds.length == 1}">
             <a href='#round{{round.num}}' data-toggle='tab'>Round {{round.num}}</a>
         </li>
       </ul>
@@ -132,7 +136,7 @@
                 </div>
               </div>
 
-              <div ng-repeat="game in currentEvent.games" style="margin-left:20px; margin-right:20px" ng-if='game.round.num == round.num'>
+              <div ng-repeat="game in currentEvent.games" style="margin-left:20px; margin-right:20px" ng-show='game.round.num == round.num'>
 
                   <div>
 
@@ -140,8 +144,8 @@
                       <div class="row" style="border:thin solid black;padding-bottom:5px;" ng-style="game.winner ? {'background-color': '#AAFFAA'} : {'background-color': '#FFAAAA'} ">
 
                           <div class="col-xs-6" style="margin-top:5px">
-                              <div>{{game.player1.name}}</div>
-                              <div>{{game.player2.name}}</div>
+                              <div>Dark: {{game.playerDark.name}}</div>
+                              <div>Light: {{game.playerLight.name}}</div>
                           </div>
                           <div class="col-xs-6" style="margin-top:5px">
 
