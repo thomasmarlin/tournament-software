@@ -31,14 +31,13 @@
         <div>
           <button class="btn btn-primary btn-lg" ng-click="createEvent()">Create New Event</button>
           <button class="btn btn-primary btn-lg" ng-click="loadEvent()">Load Existing Event</button>
-          <button class="btn btn-primary btn-lg" ng-click="loadEventFromFile()">Load File</button>
-          <input style="display:none" type='file' id='fileinput'>
         </div>
       </div>
 
-      <div style="position:absolute; right:0px; bottom:0px">
+      <div style="position:absolute; right:5px; bottom:5px">
+        <button class="btn btn-info" ng-click="loadEventFromFile()">DEBUG: Load File</button>
         <button class="btn btn-danger" ng-click="clearAllData()">DEBUG: Clear All Data</button>
-
+        <input style="display:none" type='file' id='fileinput'>
       </div>
 
     </div>
