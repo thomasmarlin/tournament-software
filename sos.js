@@ -87,9 +87,19 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
     clickFirstRound();
   }
 
+  function playerSummaryString(player) {
+    return player.name + "  (VP: " + player.vp + " SoS: " + player.sos + " Diff: " + player.diff + ")";
+  }
+
   $scope.newRound = function() {
 
+
     var newRoundNum = getCurrentRoundNumber() + 1;
+    Logger.decision("-------- Starting New Round (" + newRoundNum + ")--------");
+    if (!isOddRound()) {
+      Logger.decision("Piles remain the same this round, but Dark/Light will swap");
+    }
+
     $scope.currentEvent.rounds.push({
       num: newRoundNum
     });
@@ -149,7 +159,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
     players.sort(personSortHelper);
     Logger.decision("Sorting players by score...");
     for (var i = 0; i < players.length; i++) {
-      Logger.decision("  " + i + ". " + players[i].name);
+      Logger.decision("  " + i + ". " + playerSummaryString(players[i]));
     }
   }
 
@@ -249,12 +259,12 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
     Logger.decision("Separated Command cards into piles:");
     Logger.decision("  -- Dark -- ");
     for (var i = 0; i < darkPile.length; i++) {
-      Logger.decision("  " + i + ". " + darkPile[i].name);
+      Logger.decision("  " + i + ". " + playerSummaryString(darkPile[i]));
     }
     Logger.decision("");
     Logger.decision("  -- Light -- ");
     for (var i = 0; i < lightPile.length; i++) {
-      Logger.decision("  " + i + ". " + lightPile[i].name);
+      Logger.decision("  " + i + ". " + playerSummaryString(lightPile[i]));
     }
 
   };
@@ -347,11 +357,11 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
         if (idealPile === darkPile) {
           addNewGame(candidatePlayer, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile);
           byeAssigned = true;
-          Logger.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);//JSON.stringify(candidatePlayer));
+          Logger.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);
         } else {
           addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, darkPile, lightPile);
           byeAssigned = true;
-          Logger.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);//JSON.stringify(candidatePlayer));
+          Logger.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);
         }
       }
 
@@ -362,11 +372,11 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
           if (backupPile === darkPile) {
             addNewGame(candidatePlayer, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile);
             byeAssigned = true;
-            Logger.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);// JSON.stringify(candidatePlayer));
+            Logger.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);
           } else {
             addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, darkPile, lightPile);
             byeAssigned = true;
-            Logger.decision("Lowest-rank dark player (fewest byes) is getting a bye: " + candidatePlayer.name);//JSON.stringify(candidatePlayer));
+            Logger.decision("Lowest-rank dark player (fewest byes) is getting a bye: " + candidatePlayer.name);
           }
         }
       }
