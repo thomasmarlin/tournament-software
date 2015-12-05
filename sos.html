@@ -105,7 +105,7 @@
         <h2>Games</h2>
         <div style="position:absolute; top:0; bottom:0; right:0; left:0;">
           <button class="btn btn-default" style="float:right" data-ng-click="newRound()">New Round</button>
-          <button class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="createGame()">Create Game</button>
+          <button data-ng-if="currentEvent.rounds.length > 0" class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="createGame()">Create Game</button>
         </div>
       </div>
       <ul class="nav nav-tabs">
