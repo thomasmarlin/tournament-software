@@ -147,6 +147,10 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
 
   function sortPlayersByScore(players) {
     players.sort(personSortHelper);
+    Logger.decision("Sorting players by score...");
+    for (var i = 0; i < players.length; i++) {
+      Logger.decision("  " + i + ". " + players[i].name);
+    }
   }
 
   function personSortHelper(playerA, playerB) {
@@ -242,6 +246,17 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
       buildPilesSwapAllegience(players, darkPile, lightPile);
     }
 
+    Logger.decision("Separated Command cards into piles:");
+    Logger.decision("  -- Dark -- ");
+    for (var i = 0; i < darkPile.length; i++) {
+      Logger.decision("  " + i + ". " + darkPile[i].name);
+    }
+    Logger.decision("");
+    Logger.decision("  -- Light -- ");
+    for (var i = 0; i < lightPile.length; i++) {
+      Logger.decision("  " + i + ". " + lightPile[i].name);
+    }
+
   };
 
 
@@ -332,11 +347,11 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
         if (idealPile === darkPile) {
           addNewGame(candidatePlayer, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile);
           byeAssigned = true;
-          Logger.decision("Lowest-rank dark player is getting a bye: " + JSON.stringify(candidatePlayer));
+          Logger.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);//JSON.stringify(candidatePlayer));
         } else {
           addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, darkPile, lightPile);
           byeAssigned = true;
-          Logger.decision("Lowest-rank dark player is getting a bye: " + JSON.stringify(candidatePlayer));
+          Logger.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);//JSON.stringify(candidatePlayer));
         }
       }
 
@@ -347,18 +362,18 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
           if (backupPile === darkPile) {
             addNewGame(candidatePlayer, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile);
             byeAssigned = true;
-            Logger.decision("Lowest-rank dark player is getting a bye: " + JSON.stringify(candidatePlayer));
+            Logger.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);// JSON.stringify(candidatePlayer));
           } else {
             addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, darkPile, lightPile);
             byeAssigned = true;
-            Logger.decision("Lowest-rank dark player is getting a bye: " + JSON.stringify(candidatePlayer));
+            Logger.decision("Lowest-rank dark player (fewest byes) is getting a bye: " + candidatePlayer.name);//JSON.stringify(candidatePlayer));
           }
         }
       }
 
       if (!byeAssigned) {
         // Apparently, everybody has a bye count of minPlayerByeCount.  See who has the next-fewest byes
-        Logger.log("Everyone has a bye count of : " + minPlayerByeCount);
+        Logger.decision("Everyone has a bye count of : " + minPlayerByeCount + ".  Checking for bye counts of: " + minPlayerByeCount + 1);
         minPlayerByeCount++;
       }
     }
@@ -383,6 +398,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
 
     // Sort Players by their scores
     sortPlayersByScore(allPlayerList);
+
 
     // Sort players into 2 piles (dark and light)
     var darkPile = [];
@@ -430,11 +446,14 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
           // They've already played this matchup...see if the reverse is OK
           if (!hasPlayedSameAllegiance(playerLight, true, playerDark)) {
 
+            Logger.decision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played. Swapping sides...");
             // No problem!  They haven't played this match yet
             // Just swap allegiances for this matchup
             addNewGame(playerLight, playerDark, currentRound, downgradedPlayers, darkPile, lightPile);
 
           } else {
+
+            Logger.decision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played (both sides). Attempting to move a player down...");
 
             // Bummer...they've already played both sides against eachother.
             // Pick the lower ranking of the two players and drop them down in the rankings 1 spot.
