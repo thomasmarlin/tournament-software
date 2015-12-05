@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp', ['ui.bootstrap']);
-sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
+sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function($scope, $modal, $document, $compile) {
 
   var Logger = new function() {
     this.calculation = function(str) {
@@ -66,16 +66,25 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     for (var i = 0; i < $scope.allEvents.length; i++) {
       var evt = $scope.allEvents[i];
       if (evt.name == eventName) {
+        loadSpecificJson(evt);
+        /*
         $scope.currentEvent = JSON.parse(JSON.stringify(evt));
         updateVictoryPoints();
 
         clickFirstRound();
-
+        */
         return;
       }
     }
 
     alert("Failed to load event. The event is not present in the system.");
+  }
+
+  function loadSpecificJson(evt) {
+    $scope.currentEvent = JSON.parse(JSON.stringify(evt));
+    updateVictoryPoints();
+
+    clickFirstRound();
   }
 
   $scope.newRound = function() {
@@ -638,6 +647,41 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     );
   }
 
+  $scope.loadEventFromFile = function() {
+    var input, file, fr;
+
+    if (typeof window.FileReader !== 'function') {
+      alert("The file API isn't supported on this browser yet.");
+      return;
+    }
+
+    input = angular.element('#fileinput').get(0);
+    input.onchange = function() {
+      if (!input) {
+        alert("Um, couldn't find the fileinput element.");
+      }
+      else if (!input.files) {
+        alert("This browser doesn't seem to support the `files` property of file inputs.");
+      }
+      else if (!input.files[0]) {
+        alert("Please select a file before clicking 'Load'");
+      }
+      else {
+        file = input.files[0];
+        fr = new FileReader();
+        fr.onload = receivedText;
+        fr.readAsText(file);
+      }
+
+      function receivedText(e) {
+        var lines = e.target.result;
+        var newArr = JSON.parse(lines);
+        loadSpecificJson(newArr);
+        $scope.$apply();
+      }
+    }
+    input.click();
+  }
 
   var createEditGameHtml = "<form><div style='margin:20px'>"+
               "<h2>Create / Edit Game</h2>" +
@@ -879,6 +923,26 @@ sosApp.controller('sos', ['$scope', '$modal', function($scope, $modal) {
     currentPlayer.sos = sos;
   }
 
+  $scope.exportData = function() {
+
+    var filename = $scope.currentEvent.name;
+    var text = JSON.stringify($scope.currentEvent);
+
+    var elementId = generateGUID();
+    var element = angular.element('<a id="' + elementId + '">ClickMe</a>');
+    element.attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.attr('download', filename);
+
+    var compiled = $compile(element)($scope);
+
+    element.css("display", 'none');
+
+    var body = angular.element(document).find('body').eq(0);
+    body.append(element)
+
+    element.get(0).click();
+    element.remove();
+  }
 
   $scope.saveData = function(){
 

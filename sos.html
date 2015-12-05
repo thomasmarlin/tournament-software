@@ -31,6 +31,8 @@
         <div>
           <button class="btn btn-primary btn-lg" ng-click="createEvent()">Create New Event</button>
           <button class="btn btn-primary btn-lg" ng-click="loadEvent()">Load Existing Event</button>
+          <button class="btn btn-primary btn-lg" ng-click="loadEventFromFile()">Load File</button>
+          <input style="display:none" type='file' id='fileinput'>
         </div>
       </div>
 
@@ -174,6 +176,7 @@
 
     <div style="margin:20px">
       <button class="btn btn-success" style="float:right; margin-left:10px" data-ng-click="saveData()">Save Data</button>
+      <button class="btn btn-success" style="float:right; margin-left:10px" data-ng-click="exportData()">Export Data</button>
       <div style="clear:both"></div>
     </div>
   </div>
