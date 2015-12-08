@@ -32,7 +32,7 @@ sosApp.controller('CreateGameController', ['$scope', '$modalInstance', '$timeout
       players.push($scope.playerLight);
     }
     return players;
-  }
+  };
 
   $scope.cancelClick = function() {
     $scope.newPlayerName = null;

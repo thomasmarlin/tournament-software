@@ -26,6 +26,18 @@ sosApp.controller('AssignWinnerController', ['$scope', '$modalInstance', '$timeo
     $modalInstance.close(edittedGame);
   }
 
+  $scope.getPlayers = function() {
+    var players = [];
+    if ($scope.playerDark) {
+      players.push($scope.playerDark);
+    }
+    if ($scope.playerLight) {
+      players.push($scope.playerLight);
+    }
+    return players;
+  };
+
+
   $scope.cancelClick = function() {
     $modalInstance.dismiss(null);
   }
