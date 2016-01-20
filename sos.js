@@ -581,19 +581,22 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
     */
   }
 
+  $scope.editPlayer = function(player) {
+    var modalDialog = $modal.open({
+        template: editPlayerHTML,
+        controller: 'EditPlayerController',
+        scope: $scope,
+        resolve: {
+          player: function() {
+            return player;
+          }
+        }
+      });
+  }
+
   $scope.addPlayer = function() {
     var modalDialog = $modal.open({
-        template: "<form><div style='margin:20px'>"+
-                    "<h2>Create Player</h2>" +
-                    "<div>Player Name</div>" +
-                    "<input ng-model='newPlayerName' placeholder='ex: John Smith' style='width:100%' autofocus>" +
-                    "<hr>" +
-                    "<div>" +
-                    "  <button class='btn btn-success btn-default' style='float:right' ng-click='okClick()'>OK</button>" +
-                    "  <button class='btn btn-fatal' style='float:right;margin-right:5px;' ng-click='cancelClick()'>Cancel</button>" +
-                    "  <div style='clear:both'></div>" +
-                    "</div>" +
-                  "</div></form>",
+        template: createPlayerHTML,
         controller: 'AddPlayerController',
         scope: $scope
       });
@@ -613,20 +616,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
 
   $scope.createEvent = function() {
     var modalDialog = $modal.open({
-        template: "<form><div style='margin:20px'>"+
-                    "<h2>Create Event</h2>" +
-                    "<div>Event Name</div>" +
-                    "<input ng-model='creatingEventData.name' placeholder='ex: 2015 MPC' style='width:100%' autofocus>" +
-                    "<label><input type='radio' ng-model='creatingEventData.mode' value='SOS'>  SOS  </label>" +
-                    "<div style='width:30px'></div>" +
-                    "<label><input type='radio' ng-model='creatingEventData.mode' value='DIFF'>  DIFF  </label>" +
-                    "<hr>" +
-                    "<div>" +
-                    "  <button class='btn btn-success btn-default' style='float:right' ng-click='okClick()'>OK</button>" +
-                    "  <button class='btn btn-fatal' style='float:right;margin-right:5px;' ng-click='cancelClick()'>Cancel</button>" +
-                    "  <div style='clear:both'></div>" +
-                    "</div>" +
-                  "</div></form>",
+        template: createEventHTML,
         controller: 'CreateEventController',
         scope: $scope
       });
@@ -646,19 +636,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
 
   $scope.loadEvent = function() {
     var modalDialog = $modal.open({
-        template: "<form><div style='margin:20px'>"+
-                    "<h2>Load Existing Event</h2>" +
-                    "<select class='input-sm' data-ng-model='tmp.eventNameToLoad' style='min-width:200px' autofocus>" +
-                    "  <option value='-- Select Event --'>-- Select Event --</option>" +
-                    "  <option ng-repeat='evt in allEvents track by $index'>{{evt.name}}</option>" +
-                    "</select>" +
-                    "<hr>" +
-                    "<div>" +
-                    "  <button class='btn btn-success btn-default' style='float:right' ng-click='okClick()'>OK</button>" +
-                    "  <button class='btn btn-fatal' style='float:right;margin-right:5px;' ng-click='cancelClick()'>Cancel</button>" +
-                    "  <div style='clear:both'></div>" +
-                    "</div>" +
-                  "</div></form>",
+        template: loadEventHTML,
         controller: 'LoadEventController',
         scope: $scope
       });
@@ -712,45 +690,9 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
     input.click();
   }
 
-  var createEditGameHtml = "<form><div style='margin:20px'>"+
-              "<h2>Create / Edit Game</h2>" +
-              "<div class='row'>" +
-
-                "<div class='col-xs-6'>" +
-                  "" +
-                  "<div>Player (DS)</div>" +
-                  "<select ng-model='playerDark' ng-options='player.name for player in currentEvent.players track by player.id' autofocus>" +
-                  "</select>" +
-                  "" +
-                  "<div>Player (LS)</div>" +
-                  "<select ng-model='playerLight' ng-options='player.name for player in currentEvent.players track by player.id'>" +
-                  "</select>" +
-                  "" +
-                  "<div>Round</div>" +
-                  "<select ng-model='round' ng-options='roundObj.num for roundObj in currentEvent.rounds track by roundObj.num'>" +
-                  "</select>" +
-                  "" +
-                "</div>" +
-
-                "<div class='col-xs-6'>" +
-                  "" +
-                  "<div>Winner</div>" +
-                  "<select ng-model='winner' ng-options='player.name for player in getPlayers() track by player.id'>" +
-                  "</select>" +
-                  "<div>Differential</div>" +
-                  "<input ng-model='diff'>" +
-                  "" +
-                "</div>" +
-
-              "</div>" +
-              "<hr>" +
-              "" +
-              "<div>" +
-              "  <button class='btn btn-success btn-default' style='float:right;' ng-click='okClick()'>OK</button>" +
-              "  <button class='btn btn-fatal' style='float:right;margin-right:5px;' ng-click='cancelClick()'>Cancel</button>" +
-              "  <div style='clear:both'></div>" +
-              "</div>" +
-            "</div></form>";
+  // createEditGameHTML is generated off of createEditGameHTML at compile-time
+  // This is required so that we can run this app in 100% offline-mode
+  var createEditGameHtml = createEditGameHTML;
 
 
   $scope.createGame = function() {

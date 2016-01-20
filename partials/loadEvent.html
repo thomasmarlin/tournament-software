@@ -1,0 +1,15 @@
+<form>
+  <div style="margin:20px">
+    <h2>Load Existing Event</h2>
+    <select class="input-sm" data-ng-model="tmp.eventNameToLoad" style="min-width:200px" autofocus>
+      <option value="-- Select Event --">-- Select Event --</option>
+      <option ng-repeat="evt in allEvents track by $index">{{evt.name}}</option>
+    </select>
+    <hr>
+    <div>
+      <button class="btn btn-success btn-default" style="float:right" ng-click="okClick()">OK</button>
+      <button class="btn btn-fatal" style="float:right;margin-right:5px;" ng-click="cancelClick()">Cancel</button>
+      <div style="clear:both"></div>
+    </div>
+  </div>
+</form>

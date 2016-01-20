@@ -1,0 +1,16 @@
+<form>
+  <div style="margin:20px">
+    <h2>Create Event</h2>
+    <div>Event Name</div>
+    <input ng-model="creatingEventData.name" placeholder="ex: 2015 MPC" style="width:100%" autofocus>
+    <label><input type="radio" ng-model="creatingEventData.mode" value="SOS">  SOS  </label>
+    <div style="width:30px"></div>
+    <label><input type="radio" ng-model="creatingEventData.mode" value="DIFF">  DIFF  </label>
+    <hr>
+    <div>
+      <button class="btn btn-success btn-default" style="float:right" ng-click="okClick()">OK</button>
+      <button class="btn btn-fatal" style="float:right;margin-right:5px;" ng-click="cancelClick()">Cancel</button>
+      <div style="clear:both"></div>
+    </div>
+  </div>
+</form>
