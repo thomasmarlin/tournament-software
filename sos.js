@@ -1,6 +1,6 @@
 'use strict';
-var sosApp = angular.module('sosApp', ['ui.bootstrap']);
-sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function($scope, $modal, $document, $compile) {
+var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs']);
+sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', 'MessageBoxService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, MessageBoxService) {
 
   var Logger = new function() {
     this.calculation = function(str) {
@@ -23,6 +23,11 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
   var FORMAT = {
     SOS: "SOS",
     DIFF: "DIFF"
+  };
+
+  var STATUS = {
+    STATUS_ACTIVE: "STATUS_ACTIVE",
+    STATUS_DROPPED: "STATUS_DROPPED"
   };
 
   $scope.allEvents = [];
@@ -248,6 +253,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
 
 
   function buildPiles(players, darkPile, lightPile) {
+
     // On the odd rounds, just push them into piles one-one-one-one, etc
     if (isOddRound()) {
       buildPilesSequential(players, darkPile, lightPile);
@@ -400,7 +406,9 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
     var allPlayerList = [];
     for (var i = 0; i < $scope.currentEvent.players.length; i++) {
       var player = $scope.currentEvent.players[i];
-      allPlayerList.push(player);
+      if (player.status == STATUS.STATUS_ACTIVE) {
+        allPlayerList.push(player);
+      }
     }
 
     // Always shuffle the player list first
@@ -581,8 +589,58 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
     */
   }
 
+  $scope.deleteRound = function() {
+    var currentRound = $scope.getCurrentRound();
+
+    // Make sure:
+    // #1:  0 games are present in this round
+    // #2:  This is the last round.
+    var numRounds = $scope.currentEvent.rounds.length;
+    var lastRoundIndex = numRounds -1;
+    var lastRound = $scope.currentEvent.rounds[lastRoundIndex];
+
+    var selectedRound = null;
+    for (var i = 0; i < $scope.currentEvent.rounds.length; i++) {
+      var round = $scope.currentEvent.rounds[i];
+      if (round.active) {
+        selectedRound = round;
+      }
+    }
+
+    if (!selectedRound) {
+      MessageBoxService.errorMessage("There isn't a 'round' selected. Try clicking on one of the 'round' tabs and try again.");
+      return;
+    }
+
+    console.log("last round num: " + lastRound.num);
+    console.log("current round num: " + currentRound.num);
+
+    if (lastRound.num != selectedRound.num) {
+      MessageBoxService.errorMessage("You can only delete the last round of an event.");
+      return;
+    }
+
+    // Ensure no games in this round
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
+      if (game.round.num == currentRound.num) {
+        MessageBoxService.errorMessage("You cannot delete a round which contains games.\nIf you really want to delete this round, first remove each of the games.");
+        return;
+      }
+    }
+
+    // Ok - No games in this round and we are the last round, so just move back a step
+    var roundIndex = $scope.currentEvent.rounds.indexOf(currentRound);
+    if (roundIndex != -1) {
+      $scope.currentEvent.rounds.splice(roundIndex, 1);
+    } else {
+      MessageBoxService.errorMessage("Could not find the active round!");
+    }
+  }
+
+
   $scope.editPlayer = function(player) {
-    var modalDialog = $modal.open({
+    var modalDialog = $uibModal.open({
         template: editPlayerHTML,
         controller: 'EditPlayerController',
         scope: $scope,
@@ -595,7 +653,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
   }
 
   $scope.addPlayer = function() {
-    var modalDialog = $modal.open({
+    var modalDialog = $uibModal.open({
         template: createPlayerHTML,
         controller: 'AddPlayerController',
         scope: $scope
@@ -615,7 +673,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
   }
 
   $scope.createEvent = function() {
-    var modalDialog = $modal.open({
+    var modalDialog = $uibModal.open({
         template: createEventHTML,
         controller: 'CreateEventController',
         scope: $scope
@@ -635,7 +693,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
   }
 
   $scope.loadEvent = function() {
-    var modalDialog = $modal.open({
+    var modalDialog = $uibModal.open({
         template: loadEventHTML,
         controller: 'LoadEventController',
         scope: $scope
@@ -696,7 +754,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
 
 
   $scope.createGame = function() {
-    var modalDialog = $modal.open({
+    var modalDialog = $uibModal.open({
         template: createEditGameHtml,
         controller: 'CreateGameController',
         scope: $scope
@@ -719,7 +777,7 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
 
   $scope.addResult = function(gameToUpdate) {
     $scope.gameToOpen = JSON.parse(JSON.stringify(gameToUpdate));
-    var modalDialog = $modal.open({
+    var modalDialog = $uibModal.open({
         template: createEditGameHtml,
         controller: 'AssignWinnerController',
         scope: $scope
@@ -937,13 +995,19 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
   }
 
   $scope.clearAllData = function(){
-    if (confirm("This will wipe out all data from all events. Are you sure?")) {
-      Logger.action("wiping out the world!");
-      localStorage.setItem("allEvents", null);
-      localStorage.setItem("data", null);
-    } else {
-      Logger.log("Whew...that was close.")
-    }
+    var confirmDialog = MessageBoxService.confirmDialog("This will wipe out all data from all events. Are you sure?");
+    confirmDialog.result.then(
+      //Confirmed
+      function() {
+        Logger.action("wiping out the world!");
+        localStorage.setItem("allEvents", null);
+        localStorage.setItem("data", null);
+      },
+      //Cancelled
+      function() {
+        Logger.log("Whew...that was close.")
+      }
+    );
   }
 
   function loadData() {
@@ -975,7 +1039,8 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
   function playerAdded(playerName){
     $scope.currentEvent.players.push({
       id: generateGUID(),
-      name: playerName
+      name: playerName,
+      status: STATUS.STATUS_ACTIVE
     });
   }
 
@@ -987,19 +1052,25 @@ sosApp.controller('sos', ['$scope', '$modal', '$document', '$compile', function(
 
   $scope.deleteGame = function(gameToDelete) {
 
-    if (!confirm("This game will be deleted and cannot be undone. Are you sure?")) {
-      return;
-    }
-
-    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
-      var game = $scope.currentEvent.games[i];
-      if (game.id == gameToDelete.id) {
-        $scope.currentEvent.games.splice(i, 1);
-        Logger.action("Game deleted");
-        break;
+    var confirmDialog = MessageBoxService.confirmDialog("This game will be deleted and cannot be undone. Are you sure?");
+    confirmDialog.result.then(
+      //Confirmed
+      function() {
+        for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+          var game = $scope.currentEvent.games[i];
+          if (game.id == gameToDelete.id) {
+            $scope.currentEvent.games.splice(i, 1);
+            Logger.action("Game deleted");
+            break;
+          }
+        }
+        updateVictoryPoints();
+      },
+      // Cancelled
+      function(){
+        console.log("Cancelled Game Deletion...");
       }
-    }
-    updateVictoryPoints();
+    );
   }
 
   $scope.deletePlayer = function(playerToDelete) {

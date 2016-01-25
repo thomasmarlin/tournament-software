@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('LoadEventController', ['$scope', '$modalInstance', '$timeout', function($scope, $modalInstance, $timeout) {
+sosApp.controller('LoadEventController', ['$scope', '$uibModalInstance', '$timeout', function($scope, $uibModalInstance, $timeout) {
 
   $scope.tmp = {
     eventNameToLoad: "-- Select Event --"
@@ -11,11 +11,11 @@ sosApp.controller('LoadEventController', ['$scope', '$modalInstance', '$timeout'
       alert("Please select an event from the list");
       return;
     }
-    $modalInstance.close($scope.tmp.eventNameToLoad);
+    $uibModalInstance.close($scope.tmp.eventNameToLoad);
   }
 
   $scope.cancelClick = function() {
-    $modalInstance.dismiss(null);
+    $uibModalInstance.dismiss(null);
   }
 
 }]);

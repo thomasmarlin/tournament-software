@@ -1,21 +1,31 @@
 <!DOCTYPE html>
 <html>
 <script src="jquery-2.1.4.min.js"></script>
-<script src="angular.min.js"></script>
+<!--<script src="angular.min.js"></script>-->
+<script src='angular.1.4.8.min.js'></script>
+<script src='angular-animate.min.js'></script>
 <script src="js/bootstrap.min.js"></script>
-<script src="ui-bootstrap-tpls-0.14.3.min.js.css"></script>
+<!--<script src="ui-bootstrap-tpls-0.14.3.min.js.css"></script>-->
+<script src="ui-bootstrap-tpls-1.1.0.min.js.css"></script>
+
 <script src="sos.js"></script>
-<script src="AddPlayerController.js"></script>
-<script src="CreateGameController.js"></script>
-<script src="CreateEventController.js"></script>
-<script src="LoadEventController.js"></script>
-<script src="AssignWinnerController.js"></script>
+<script src="js/controllers/AddPlayerController.js"></script>
+<script src="js/controllers/CreateGameController.js"></script>
+<script src="js/controllers/CreateEventController.js"></script>
+<script src="js/controllers/LoadEventController.js"></script>
+<script src="js/controllers/AssignWinnerController.js"></script>
+<script src="js/controllers/MessageBoxController.js"></script>
+<script src="js/controllers/ConfirmBoxController.js"></script>
+<script src="js/controllers/EditPlayerController.js"></script>
+<script src="js/services/MessageBoxService.js"></script>
 
 <script src="gen/createEditGameHTML.js"></script>
 <script src="gen/createEventHTML.js"></script>
 <script src="gen/createPlayerHTML.js"></script>
 <script src="gen/editPlayerHTML.js"></script>
 <script src="gen/loadEventHTML.js"></script>
+<script src="gen/messageBoxHTML.js"></script>
+<script src="gen/confirmBoxHTML.js"></script>
 
 <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="css/sos.css">
@@ -32,6 +42,10 @@
     <hr>
 
     <div class="row choiceContainer">
+
+      <button ng-click="alertTest()">Alert</button>
+        <button ng-click="errorTest()">Error</button>
+          <button ng-click="confirmTest()">Confirm</button>
 
       <div style="text-align:center">
         <div>
@@ -72,12 +86,14 @@
 
       <div ng-if="currentEvent.players.length > 0">
         <!-- Headers -->
-        <div ng-repeat="player in currentEvent.players | orderBy:['-vp', '-sos']" style="border:thin solid black; margin-top:5px; border-radius:4px;">
+        <div ng-repeat="player in currentEvent.players | orderBy:['-vp', '-sos']"
+             style="border:thin solid black; margin-top:5px; border-radius:4px; {{ player.status !== 'STATUS_ACTIVE' ? 'background-color: lightslategrey' : ''}}">
           <div style="margin:10px">
             <div class="row">
 
               <div class="col-xs-2">
                 <div class="glyphicon glyphicon-user" style="font-size: 2.5em;"></div>
+                <div style="color:blue; text-decoration:underline" ng-click="editPlayer(player)">Edit</div>
               </div>
 
               <div class="col-xs-4">
@@ -92,6 +108,7 @@
               <div class="col-xs-4">
                 <div>Victory Points: {{player.vp}}</div>
                 <div>Record: {{player.wins}}-{{player.losses}}</div>
+                <div>Status: {{player.status == 'STATUS_ACTIVE' ? 'Active' : 'DROPPED' }}</div>
               </div>
 
               <div class="col-xs-2">
@@ -112,22 +129,24 @@
         <div style="position:absolute; top:0; bottom:0; right:0; left:0;">
           <button class="btn btn-default" style="float:right" data-ng-click="newRound()">New Round</button>
           <button data-ng-if="currentEvent.rounds.length > 0" class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="createGame()">Create Game</button>
+          <button data-ng-if="currentEvent.rounds.length > 0" class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="deleteRound()">Delete Round</button>
         </div>
       </div>
+
+      <!--
       <ul class="nav nav-tabs">
-        <!--<li class="active"> <a href='#round1' data-toggle='tab'>Round 1</a> </li> -->
-        <li ng-repeat='round in currentEvent.rounds' ng-class="{active: round.num == 1 && currentEvent.rounds.length == 1}">
+        <li ng-repeat='round in currentEvent.rounds' ng-class="{active: round.num == 1 && currentEvent.rounds.length == 1}" active="round.active">
             <a href='#round{{round.num}}' data-toggle='tab'>Round {{round.num}}</a>
         </li>
       </ul>
+    -->
+      <uib-tabset>
+        <uib-tab active='round.active'
+              heading='Round {{round.num}}'
+              ng-repeat='round in currentEvent.rounds'>
 
-      <div class="tab-content">
-
-          <!-- Games from this current round -->
-          <div ng-repeat='round in currentEvent.rounds' id="round{{round.num}}" class="tab-pane fade in active">
             <div ng-if="currentEvent.games.length == 0" style="margin:50px">
               <h3 style="font-style:italic; color:gray">Click 'Create Game' to add a new game...</h3>
-
             </div>
 
             <div ng-if="currentEvent.games.length > 0">
@@ -172,9 +191,9 @@
                   </div>
 
               </div>
-          </div>
-        </div>
-      </div>
+
+        </uib-tab>
+      </uib-tabs>
     </div>
 
     <hr>

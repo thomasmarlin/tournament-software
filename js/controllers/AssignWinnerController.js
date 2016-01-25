@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('AssignWinnerController', ['$scope', '$modalInstance', '$timeout', function($scope, $modalInstance, $timeout) {
+sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$timeout', function($scope, $uibModalInstance, $timeout) {
 
   // Get the game to open from the parent scope
   $scope.gameToOpen = $scope.gameToOpen;
@@ -23,7 +23,7 @@ sosApp.controller('AssignWinnerController', ['$scope', '$modalInstance', '$timeo
       diff: $scope.diff,
       round: $scope.round
     }
-    $modalInstance.close(edittedGame);
+    $uibModalInstance.close(edittedGame);
   }
 
   $scope.getPlayers = function() {
@@ -39,7 +39,7 @@ sosApp.controller('AssignWinnerController', ['$scope', '$modalInstance', '$timeo
 
 
   $scope.cancelClick = function() {
-    $modalInstance.dismiss(null);
+    $uibModalInstance.dismiss(null);
   }
 
 }]);

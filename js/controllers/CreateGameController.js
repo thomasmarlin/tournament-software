@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('CreateGameController', ['$scope', '$modalInstance', '$timeout', function($scope, $modalInstance, $timeout) {
+sosApp.controller('CreateGameController', ['$scope', '$uibModalInstance', '$timeout', function($scope, $uibModalInstance, $timeout) {
 
   $scope.winner = null;
   $scope.playerDark = null;
@@ -20,7 +20,7 @@ sosApp.controller('CreateGameController', ['$scope', '$modalInstance', '$timeout
       diff: parseInt($scope.diff)
     };
 
-    $modalInstance.close(newGame);
+    $uibModalInstance.close(newGame);
   }
 
   $scope.getPlayers = function() {
@@ -36,7 +36,7 @@ sosApp.controller('CreateGameController', ['$scope', '$modalInstance', '$timeout
 
   $scope.cancelClick = function() {
     $scope.newPlayerName = null;
-    $modalInstance.dismiss(null);
+    $uibModalInstance.dismiss(null);
   }
 
 }]);

@@ -1,0 +1,1 @@
+var confirmBoxHTML =  "<div style=\"margin: 20px\">   <h3>{{title}}</h3>   <hr>   <div>{{message}}</div>   <div>     <button style=\"float:right\" ng-click=\"yes()\">Yes</button>     <button style=\"float:right; margin-left:20px\" ng-click=\"no()\">No</button>     <div style=\"clear:both\"></div>   </div> </div>" 
