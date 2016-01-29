@@ -1,1 +1,1 @@
-var messageBoxHTML =  "<div style=\"margin: 20px\">   <h3>{{title}}</h3>   <hr>   <div>{{message}}</div>   <div>     <button style=\"float:right\" ng-click=\"ok()\">OK</button>     <div style=\"clear:both\"></div>   </div> </div>" 
+var messageBoxHTML =  "<div style=\"margin: 20px\">   <h3>{{title}}</h3>   <hr>   <div>{{message}}</div>   <div>     <button class=\"btn btn-default\" style=\"float:right\" ng-click=\"ok()\">OK</button>     <div style=\"clear:both\"></div>   </div> </div>" 

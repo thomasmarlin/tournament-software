@@ -1,34 +1,34 @@
 <!DOCTYPE html>
 <html>
-<script src="jquery-2.1.4.min.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/jquery-2.1.4.min.js"></script>
 <!--<script src="angular.min.js"></script>-->
-<script src='angular.1.4.8.min.js'></script>
-<script src='angular-animate.min.js'></script>
-<script src="js/bootstrap.min.js"></script>
-<!--<script src="ui-bootstrap-tpls-0.14.3.min.js.css"></script>-->
-<script src="ui-bootstrap-tpls-1.1.0.min.js.css"></script>
+<script src='/wp-content/plugins/swccg-tourny/angular.1.4.8.min.js'></script>
+<script src='/wp-content/plugins/swccg-tourny/angular-animate.min.js'></script>
+<script src="/wp-content/plugins/swccg-tourny/js/bootstrap.min.js"></script>
+<!--<script src="/wp-content/plugins/swccg-tourny/ui-bootstrap-tpls-0.14.3.min.js.css"></script>-->
+<script src="/wp-content/plugins/swccg-tourny/ui-bootstrap-tpls-1.1.0.min.js.css"></script>
 
-<script src="sos.js"></script>
-<script src="js/controllers/AddPlayerController.js"></script>
-<script src="js/controllers/CreateGameController.js"></script>
-<script src="js/controllers/CreateEventController.js"></script>
-<script src="js/controllers/LoadEventController.js"></script>
-<script src="js/controllers/AssignWinnerController.js"></script>
-<script src="js/controllers/MessageBoxController.js"></script>
-<script src="js/controllers/ConfirmBoxController.js"></script>
-<script src="js/controllers/EditPlayerController.js"></script>
-<script src="js/services/MessageBoxService.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/sos.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/AddPlayerController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/CreateGameController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/CreateEventController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/LoadEventController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/AssignWinnerController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/MessageBoxController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/ConfirmBoxController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/EditPlayerController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/services/MessageBoxService.js"></script>
 
-<script src="gen/createEditGameHTML.js"></script>
-<script src="gen/createEventHTML.js"></script>
-<script src="gen/createPlayerHTML.js"></script>
-<script src="gen/editPlayerHTML.js"></script>
-<script src="gen/loadEventHTML.js"></script>
-<script src="gen/messageBoxHTML.js"></script>
-<script src="gen/confirmBoxHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/createEditGameHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/createEventHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/createPlayerHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/editPlayerHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/loadEventHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/messageBoxHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/confirmBoxHTML.js"></script>
 
-<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-<link rel="stylesheet" type="text/css" href="css/sos.css">
+<link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/sos.css">
 
 
 <div ng-app="sosApp" ng-controller="sos" style="margin:20px">
@@ -43,10 +43,6 @@
 
     <div class="row choiceContainer">
 
-      <button ng-click="alertTest()">Alert</button>
-        <button ng-click="errorTest()">Error</button>
-          <button ng-click="confirmTest()">Confirm</button>
-
       <div style="text-align:center">
         <div>
           <button class="btn btn-primary btn-lg" ng-click="createEvent()">Create New Event</button>
@@ -54,10 +50,18 @@
         </div>
       </div>
 
-      <div style="position:absolute; right:5px; bottom:5px">
-        <button class="btn btn-info" ng-click="loadEventFromFile()">DEBUG: Load File</button>
-        <button class="btn btn-danger" ng-click="clearAllData()">DEBUG: Clear All Data</button>
-        <input style="display:none" type='file' id='fileinput'>
+
+      <div style="margin-top: 300px; margin-left: 50px; text-align:center">
+        <div style="border: thin solid #DADADA; padding: 20px">
+          <div style="font-weight:bold">DEBUG TOOLS</div>
+
+          <div>
+            <button class="btn btn-info" ng-click="loadEventFromFile()">DEBUG: Load File</button>
+            <button class="btn btn-danger" ng-click="clearAllData()">DEBUG: Clear All Data</button>
+            <input style="display:none" type='file' id='fileinput'>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -177,12 +181,12 @@
 
                               <div ng-if="game.winner">
                                   <div>{{game.winner.name}}</div>
-                                  <button ng-click="addResult(game)">Change</button>
+                                  <button class="btn btn-default" ng-click="addResult(game)">Change</button>
                                   <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
                               </div>
 
                               <div ng-if="!game.winner">
-                                  <button ng-click="addResult(game)">Add Result</button>
+                                  <button class="btn btn-default" ng-click="addResult(game)">Add Result</button>
                                   <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
                               </div>
 
