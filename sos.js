@@ -56,6 +56,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     var newEvent = getNewBlankData();;
     newEvent.name = name;
     newEvent.mode = mode;
+    newEvent.id = generateGUID();
     $scope.currentEvent = newEvent;
   }
 

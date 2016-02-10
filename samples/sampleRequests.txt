@@ -1,0 +1,6 @@
+GET:
+http://192.168.33.10/wp-content/plugins/swccg-tourny/api.php?request=games&tournamentId=XXXXXX&year=YYYYYY&pickers=Yes
+
+
+POST:
+http://192.168.33.10/wp-content/plugins/swccg-tourny/api.php?request=games&tournamentId=XXXXXX&year=YYYYYY&pickers=Yes

@@ -35,24 +35,29 @@ abstract class API
      * Constructor: __construct
      * Allow for CORS, assemble and pre-process the data
      */
-    public function __construct($request) {
-        header("Access-Control-Allow-Orgin: *");
-        header("Access-Control-Allow-Methods: *");
-        header("Content-Type: application/json");
+    public function __construct($request, $http_raw_post_data) {
+        //header("Access-Control-Allow-Orgin: *");
+        //header("Access-Control-Allow-Methods: *");
+        //header("Content-Type: application/json");
 
-        $this->args = explode('/', rtrim($request, '/'));
-        $this->endpoint = array_shift($this->args);
+        print("-------- construct-----\n");
+        print_r($request);
+        print("------- after construct ------\n");
 
-        print("Endpoint: ");
-        print($this->endpoint);
+        $this->endpoint = $request['endpoint'];
+        $this->args = $request;
+        $this->post_data = $http_raw_post_data;
 
-        print("\n");
 
-        print("Args: ");
-        print_r($this->args);
-        if (array_key_exists(0, $this->args) && !is_numeric($this->args[0])) {
-            $this->verb = array_shift($this->args);
-        }
+        /*
+        print("In API.class.php  construct\n");
+        print_r($request);
+
+        print("-------\n");
+        */
+
+        //$this->args = explode('/', rtrim($request, '/'));
+        $this->args = $request;
 
         $this->method = $_SERVER['REQUEST_METHOD'];
         if ($this->method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
@@ -83,35 +88,6 @@ abstract class API
         }
     }
 
-    public function games($args) {
-
-      // Supported Params:
-      // games?tournamentId=XXXXXXX
-      // games/XXXXXXXXX
-
-      print("In Games!\n");
-
-
-      print("==========\n");
-
-      print_r($args);
-
-      print("==========\n");
-
-      $game1 = new stdClass();
-      $game1->id = "13423423423423";
-      $game2 = new stdClass();
-      $game2->id = "98987987987987";
-
-
-      $gamesList = array(
-        $game1,
-        $game2
-      );
-
-
-      return json_encode($gamesList);
-    }
 
     public function processAPI() {
         if (method_exists($this, $this->endpoint)) {
@@ -121,7 +97,7 @@ abstract class API
     }
 
     private function _response($data, $status = 200) {
-        header("HTTP/1.1 " . $status . " " . $this->_requestStatus($status));
+        //header("HTTP/1.1 " . $status . " " . $this->_requestStatus($status));
         return json_encode($data);
     }
 
