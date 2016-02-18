@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs']);
-sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', 'MessageBoxService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, MessageBoxService) {
+sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', 'MessageBoxService', 'DataStorage', function($scope, $animate, $animateCss, $uibModal, $document, $compile, MessageBoxService, DataStorage) {
 
   var Logger = new function() {
     this.calculation = function(str) {
@@ -30,14 +30,24 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     STATUS_DROPPED: "STATUS_DROPPED"
   };
 
-  $scope.allEvents = [];
   $scope.currentEvent = null;
 
-  function loadAllEvents() {
-    loadData();
+  $scope.toggleOnlineMode = function() {
+    DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
+    $scope.networkMode = DataStorage.getNetworkMode();
+  };
+
+  $scope.toggleOfflineMode = function() {
+    DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
+    $scope.networkMode = DataStorage.getNetworkMode();
+  };
+
+  function refreshNetworkStatus() {
+    $scope.networkMode = DataStorage.getNetworkMode();
   }
 
-  loadAllEvents();
+  refreshNetworkStatus();
+
 
   var newEventData = {
     name: "",
@@ -53,7 +63,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
 
   function createEventWithName(name, mode) {
-    var newEvent = getNewBlankData();;
+    var newEvent = getNewBlankData();
     newEvent.name = name;
     newEvent.mode = mode;
     newEvent.id = generateGUID();
@@ -67,23 +77,15 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     }, 0);
   }
 
-  function loadEventWithName(eventName) {
-    Logger.action("loading event: " + eventName);
-    for (var i = 0; i < $scope.allEvents.length; i++) {
-      var evt = $scope.allEvents[i];
-      if (evt.name == eventName) {
-        loadSpecificJson(evt);
-        /*
-        $scope.currentEvent = JSON.parse(JSON.stringify(evt));
-        updateVictoryPoints();
-
-        clickFirstRound();
-        */
-        return;
+  function loadEventById(tournamentId) {
+    DataStorage.getEventInfo(tournamentId).then(
+      function(data) {
+        loadSpecificJson(data);
+      },
+      function(err) {
+        MessageBoxService.errorMessage("Failed to load event. The event could not be found");
       }
-    }
-
-    alert("Failed to load event. The event is not present in the system.");
+    )
   }
 
   function loadSpecificJson(evt) {
@@ -702,9 +704,9 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
     modalDialog.result.then(
       // Success
-      function(name) {
-          Logger.action("Loading event with name: " + name);
-          loadEventWithName(name);
+      function(tournamentId, name) {
+          Logger.action("Loading event with name: " + name + " id: " + tournamentId);
+          loadEventById(tournamentId);
       },
       // Cancelled
       function() {
@@ -978,21 +980,14 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   $scope.saveData = function(){
 
-    var eventAdded = false;
-    var eventName = $scope.currentEvent.name;
-    for (var i = 0; i < $scope.allEvents.length; i++) {
-      var evt = $scope.allEvents[i];
-      if (evt.name == $scope.currentEvent.name) {
-        $scope.allEvents[i] = $scope.currentEvent;
-        eventAdded = true;
+    DataStorage.saveEventInfo($scope.currentEvent).then(
+      function(response) {
+        console.log("Data successfully saved!");
+      },
+      function(err) {
+        MessageBoxService.errorMessage("Error saving event data.");
       }
-    }
-
-    if (!eventAdded) {
-      $scope.allEvents.push($scope.currentEvent);
-    }
-
-    saveData($scope.allEvents);
+    );
   }
 
   $scope.clearAllData = function(){
@@ -1001,40 +996,13 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       //Confirmed
       function() {
         Logger.action("wiping out the world!");
-        localStorage.setItem("allEvents", null);
-        localStorage.setItem("data", null);
+        DataStorage.deleteAllEvents();
       },
       //Cancelled
       function() {
         Logger.log("Whew...that was close.")
       }
     );
-  }
-
-  function loadData() {
-
-    var data = localStorage.data;
-    var allEvents = [];
-
-    try {
-      if (data) {
-        var parsedData = JSON.parse(data);
-        if (parsedData) {
-          allEvents = parsedData.allEvents;
-        }
-      }
-    } catch(ex) {
-      Logger.error("Error loading stored data!");
-    }
-    $scope.allEvents = allEvents;
-  }
-
-  function saveData(events) {
-    var storableData = {
-      allEvents: JSON.parse(JSON.stringify(events))
-    };
-    var eventsString = JSON.stringify(storableData);
-    localStorage.setItem('data', eventsString);
   }
 
   function playerAdded(playerName){
