@@ -2,6 +2,9 @@
   <h3>{{title}}</h3>
   <hr>
   <div>{{message}}</div>
+  <li data-ng-repeat='message in extraMessages'>
+    {{message}}
+  </li>
   <div>
     <button class="btn btn-default" style="float:right" ng-click="ok()">OK</button>
     <div style="clear:both"></div>

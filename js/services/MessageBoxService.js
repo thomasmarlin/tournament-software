@@ -3,7 +3,7 @@ var sosApp = angular.module('sosApp');
 sosApp.service('MessageBoxService', ['$uibModal', function($uibModal) {
 
 
-  this.infoMessage = function(infoMessage, scope) {
+  this.infoMessage = function(infoMessage, scope, extraMessages) {
     var modalDialog = $uibModal.open({
         template: messageBoxHTML,
         controller: "MessageBoxController",
@@ -12,6 +12,9 @@ sosApp.service('MessageBoxService', ['$uibModal', function($uibModal) {
           message: function() {
             return infoMessage;
           },
+          extraMessages: function() {
+            return extraMessages;
+          },
           title: function() {
             return "Info:";
           }
@@ -19,7 +22,7 @@ sosApp.service('MessageBoxService', ['$uibModal', function($uibModal) {
       });
   };
 
-  this.errorMessage = function(errorMessage, scope) {
+  this.errorMessage = function(errorMessage, scope, extraMessages) {
     var modalDialog = $uibModal.open({
         template: messageBoxHTML,
         controller: "MessageBoxController",
@@ -27,6 +30,9 @@ sosApp.service('MessageBoxService', ['$uibModal', function($uibModal) {
         resolve: {
           message: function() {
             return errorMessage;
+          },
+          extraMessages: function() {
+            return extraMessages;
           },
           title: function() {
             return "Sorry!";
@@ -53,7 +59,5 @@ sosApp.service('MessageBoxService', ['$uibModal', function($uibModal) {
       });
     return modalDialog;
   };
-
-
 
 }]);

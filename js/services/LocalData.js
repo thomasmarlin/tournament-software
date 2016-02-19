@@ -1,6 +1,6 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.service('LocalData', ['$q', function($q) {
+sosApp.service('LocalData', ['$q', 'LoggerService', function($q, LoggerService) {
 
   var LOCAL_STORAGE_KEY = 'LOCAL_STORAGE_KEY';
   var self = this;
@@ -17,7 +17,7 @@ sosApp.service('LocalData', ['$q', function($q) {
         }
       }
     } catch(ex) {
-      Logger.error("Error loading stored data!");
+      LoggerService.error("Error loading stored data!");
     }
 
     return allEvents;
