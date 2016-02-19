@@ -3,7 +3,7 @@ var sosApp = angular.module('sosApp');
 sosApp.controller('LoadEventController', ['$scope', '$uibModalInstance', '$timeout', 'DataStorage', function($scope, $uibModalInstance, $timeout, DataStorage) {
 
   $scope.tmp = {
-    eventId: "-- Select Event --",
+    eventId: "SELECT_EVENT_PLACEHOLDER",
     eventNames: []
   };
 
