@@ -1,6 +1,6 @@
 .choiceBox {
   border: thin solid #dadada;
-  border-radius:5px;
+  border-radius: 5px;
 }
 
 .leftChoiceBox {
@@ -8,7 +8,68 @@
 }
 
 .choiceContainer {
-  padding:20px;
+  padding: 20px;
   /*border: thin solid #dadada;*/
-  border-radius:5px;
+  border-radius: 5px;
+}
+
+.tournamentTitle {
+  text-align: center;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.mainContentBox {
+  border-radius: 12px;
+  background-color: #f0f0f0;
+  padding-top: 5px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  border: thin solid gray;
+}
+
+.mainContentHeader {
+  position: relative;
+}
+
+.mainContentHeaderName {
+  font-style: italic;
+  font-weight: bold
+}
+
+.mainContentHeaderButtons {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+.mainContentBox hr {
+  border-color: lightgray;
+}
+
+.playerBox {
+  border: thin solid gray;
+  margin-top: 5px;
+  border-radius: 8px;
+  background-color: #FAFAFA;
+  padding-bottom: 5px;
+}
+
+.playerBoxHeader {
+  font-size: 1.2em;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.playerBox.droppedPlayer {
+  background-color: #FFAAAA;
+}
+.playerBox.gameFinished {
+  background-color: #AAFFAA;
+}
+.playerBox.gamePending {
+  background-color: #FFAAAA;
 }
