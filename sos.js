@@ -5,13 +5,38 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   $scope.currentEvent = null;
 
   $scope.toggleOnlineMode = function() {
-    DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
-    $scope.networkMode = DataStorage.getNetworkMode();
+    if (DataStorage.getNetworkMode() === DataStorage.NETWORK_MODES.NETWORK_ONLINE) {
+      return;
+    }
+
+    var confirmDlg = MessageBoxService.confirmDialog("Continuing will enter ONLINE mode. Any changes you make to this event will be sent up to the SWCCG Server.\n\nAre you sure you want to continue?", $scope);
+    confirmDlg.result.then(
+      function() {
+        DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
+        $scope.networkMode = DataStorage.getNetworkMode();
+      },
+      //Cancel
+      function() {
+        DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
+        $scope.networkMode = DataStorage.getNetworkMode();
+      }
+    );
   };
 
   $scope.toggleOfflineMode = function() {
-    DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
-    $scope.networkMode = DataStorage.getNetworkMode();
+
+    var confirmDlg = MessageBoxService.confirmDialog("Continuing will enter OFFLINE mode. All changes will be stored inside your browser. \n\nAre you sure you want to continue?", $scope);
+    confirmDlg.result.then(
+      function() {
+        DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
+        $scope.networkMode = DataStorage.getNetworkMode();
+      },
+      //Caancel
+      function(){
+        DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
+        $scope.networkMode = DataStorage.getNetworkMode();
+      }
+    );
   };
 
   function refreshNetworkStatus() {
