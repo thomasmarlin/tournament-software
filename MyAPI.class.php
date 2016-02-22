@@ -17,6 +17,13 @@ class MyAPI extends API
         $this->User = "FakeUser";
     }
 
+    private function getPlayersPath() {
+      return 'players';
+    }
+
+    private function getPlayersFileName() {
+      return 'players.json';
+    }
 
     private function getTournamentsPath() {
       return 'tournaments';
@@ -39,17 +46,29 @@ class MyAPI extends API
       return $tournamentIds;
     }
 
-    private function writeTournamentFile($tournamentId, $tournamentData) {
+    private function writeFile($fileName, $filePath, $fileContents) {
 
-      $tournamentFile = $this->getTournamentsPath() . '/' . $tournamentId;
+      $fullPath = $filePath . '/' . $fileName;
 
-      $jsonString = json_encode($tournamentData);
+      $jsonString = json_encode($fileContents);
 
-      $openedFile = fopen($tournamentFile, "w");
+      $openedFile = fopen($fullPath, "w");
       fwrite($openedFile, $jsonString);
       fclose($openedFile);
 
       return true;
+    }
+
+    private function writeTournamentFile($tournamentId, $tournamentData) {
+      return $this->writeFile($tournamentId, $this->getTournamentsPath(), $tournamentData);
+    }
+
+    private function writePlayerList($playersArray) {
+
+      $playerData = new stdClass();
+      $playerData->players = $playersArray;
+
+      return $this->writeFile($this->getPlayersFileName(), $this->getPlayersPath(), $playerData);
     }
 
     private function doesTournamentExist($tournamentId) {
@@ -86,6 +105,59 @@ class MyAPI extends API
       }
 
       return $tournamentList;
+    }
+
+
+    private function playerInArray($player, $allPlayersArray) {
+      foreach($allPlayersArray as $existingPlayer) {
+        if ($player->id == $existingPlayer->id) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+
+    /**
+     * Parse all Tournament files and get all Player objects out of there
+     */
+    private function getPlayersFromTournaments() {
+
+      $allPlayers =[];
+
+      $tournamentIds = $this->getTournamentIds();
+
+      foreach($tournamentIds as $tournamentId) {
+        $tournamentJson = $this->getTournament($tournamentId);
+
+        $playersInTournament = $tournamentJson->players;
+        foreach($playersInTournament as $player) {
+
+          if (!$this->playerInArray($player, $allPlayers)) {
+
+            $playerObj = new stdClass();
+            $playerObj->id = $player->id;
+            $playerObj->name = $player->name;
+            $playerObj->forum_handle = $player->forum_handle;
+
+            array_push($allPlayers, $playerObj);
+          }
+
+        }
+      }
+
+      return $allPlayers;
+    }
+
+
+    /**
+     * Get an array containing the current list of players
+     */
+    private function getPlayerList() {
+      $playersFilePath = $this->getPlayersPath() . '/' . $this->getPlayersFileName();
+      $playersDataString = file_get_contents($playersFilePath);
+      $playersData = json_decode($playersDataString);
+      return $playersData->players;
     }
 
 
@@ -139,6 +211,18 @@ class MyAPI extends API
       } else {
         $this->sendJsonResponse(true, $tournamentData, "Error writing tournament results");
       }
+
+      // Also, update the cached player list
+      $playersFromTournaments = $this->getPlayersFromTournaments();
+      $this->writePlayerList($playersFromTournaments);
+    }
+
+    protected function handlePlayerListGET() {
+      $playerList = $this->getPlayerList();
+
+      $playerListData = new stdClass();
+      $playerListData->players = $playerList;
+      $this->sendJsonResponse(true, $playerListData, null);
     }
 
     protected function handleTournamentListGET() {
@@ -170,6 +254,17 @@ class MyAPI extends API
 
       }
 
+    }
+
+    protected function playerList() {
+      $method = $this->method;
+      if ($method == "GET") {
+
+        $this->handlePlayerListGET();
+
+      } else {
+        $this->sendJsonResponse(false, null, "playerList only supports HTTP GET");
+      }
     }
 
     protected function tournamentList() {

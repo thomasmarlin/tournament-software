@@ -80,6 +80,11 @@ sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
     return this.get(url);
   };
 
+  this.getPlayerList = function() {
+    var url = DEFAULT_ENDPOINT + '?endpoint=playerList';
+    return this.get(url);
+  };
+
   this.getTournamentInfo = function(tournamentId) {
     var url = DEFAULT_ENDPOINT + '?endpoint=tournaments&tournamentId=' + tournamentId;
     return this.get(url);

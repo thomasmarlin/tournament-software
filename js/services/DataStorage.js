@@ -19,6 +19,16 @@ sosApp.service('DataStorage', ['RESTService', 'LocalData', '$q', function(APISer
     return networkMode;
   }
 
+  this.getPlayerList = function() {
+    var promise = null;
+    if (networkMode == self.NETWORK_MODES.NETWORK_ONLINE) {
+      promise = APIService.getPlayerList();
+    } else {
+      promise = LocalData.getPlayerList();
+    }
+    return promise;
+  };
+
   this.getEventNames = function() {
     var promise = null;
     if (networkMode == self.NETWORK_MODES.NETWORK_ONLINE) {

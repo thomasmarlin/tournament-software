@@ -1,0 +1,36 @@
+--- Tournaments ---
+{
+  id: XXXXXXXXXXX,
+  name: XXXXXXXXXX,
+  mode: 'SOS' or 'DIFF',
+  players: [
+    { (player-data) },
+    { (player-data) },
+    { (player-data) }
+    ...
+  ],
+  games: [
+    { (game-data) },
+    { (game-data) },
+    { (game-data) }
+    ...
+  ]
+}
+
+
+--- Player ---
+{
+  id: XXXXXXX,
+  name: XXXXXXXXX,
+  forum_handle: XXXXXXXXXX
+}
+
+
+--- Game ---
+{
+  id: XXXXXX,
+  playerDark: (player-data),
+  playerLight: (player-data),
+  winner: (player-data),
+  diff: X
+}

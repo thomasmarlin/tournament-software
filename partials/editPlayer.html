@@ -1,15 +1,27 @@
 <form>
-  <div style="margin:20px">
+  <div style="margin:20px; position:relative;">
     <h2>Edit Player</h2>
+    <div style="position:absolute; right: 0px; top: 0px;">
+      <button class="btn btn-default" style="float:right" ng-click='loadPlayer()'>Load Player...</button>
+      <button ng-if="existingPlayerMode" class="btn btn-default" style="float:right" ng-click='newPlayer()'>Create New</button>
+      <div style="clear:both"></div>
+    </div>
 
     <div class="row">
       <div class="col-md-8">
-        <div>Player Name</div>
-        <input ng-model="player.name" placeholder="ex: John Smith" style="width:100%;" autofocus>
+
+        <div ng-show='existingPlayerMode'>Existing Player:</div>
+
+        <div class='swccg-margin-top-10'>Player Name</div>
+        <input ng-model="player.name" ng-disabled='existingPlayerMode' placeholder="ex: John Smith" style="width:100%;" autofocus>
+
+        <div class='swccg-margin-top-10'>Forum Handle</div>
+        <input ng-model="player.forum_handle" ng-disabled='existingPlayerMode' style="width:100%;">
       </div>
 
       <div class="col-md-4">
-        <div>Active</div>
+
+        <div class='swccg-margin-top-10'>Active</div>
         <select data-ng-model="player.status">
           <option value="STATUS_ACTIVE">Active</option>
           <option value="STATUS_DROPPED">Dropped</option>

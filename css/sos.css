@@ -73,3 +73,25 @@
 .playerBox.gamePending {
   background-color: #FFAAAA;
 }
+
+.debugToolsLabel {
+  float: left;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.rightFloatButtons {
+  float: right;
+  margin-left: 10px;
+}
+
+.swccg-margin-top-10 {
+  margin-top: 10px;
+}
+
+.swccg_forum_handle {
+  font-style:italic;
+  font-size: small;
+  text-decoration: underline;
+  color: blue;
+}

@@ -75,6 +75,37 @@ sosApp.service('LocalData', ['$q', 'LoggerService', function($q, LoggerService) 
     return deferred.promise;
   };
 
+  function isPlayerInList(playerId, playerArray) {
+
+  }
+
+  // Get a list of all of the registered Players
+  this.getPlayerList = function() {
+    var deferred = $q.defer();
+    var allEvents = self.loadData();
+
+    var allPlayers = [];
+    for (var i = 0; i < allEvents.length; i++) {
+      var existingEvent = allEvents[i];
+
+      for (var j = 0; j < existingEvent.players.length; j++) {
+        var player = existingEvent.players[j];
+        if (!isPlayerInList(player.id, allPlayers)) {
+          allPlayers.push(player);
+        }
+      }
+
+    }
+
+    var playersResponse = {
+      players: allPlayers
+    };
+
+    deferred.resolve(playersResponse);
+
+    return deferred.promise;
+  }
+
 
   // Get a list of all of the Tournament Ids
   this.getTournamentList = function() {

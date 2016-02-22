@@ -171,7 +171,44 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
           }
         }
       });
+
+      modalDialog.result.then(
+        //Success
+        function(newPlayer) {
+          replacePlayer(player.id, newPlayer);
+        }
+      );
   }
+
+  function replacePlayer(playerId, newPlayer) {
+
+    LoggerService.action("Replacing Player : " + playerId + " with: " + JSON.stringify(newPlayer));
+
+    // First, replace him in the 'players' list
+    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
+      var player = $scope.currentEvent.players[i];
+      if (player.id == playerId) {
+        $scope.currentEvent.players[i] = newPlayer;
+      }
+    }
+
+    // Next, replace the person in all of the games {
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
+      if (game.playerDark.id == playerId) {
+        game.playerDark = newPlayer;
+      }
+      if (game.playerLight.id == playerId) {
+        game.playerLight = newPlayer;
+      }
+      if (game.winner && game.winner.id == playerId) {
+        game.winner = newPlayer;
+      }
+    }
+
+
+  }
+
 
   $scope.addPlayer = function() {
     var modalDialog = $uibModal.open({

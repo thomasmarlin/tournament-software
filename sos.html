@@ -17,6 +17,7 @@
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/MessageBoxController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/ConfirmBoxController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/EditPlayerController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/FindPlayerController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/services/MessageBoxService.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/services/RESTService.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/services/LocalData.js"></script>
@@ -34,10 +35,11 @@
 <script src="/wp-content/plugins/swccg-tourny/gen/loadEventHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/messageBoxHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/confirmBoxHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/findPlayerHTML.js"></script>
 
 <link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/sos.css">
-
+<link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/findPlayer.css">
 
 <div ng-app="sosApp" ng-controller="sos" style="margin:20px">
 
@@ -113,12 +115,13 @@
             <div class="row">
 
               <div class="col-xs-2">
-                <div class="glyphicon glyphicon-user" style="font-size: 2.5em;"></div>
-                <div style="color:blue; text-decoration:underline; margin-left: 5px;" ng-click="editPlayer(player)">Edit</div>
+                <div class="glyphicon glyphicon-user" style="font-size: 2.5em; margin-left: 9px"></div>
+                <div style="color:blue; text-decoration:underline; margin-left: 5px;" ng-click="editPlayer(player)">Update</div>
               </div>
 
               <div class="col-xs-4">
                 <div class="playerBoxHeader">{{player.name}}</div>
+                <div ng-if='player.forum_handle' class="swccg_forum_handle">{{player.forum_handle}}</div>
                 <div>SoS: {{player.sos}}</div>
                 <div>Diff:
                   <span ng-if="player.diff >= 0" style="color:green"> ({{player.diff}}) </span>
@@ -152,6 +155,7 @@
           <button class="btn btn-default" style="float:right" data-ng-click="newRound()">New Round</button>
           <button data-ng-if="currentEvent.rounds.length > 0" class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="createGame()">Create Game</button>
           <button data-ng-if="currentEvent.rounds.length > 0" class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="deleteRound()">Delete Round</button>
+          <div style="clear:both"></div>
         </div>
       </div>
 
@@ -217,9 +221,13 @@
 
   </div>
 
+  <hr>
+
+
   <div style="margin-top:20px">
-    <button class="btn btn-success" style="float:right; margin-left:10px" data-ng-click="saveData()">Save Data</button>
-    <button class="btn btn-success" style="float:right; margin-left:10px" data-ng-click="exportData()">Export Data</button>
+    <div class="debugToolsLabel">Debug Tools</div>
+    <button class="btn btn-success rightFloatButtons" data-ng-click="saveData()">Save Data</button>
+    <button class="btn btn-success rightFloatButtons" data-ng-click="exportData()">Export Data</button>
     <div style="clear:both"></div>
   </div>
 
