@@ -43,7 +43,7 @@ sosApp.service('MessageBoxService', ['$uibModal', function($uibModal) {
   };
 
 
-  this.confirmDialog = function(confirmMessage, scope) {
+  this.confirmDialog = function(confirmMessage, scope, title) {
     var modalDialog = $uibModal.open({
         template: confirmBoxHTML,
         controller: "ConfirmBoxController",
@@ -53,7 +53,11 @@ sosApp.service('MessageBoxService', ['$uibModal', function($uibModal) {
             return confirmMessage;
           },
           title: function() {
-            return "Are you sure?";
+            if (title) {
+              return title;
+            } else {
+              return "Are you sure?";
+            }
           }
         }
       });

@@ -28,7 +28,7 @@
     <!-- Player Data -->
     <div style="max-height: 300px; overflow:auto;">
       <ul>
-        <li ng-repeat="player in matchingPlayers" style="width:100%; border-bottom: thin solid #DADADA" ng-click="selectPlayer(player)">
+        <li ng-repeat="player in matchingPlayers track by $index" style="width:100%; border-bottom: thin solid #DADADA" ng-click="selectPlayer(player)">
           <div class="findPlayerResult">
             {{player.name}}
             <span ng-if='player.forum_handle' style="margin-left: 5px;">

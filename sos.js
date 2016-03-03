@@ -1,6 +1,6 @@
 'use strict';
-var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs']);
-sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', 'MessageBoxService', 'DataStorage', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, MessageBoxService, DataStorage, LoggerService, UtilService, StatsService, TournamentService, ConstantsService) {
+var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs', 'angularSpinner']);
+sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', 'MessageBoxService', 'DataStorage', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, MessageBoxService, DataStorage, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService) {
 
   $scope.currentEvent = null;
 
@@ -63,7 +63,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     var newEvent = getNewBlankData();
     newEvent.name = name;
     newEvent.mode = mode;
-    newEvent.id = generateGUID();
+    newEvent.id = UtilService.generateGUID();
     $scope.currentEvent = newEvent;
   }
 
@@ -394,7 +394,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     var filename = $scope.currentEvent.name;
     var text = JSON.stringify($scope.currentEvent);
 
-    var elementId = generateGUID();
+    var elementId = UtilService.generateGUID();
     var element = angular.element('<a id="' + elementId + '">ClickMe</a>');
     element.attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.attr('download', filename);
@@ -439,14 +439,14 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   function playerAdded(playerName){
     $scope.currentEvent.players.push({
-      id: generateGUID(),
+      id: UtilService.generateGUID(),
       name: playerName,
       status: ConstantsService.PLAYER_STATUS.STATUS_ACTIVE
     });
   }
 
   function gameCreated(newGame){
-    newGame.id = generateGUID();
+    newGame.id = UtilService.generateGUID();
     $scope.currentEvent.games.push(newGame);
     StatsService.updateVictoryPoints($scope.currentEvent);
   }
@@ -472,7 +472,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         console.log("Cancelled Game Deletion...");
       }
     );
-  }
+  };
 
   $scope.deletePlayer = function(playerToDelete) {
     for (var i = 0; i < $scope.currentEvent.games.length; i++) {
@@ -494,15 +494,33 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     }
 
     StatsService.updateVictoryPoints($scope.currentEvent);
-  }
-
-  function generateGUID() {
-    // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-    /*jshint bitwise: false*/
-    return   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
-        return v.toString(16);
-    });
   };
+
+
+  // See if we are online or not by trying to fetch the tournament list
+  $scope.checkingNetworkStatus = true;
+  RESTService.ping().then(
+    function() {
+      $scope.checkingNetworkStatus = false;
+      console.log("We are online!");
+    },
+    function(){
+      $scope.checkingNetworkStatus = false;
+      console.log("Error getting tournament list. Prompt for offline mode!");
+      var confirmDlg = MessageBoxService.confirmDialog("The Tournament Server could not be reached.  Would you like to work in Offline mode?", $scope, "Work in Offline Mode?");
+      confirmDlg.result.then(
+        // User wants to go offline!
+        function() {
+          DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
+          $scope.networkMode = DataStorage.getNetworkMode();
+        },
+        //Cancel
+        function() {
+          DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
+          $scope.networkMode = DataStorage.getNetworkMode();
+        }
+      );
+    }
+  )
 
 }]);

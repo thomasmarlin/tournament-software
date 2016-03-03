@@ -233,6 +233,11 @@ class MyAPI extends API
       $this->sendJsonResponse(true, $tournamentListData, null);
     }
 
+    protected function ping() {
+      $pingResponse = new stdClass();
+      $pingResponse->message = "PONG";
+      $this->sendJsonResponse(true, $pingResponse, null);
+    }
 
     protected function tournaments() {
 

@@ -9,6 +9,10 @@ sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
   var JSON_RESPONSE_END = "====================JSON_RESPONSE_END====================";
 
   function getJsonDataFromResponse(response) {
+    if (response == null) {
+      console.log("JSON response was null. Settings empty object");
+      response = "{}";
+    }
     var httpResponse = response.toString();
     var jsonStart = httpResponse.indexOf(JSON_RESPONSE_START) + JSON_RESPONSE_START.length;
     var jsonEnd = httpResponse.indexOf(JSON_RESPONSE_END);
@@ -43,9 +47,9 @@ sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
     return deferred.promise;
   }
 
-  this.get = function(url) {
+  this.get = function(url, config) {
     var deferred = $q.defer();
-    $http.get(url)
+    $http.get(url, config)
       .success(function(response) {
         // Get just the JSON data out of the response
         var jsonContent = getJsonDataFromResponse(response);
@@ -88,6 +92,16 @@ sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
   this.getTournamentInfo = function(tournamentId) {
     var url = DEFAULT_ENDPOINT + '?endpoint=tournaments&tournamentId=' + tournamentId;
     return this.get(url);
+  };
+
+
+  this.ping = function() {
+    var url = DEFAULT_ENDPOINT + '?endpoint=ping';
+
+    var config = {
+      timeout: 15*1000
+    };
+    return this.get(url, config);
   };
 
 

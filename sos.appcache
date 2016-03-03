@@ -1,0 +1,77 @@
+CACHE MANIFEST
+# 2016-03-02:v2
+
+# Explicitly cached entries
+sos.html
+sos.js
+
+css/bootstrap-theme.css
+css/bootstrap-theme.css.map
+css/bootstrap-theme.min.css
+css/bootstrap.css
+css/bootstrap.css.map
+css/bootstrap.min.css
+css/findPlayer.css
+css/progress.css
+css/sos.css
+
+fonts/glyphicons-halflings-regular.eot
+fonts/glyphicons-halflings-regular.svg
+fonts/glyphicons-halflings-regular.ttf
+fonts/glyphicons-halflings-regular.woff
+fonts/glyphicons-halflings-regular.woff2
+
+gen/confirmBoxHTML.js
+gen/createEditGameHTML.js
+gen/createEventHTML.js
+gen/createPlayerHTML.js
+gen/editPlayerHTML.js
+gen/findPlayerHTML.js
+gen/loadEventHTML.js
+gen/messageBoxHTML.js
+
+img/swccg_logo.png
+
+js/controllers/AddPlayerController.js
+js/controllers/AssignWinnerController.js
+js/controllers/ConfirmBoxController.js
+js/controllers/CreateEventController.js
+js/controllers/CreateGameController.js
+js/controllers/EditPlayerController.js
+js/controllers/FindPlayerController.js
+js/controllers/LoadEventController.js
+js/controllers/MessageBoxController.js
+
+js/services/ConstantsService.js
+js/services/DataStorage.js
+js/services/LocalData.js
+js/services/LoggerService.js
+js/services/MessageBoxService.js
+js/services/RESTService.js
+js/services/StatsService.js
+js/services/TournamentService.js
+js/services/UtilService.js
+
+js/bootstrap.js
+js/bootstrap.min.js
+js/angular-spinner.js
+js/spin.min.js.css
+
+angular-animate.min.js
+angular.1.4.8.min.js
+angular.min.js
+jquery-2.1.4.min.js
+ui-bootstrap-tpls-1.1.0.min.js.css
+
+
+# offline.html will be displayed if the user is offline
+FALLBACK:
+#offline.html
+
+# All other resources (e.g. sites) require the user to be online.
+NETWORK:
+*
+
+# Additional resources to cache
+CACHE:
+#images/logo1.png

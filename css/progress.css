@@ -1,0 +1,39 @@
+.progressPopup {
+  position: absolute;
+  z-index: 50;
+  width: 300px;
+  height: 200px;
+  border-radius: 7px;
+  background-color: #DADADA;
+  border: 2px solid gray;
+  margin: auto;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
+}
+
+.progressCentered {
+  position:relative;
+  text-align: center;
+  padding-top:50px;
+}
+
+.progressSpinner {
+  position:relative;
+}
+
+.progressSpacer {
+  height: 30px;
+  width: 30px;
+}
+
+.progressBackgroundOverlay {
+  position:absolute;
+  top: 0px;
+  right: 0px;
+  left: 0px;
+  bottom: 0px;
+  background-color: rgba(100, 100, 100, 0.7);
+
+}
