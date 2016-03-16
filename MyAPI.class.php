@@ -196,10 +196,15 @@ class MyAPI extends API
     }
 
 
-    protected function handleTournamentPOST($tournamentId, $tournamentData) {
+    protected function handleTournamentPOST($tournamentId, $tournamentData, $hash) {
       $writeTournamentResult = false;
       if ($this->doesTournamentExist($jsonData['id'])) {
         print("Updating Tournament: " . $tournamentId);
+        $oldTournamentData = getTournament($tournamentId);
+        if (0 != strcmp($oldTournamentData->hash, $hash)) {
+          $this->sendJsonResponse(false, "{}", "Invalid Password");
+          return;
+        }
         $writeTournamentResult = $this->writeTournamentFile($tournamentId, $tournamentData);
       } else {
         print("Creating new tournament: " . $tournamentId);
@@ -246,6 +251,7 @@ class MyAPI extends API
       $method = $this->method;
       $endpoint = $this->args['endpoint'];
       $tournamentId = $this->args['tournamentId'];
+      $hash = $this->args['hash'];
 
       if ($method == "GET") {
 
@@ -255,7 +261,7 @@ class MyAPI extends API
 
         // We may be updating an existing tournament OR creating a new one
         $jsonData = json_decode($this->post_data, true);
-        $this->handleTournamentPOST($tournamentId, $jsonData);
+        $this->handleTournamentPOST($tournamentId, $jsonData, $hash);
 
       }
 

@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs', 'angularSpinner']);
-sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', 'MessageBoxService', 'DataStorage', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, MessageBoxService, DataStorage, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService) {
+sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', 'MessageBoxService', 'DataStorage', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', 'CryptoService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, MessageBoxService, DataStorage, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService, CryptoService) {
 
   $scope.currentEvent = null;
 
@@ -59,10 +59,11 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   }
 
 
-  function createEventWithName(name, mode) {
+  function createEventWithName(name, mode, password) {
     var newEvent = getNewBlankData();
     newEvent.name = name;
     newEvent.mode = mode;
+    newEvent.hash = CryptoService.generateHash(password);
     newEvent.id = UtilService.generateGUID();
     $scope.currentEvent = newEvent;
   }
@@ -266,7 +267,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       // Success
       function(evtData) {
           LoggerService.action("Creating event with name: " + evtData.name + " mode: " + evtData.mode);
-          createEventWithName(evtData.name, evtData.mode);
+          createEventWithName(evtData.name, evtData.mode, evtData.password);
       },
       // Cancelled
       function() {
@@ -294,6 +295,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       }
     );
   }
+
 
   $scope.loadEventFromFile = function() {
     var input, file, fr;
@@ -410,9 +412,28 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     element.remove();
   }
 
-  $scope.saveData = function(){
+  $scope.saveData = function() {
+    var modalDialog = $uibModal.open({
+        template: passwordPromptHTML,
+        controller: 'PasswordPromptController',
+        scope: $scope
+      });
 
-    DataStorage.saveEventInfo($scope.currentEvent).then(
+    modalDialog.result.then(
+      // Success
+      function(password) {
+          saveDataUsingPassword(password );
+      },
+      // Cancelled
+      function() {
+          LoggerService.log("Loading Event : Cancelled");
+      }
+    );
+  }
+
+  function saveDataUsingPassword(password) {
+
+    DataStorage.saveEventInfo($scope.currentEvent, password).then(
       function(response) {
         console.log("Data successfully saved!");
       },

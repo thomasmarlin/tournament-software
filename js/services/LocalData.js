@@ -1,6 +1,6 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.service('LocalData', ['$q', 'LoggerService', function($q, LoggerService) {
+sosApp.service('LocalData', ['$q', 'LoggerService', 'CryptoService', function($q, LoggerService, CryptoService) {
 
   var LOCAL_STORAGE_KEY = 'LOCAL_STORAGE_KEY';
   var self = this;
@@ -67,10 +67,18 @@ sosApp.service('LocalData', ['$q', 'LoggerService', function($q, LoggerService) 
 
 
   // Updates a tournament
-  this.updateTournament = function(tournamentData) {
+  this.updateTournament = function(tournamentData, password) {
+
     var deferred = $q.defer();
-    self.saveEvent(tournamentData);
-    deferred.resolve(tournamentData);
+
+    var hash = CryptoService.generateHash(password);
+    if (hash != tournamentData.hash) {
+      console.log("Error validating hash! 1: " + hash + "  2: " + tournamentData.hash);
+      deferred.reject("Invalid Password");
+    } else {
+      self.saveEvent(tournamentData);
+      deferred.resolve(tournamentData);
+    }
 
     return deferred.promise;
   };

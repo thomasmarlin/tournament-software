@@ -25,7 +25,7 @@ sosApp.controller('FindPlayerController', ['$scope', '$uibModalInstance', 'DataS
 
     var handleToMatch = null;
     if ($scope.handleFilter != "") {
-      handleToMatch = $scope.handleFilter.toLowerCase.trim();
+      handleToMatch = $scope.handleFilter.toLowerCase().trim();
     }
 
     // Remove all players which don't match both the Name and Handle (if supplied)

@@ -49,19 +49,19 @@ sosApp.service('DataStorage', ['RESTService', 'LocalData', '$q', function(APISer
     return promise;
   };
 
-  this.saveEventInfo = function(tournamentData) {
+  this.saveEventInfo = function(tournamentData, password) {
 
     var deferred = $q.defer();
 
     // Always save locally first, and the push to the server
-    var localPromise = LocalData.updateTournament(tournamentData);
+    var localPromise = LocalData.updateTournament(tournamentData, password);
     localPromise.then(
       function(response) {
 
         if (networkMode == self.NETWORK_MODES.NETWORK_ONLINE) {
 
           // Local update succeeded. Do a remote update too
-          var remotePromise = APIService.updateTournament(tournamentData);
+          var remotePromise = APIService.updateTournament(tournamentData, password);
           remotePromise.then(
             function(response) {
               // Remote succeeded.

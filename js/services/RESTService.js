@@ -1,6 +1,6 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
+sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $q, CryptoService) {
 
   var API_DOMAIN = 'http://192.168.33.10';
   var DEFAULT_ENDPOINT = API_DOMAIN + '/wp-content/plugins/swccg-tourny/api.php';
@@ -74,8 +74,9 @@ sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
     return this.post(url, tournamentData);
   };
 
-  this.updateTournament = function(tournamentData) {
-    var url = DEFAULT_ENDPOINT + '?endpoint=tournaments&tournamentId=' + tournamentData.id;
+  this.updateTournament = function(tournamentData, password) {
+    var hash = CryptoService.generateHash(password);
+    var url = DEFAULT_ENDPOINT + '?endpoint=tournaments&tournamentId=' + tournamentData.id + '&hash=' + hash;
     return this.post(url, tournamentData);
   };
 

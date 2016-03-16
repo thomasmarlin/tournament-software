@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('LoadEventController', ['$scope', '$uibModalInstance', '$timeout', 'DataStorage', function($scope, $uibModalInstance, $timeout, DataStorage) {
+sosApp.controller('LoadEventController', ['$scope', '$uibModalInstance', '$timeout', 'DataStorage', 'MessageBoxService', function($scope, $uibModalInstance, $timeout, DataStorage, MessageBoxService) {
 
   $scope.tmp = {
     eventId: "SELECT_EVENT_PLACEHOLDER",
@@ -9,9 +9,10 @@ sosApp.controller('LoadEventController', ['$scope', '$uibModalInstance', '$timeo
 
   $scope.okClick = function() {
     if (!$scope.tmp.eventId || $scope.tmp.eventId == "SELECT_EVENT_PLACEHOLDER") {
-      alert("Please select an event from the list");
+      MessageBoxService.errorMessage("Please select an event from the list", $scope);
       return;
     }
+
     $uibModalInstance.close($scope.tmp.eventId);
   };
 
