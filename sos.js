@@ -168,12 +168,46 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     }
 
     // Ensure no games in this round
+    var containsGames = false;
     for (var i = 0; i < $scope.currentEvent.games.length; i++) {
       var game = $scope.currentEvent.games[i];
       if (game.round.num == currentRound.num) {
-        MessageBoxService.errorMessage("You cannot delete a round which contains games.\nIf you really want to delete this round, first remove each of the games.");
-        return;
+        containsGames = true;
       }
+    }
+    if (containsGames) {
+      var confirmDialog = MessageBoxService.confirmDialog("This round has active games. Are you sure you want to delete this round?", $scope, "Are You Sure?");
+      confirmDialog.result.then(
+        function() {
+          console.log("Confirmed deletion of round. Removing games!");
+
+          var containsGames = true;
+          while (containsGames) {
+            containsGames = false;
+            for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+              var game = $scope.currentEvent.games[i];
+              if (game.round.num == currentRound.num) {
+                containsGames = true;
+                $scope.currentEvent.games.splice(i, 1);
+              }
+            }
+          }
+
+          // All games have been deleted.  Now, kill the round...
+          var roundIndex = $scope.currentEvent.rounds.indexOf(currentRound);
+          if (roundIndex != -1) {
+            $scope.currentEvent.rounds.splice(roundIndex, 1);
+          } else {
+            MessageBoxService.errorMessage("Could not find the active round!");
+          }
+
+        },
+        function() {
+          console.log("User cancelled game deletion!");
+        }
+      );
+
+      return;
     }
 
     // Ok - No games in this round and we are the last round, so just move back a step

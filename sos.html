@@ -219,9 +219,9 @@
                   <!-- Games Table -->
                   <div class="row playerBox" ng-class="{'gameFinished': game.winner, 'gamePending': !game.winner }">
 
-                      <div class="col-xs-6" style="margin-top:5px">
-                          <div>Dark: {{game.playerDark.name}}</div>
-                          <div>Light: {{game.playerLight.name}}</div>
+                      <div class="col-xs-6" style="margin-top:5px"> 
+                          <div>Dark: {{game.playerDark.name}}   (VP: {{game.playerDark.vp}})</div>
+                          <div>Light: {{game.playerLight.name}}   (VP: {{game.playerLight.vp}})</div>
                       </div>
                       <div class="col-xs-6" style="margin-top:5px">
 

@@ -6,25 +6,27 @@
       <div class="col-xs-6">
 
         <div>Player (DS)</div>
-        <select ng-model="playerDark" ng-options="player.name for player in currentEvent.players track by player.id" autofocus>
+        <select ng-model="playerDark" ng-options="player.name for player in currentEvent.players | orderBy:'name' track by player.id" autofocus>
         </select>
 
-        <div>Player (LS)</div>
-        <select ng-model="playerLight" ng-options="player.name for player in currentEvent.players track by player.id">
+        <div style="margin-top: 10px;">Player (LS)</div>
+        <select ng-model="playerLight" ng-options="player.name for player in currentEvent.players | orderBy:'name' track by player.id">
         </select>
 
-        <div>Round</div>
-        <select ng-model="round" ng-options="roundObj.num for roundObj in currentEvent.rounds track by roundObj.num">
-        </select>
+        <!-- No reason to have this (I don't think )
+        <div>Round {{round.num}}</div>
+          <select ng-model="round" ng-options="roundObj.num for roundObj in currentEvent.rounds track by roundObj.num">
+          </select>
+        -->
 
       </div>
 
       <div class="col-xs-6">
 
         <div>Winner</div>
-        <select ng-model="winner" ng-options="player.name for player in getPlayers() track by player.id">
+        <select ng-model="winner" ng-options="player.name for player in getPlayers() | orderBy:'name' track by player.id">
         </select>
-        <div>Differential</div>
+        <div style="margin-top: 10px;">Differential</div>
         <input ng-model="diff">
 
       </div>
