@@ -192,7 +192,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         controller: 'EditPlayerController',
         scope: $scope,
         resolve: {
-          player: function() {
+          playerToEdit: function() {
             return player;
           }
         }
@@ -231,29 +231,44 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         game.winner = newPlayer;
       }
     }
-
-
   }
 
 
   $scope.addPlayer = function() {
+
+    var newPlayer = {
+      name: "",
+      id: UtilService.generateGUID(),
+      status: ConstantsService.PLAYER_STATUS.STATUS_ACTIVE
+    };
+
     var modalDialog = $uibModal.open({
-        template: createPlayerHTML,
-        controller: 'AddPlayerController',
-        scope: $scope
+        template: editPlayerHTML,
+        controller: 'EditPlayerController',
+        scope: $scope,
+        resolve: {
+          playerToEdit: function() {
+            return newPlayer;
+          }
+        }
       });
 
-    modalDialog.result.then(
-      // Success
-      function(selectedPerson) {
-          LoggerService.action("Added Player : " + JSON.stringify(selectedPerson));
-          playerAdded(selectedPerson);
-      },
-      // Cancelled
-      function() {
-          LoggerService.log("Select person : Cancelled");
-      }
-    );
+      modalDialog.result.then(
+        // Success
+        function(selectedPerson) {
+            LoggerService.action("Added Player : " + JSON.stringify(selectedPerson));
+
+            $scope.currentEvent.players.push({
+              id: selectedPerson.id,
+              name: selectedPerson.name,
+              status: ConstantsService.PLAYER_STATUS.STATUS_ACTIVE
+            });
+        },
+        // Cancelled
+        function() {
+            LoggerService.log("Add Player : Cancelled");
+        }
+      );
   }
 
   $scope.createEvent = function() {
@@ -458,13 +473,6 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     );
   }
 
-  function playerAdded(playerName){
-    $scope.currentEvent.players.push({
-      id: UtilService.generateGUID(),
-      name: playerName,
-      status: ConstantsService.PLAYER_STATUS.STATUS_ACTIVE
-    });
-  }
 
   function gameCreated(newGame){
     newGame.id = UtilService.generateGUID();

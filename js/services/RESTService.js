@@ -2,8 +2,8 @@
 var sosApp = angular.module('sosApp');
 sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $q, CryptoService) {
 
-  //var API_DOMAIN = 'http://192.168.33.10';
-  var API_DOMAIN = 'http://www.swtournamentbeta.com';
+  var API_DOMAIN = 'http://192.168.33.10';
+  //var API_DOMAIN = 'http://www.swtournamentbeta.com';
   var DEFAULT_ENDPOINT = API_DOMAIN + '/wp-content/plugins/swccg-tourny/api.php';
 
   var JSON_RESPONSE_START = "====================JSON_RESPONSE_START====================";

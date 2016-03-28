@@ -93,5 +93,8 @@ sosApp.controller('FindPlayerController', ['$scope', '$uibModalInstance', 'DataS
     $uibModalInstance.close(playerObj);
   };
 
+  $scope.cancel = function() {
+    $uibModalInstance.dismiss('cancel');
+  };
 
 }]);
