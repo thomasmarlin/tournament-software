@@ -224,13 +224,13 @@
                   <div class="row playerBox" ng-class="{'gameFinished': game.winner, 'gamePending': !game.winner }">
 
                       <div class="col-xs-6" style="margin-top:5px">
-                          <div>Dark: <span style="font-weight:bold">{{game.playerDark.name}}</span><span style="margin-left:10px; height: 10px; width: 10px"></span>{{getPlayerRecord(game.playerDark)}}</div>
-                          <div>Light: <span style="font-weight:bold">{{game.playerLight.name}}</span><span style="margin-left:10px; height: 10px; width: 10px"></span>{{getPlayerRecord(game.playerLight)}}</div>
+                          <div>Dark: <span style="font-weight:bold; font-style:italic;">{{game.playerDark.name}}</span><span style="margin-left:10px; height: 10px; width: 10px"></span>{{getPlayerRecord(game.playerDark)}}</div>
+                          <div>Light: <span style="font-weight:bold; font-style:italic;">{{game.playerLight.name}}</span><span style="margin-left:10px; height: 10px; width: 10px"></span>{{getPlayerRecord(game.playerLight)}}</div>
                       </div>
                       <div class="col-xs-6" style="margin-top:5px">
 
                           <div ng-if="game.winner">
-                              <div>{{game.winner.name}}
+                              <div style="font-weight:bold">{{game.winner.name}}
                                 <span ng-if='currentEvent.mode !== "SOS"' style="margin-left: 5px"> (+{{game.diff}})</span>
                               </div>
                               <button class="btn btn-default" ng-click="addResult(game)">Change</button>

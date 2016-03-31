@@ -316,6 +316,8 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
             $scope.currentEvent.players.push({
               id: selectedPerson.id,
               name: selectedPerson.name,
+              forum_handle: selectedPerson.forum_handle,
+              forum_handle_lower: selectedPerson.forum_handle_lower,
               status: ConstantsService.PLAYER_STATUS.STATUS_ACTIVE
             });
         },
