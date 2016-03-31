@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs', 'angularSpinner']);
-sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', 'MessageBoxService', 'DataStorage', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', 'CryptoService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, MessageBoxService, DataStorage, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService, CryptoService) {
+sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', '$window', 'MessageBoxService', 'DataStorage', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', 'CryptoService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, $window, MessageBoxService, DataStorage, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService, CryptoService) {
 
   $scope.currentEvent = null;
 
@@ -107,6 +107,27 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     selectCurrentRound();
   }
 
+  $scope.goHome = function() {
+    var confirmDialog = MessageBoxService.confirmDialog("Warning: All unsaved data will be lost. Are you sure you want to continue?", $scope, "Are You Sure?");
+    confirmDialog.result.then(
+      function() {
+        $window.location.reload();
+      }
+    );
+  };
+
+  $scope.getPlayerRecord = function(playerObject) {
+    var record = "ERR";
+
+    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
+      var player = $scope.currentEvent.players[i];
+      if (player.id == playerObject.id) {
+        record = "(" + player.wins + "-" + player.losses + ")";
+      }
+    }
+
+    return record;
+  }
 
   /**
    * Start a new round and automatically create matchups
