@@ -59,7 +59,7 @@
 
 <div ng-app="sosApp" ng-controller="sos" style="margin:20px">
 
-  <div class="btn-group" ng-if="currentEvent !== null" style='position:absolute; top: 10px; left: 10px'>
+  <div class="btn-group" data-ng-if="currentEvent !== null" style='position:absolute; top: 10px; left: 10px'>
     <button class="btn btn-primary" data-ng-click="goHome()">&lt; Back</button>
   </div>
 
@@ -69,7 +69,7 @@
   </div>
 
   <!-- No Event yet -->
-  <div ng-if="currentEvent == null" style="padding:20px">
+  <div data-ng-if="currentEvent == null" style="padding:20px">
     <div style="width:100%; text-align:center">
       <h1 class="tournamentTitle">SWCCG Tournament Assistant</h1>
     </div>
@@ -77,7 +77,7 @@
     <hr>
 
     <!-- Checking Network Connectivity Spinner -->
-    <div ng-if="checkingNetworkStatus">
+    <div data-ng-if="checkingNetworkStatus">
       <div class="progressBackgroundOverlay">
       </div>
       <div  class="progressPopup">
@@ -93,8 +93,8 @@
 
       <div style="text-align:center">
         <div>
-          <button class="btn btn-primary btn-lg" ng-click="createEvent()">Create New Event</button>
-          <button class="btn btn-primary btn-lg" ng-click="loadEvent()">Load Existing Event</button>
+          <button class="btn btn-primary btn-lg" data-ng-click="createEvent()">Create New Event</button>
+          <button class="btn btn-primary btn-lg" data-ng-click="loadEvent()">Load Existing Event</button>
         </div>
       </div>
 
@@ -104,8 +104,8 @@
           <div style="font-weight:bold">DEBUG TOOLS</div>
 
           <div>
-            <button class="btn btn-info" ng-click="loadEventFromFile()">DEBUG: Load File</button>
-            <button class="btn btn-danger" ng-click="clearAllData()">DEBUG: Clear All Data</button>
+            <button class="btn btn-info" data-ng-click="loadEventFromFile()">DEBUG: Load File</button>
+            <button class="btn btn-danger" data-ng-click="clearAllData()">DEBUG: Clear All Data</button>
             <input style="display:none" type='file' id='fileinput'>
           </div>
         </div>
@@ -118,28 +118,29 @@
 
 
   <!-- Event Loaded! -->
-  <div ng-if="currentEvent != null">
+  <div data-ng-if="currentEvent != null">
 
     <h1 class="tournamentTitle">{{currentEvent.name}}</h1>
+    <h1 data-ng-if='currentEvent.finished' class='tournamentTitle'>Winner: {{currentEvent.players[0].name}}</h1>
 
     <hr>
 
     <!-- Players -->
     <div class="mainContentBox">
       <div class="mainContentHeader">
-        <h2 class="mainContentHeaderName">Players</h2>
+        <h2 class="mainContentHeaderName">Players: {{currentEvent.players.length}}</h2>
         <div class="mainContentHeaderButtons">
-          <button class="btn btn-default" style="float:right;" data-ng-click="addPlayer()">Add Player</button>
+          <button data-ng-if='!currentEvent.finished' class="btn btn-default" style="float:right;" data-ng-click="addPlayer()">Add Player</button>
         </div>
       </div>
 
       <hr>
 
-      <div ng-if="currentEvent.players.length == 0" style="margin:50px">
+      <div data-ng-if="currentEvent.players.length == 0" style="margin:50px">
         <h3 style="font-style:italic; color:gray">Click 'Add Player' to add players...</h3>
       </div>
 
-      <div ng-if="currentEvent.players.length > 0">
+      <div data-ng-if="currentEvent.players.length > 0">
         <!-- Headers -->
         <div ng-repeat="player in currentEvent.players | orderBy:['-vp', '-sos']"
              class="playerBox"
@@ -149,16 +150,16 @@
 
               <div class="col-xs-2">
                 <div class="glyphicon glyphicon-user" style="font-size: 2.5em; margin-left: 9px"></div>
-                <div style="color:blue; text-decoration:underline; margin-left: 5px;" ng-click="editPlayer(player)">Update</div>
+                <div style="color:blue; text-decoration:underline; margin-left: 5px;" data-ng-click="editPlayer(player)">Update</div>
               </div>
 
               <div class="col-xs-4">
                 <div class="playerBoxHeader">{{player.name}}</div>
-                <div ng-if='player.forum_handle' class="swccg_forum_handle">{{player.forum_handle}}</div>
+                <div data-ng-if='player.forum_handle' class="swccg_forum_handle">{{player.forum_handle}}</div>
                 <div>SoS: {{player.sos}}</div>
                 <div>Diff:
-                  <span ng-if="player.diff >= 0" style="color:green"> ({{player.diff}}) </span>
-                  <span ng-if="player.diff < 0" style="color:red"> ({{player.diff}}) </span>
+                  <span data-ng-if="player.diff >= 0" style="color:green"> ({{player.diff}}) </span>
+                  <span data-ng-if="player.diff < 0" style="color:red"> ({{player.diff}}) </span>
                 </div>
               </div>
 
@@ -169,7 +170,7 @@
               </div>
 
               <div class="col-xs-2">
-                <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" ng-click="deletePlayer(player)" class="glyphicon glyphicon-remove"></div>
+                <div data-ng-if='!currentEvent.finished' style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deletePlayer(player)" class="glyphicon glyphicon-remove"></div>
               </div>
 
             </div>
@@ -185,9 +186,9 @@
       <div class="mainContentHeader">
         <h2 class="mainContentHeaderName">Games</h2>
         <div class="mainContentHeaderButtons">
-          <button class="btn btn-default" style="float:right" data-ng-click="newRound()">New Round</button>
-          <button data-ng-if="currentEvent.rounds.length > 0" class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="createGame()">Create Game</button>
-          <button data-ng-if="currentEvent.rounds.length > 0" class="btn btn-default" style="float:right; margin-right:20px" data-ng-click="deleteRound()">Delete Round</button>
+          <button class="btn btn-default" style="float:right" data-ng-click="toggleTournamentFinished()">{{currentEvent.finished ? 'Re-Open Tournament' : 'Finish Tournament'}}</button>
+          <button data-ng-if="!currentEvent.finished" class="btn btn-default" style="float:right; margin-right: 15px;" data-ng-click="newRound()">Generate Next Game</button>
+
           <div style="clear:both"></div>
         </div>
       </div>
@@ -196,14 +197,15 @@
 
       <uib-tabset>
         <uib-tab active='round.active'
-              heading='Round {{round.num}}'
+              heading='Game {{round.num}}'
               ng-repeat='round in currentEvent.rounds'>
+          <div style="border: 3px solid white; border-radius: 5px; padding-top: 5px; padding-bottom: 5px;">
 
-            <div ng-if="currentEvent.games.length == 0" style="margin:50px">
-              <h3 style="font-style:italic; color:gray">Click 'Create Game' to add a new game...</h3>
+            <div data-ng-if="currentEvent.games.length == 0" style="margin:50px">
+              <h3 style="font-style:italic; color:gray">Click 'Generate Next Game' to generate matchups...</h3>
             </div>
 
-            <div ng-if="currentEvent.games.length > 0">
+            <div data-ng-if="currentEvent.games.length > 0">
               <!-- Headers -->
               <div style="margin-left:20px; margin-right:20px">
                 <div class="row" >
@@ -229,17 +231,17 @@
                       </div>
                       <div class="col-xs-6" style="margin-top:5px">
 
-                          <div ng-if="game.winner">
+                          <div data-ng-if="game.winner">
                               <div style="font-weight:bold">{{game.winner.name}}
-                                <span ng-if='currentEvent.mode !== "SOS"' style="margin-left: 5px"> (+{{game.diff}})</span>
+                                <span data-ng-if='currentEvent.mode !== "SOS"' style="margin-left: 5px"> (+{{game.diff}})</span>
                               </div>
-                              <button class="btn btn-default" ng-click="addResult(game)">Change</button>
-                              <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
+                              <button data-ng-if='!currentEvent.finished' class="btn btn-default" data-ng-click="addResult(game)">Change</button>
+                              <div data-ng-if='!currentEvent.finished' style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
                           </div>
 
-                          <div ng-if="!game.winner">
-                              <button class="btn btn-default" ng-click="addResult(game)">Add Result</button>
-                              <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
+                          <div data-ng-if="!game.winner && !currentEvent.finished">
+                              <button class="btn btn-default" data-ng-click="addResult(game)">Add Result</button>
+                              <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
                           </div>
 
                       </div>
@@ -248,6 +250,15 @@
 
               </div>
 
+            </div>
+
+            <div style="height: 10px; width: 10px"></div>
+
+            <button data-ng-if="currentEvent.rounds.length > 0 && !currentEvent.finished" class="btn btn-default" style="float:right; margin-right: 5px;" data-ng-click="deleteRound()">Delete Matchups</button>
+            <button data-ng-if="currentEvent.rounds.length > 0 && !currentEvent.finished" class="btn btn-default" style="float:right; margin-right: 15px" data-ng-click="createGame()">Add Single Game</button>
+            <div style="clear:both"></div>
+
+          </div>
         </uib-tab>
       </uib-tabs>
     </div>

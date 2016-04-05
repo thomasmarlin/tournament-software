@@ -152,8 +152,24 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     return UtilService.getCurrentRound($scope.currentEvent);
   }
 
+
   function getCurrentRoundNumber() {
     return UtilService.getCurrentRoundNumber($scope.currentEvent);
+  }
+  $scope.getCurrentRoundNumber = getCurrentRoundNumber;
+
+
+  $scope.toggleTournamentFinished = function() {
+    StatsService.updateVictoryPoints($scope.currentEvent);
+
+    $scope.currentEvent.finished = !$scope.currentEvent.finished;
+
+    if ($scope.currentEvent.finished) {
+      $window.scrollTo(0, 0);
+    } else {
+      MessageBoxService.infoMessage("This tournament has been re-opened and is ready for edits.", $scope);
+    }
+
   }
 
 
