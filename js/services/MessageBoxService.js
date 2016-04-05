@@ -20,6 +20,8 @@ sosApp.service('MessageBoxService', ['$uibModal', function($uibModal) {
           }
         }
       });
+
+    return modalDialog;
   };
 
   this.errorMessage = function(errorMessage, scope, extraMessages) {
