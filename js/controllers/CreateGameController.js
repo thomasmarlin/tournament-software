@@ -9,6 +9,8 @@ sosApp.controller('CreateGameController', ['$scope', '$uibModalInstance', '$time
   $scope.round = $scope.getCurrentRound();
   $scope.diff = $scope.diff;
 
+  $scope.allPlayersAndBye = [];
+
   $scope.okClick = function() {
 
     var newGame = {
@@ -23,7 +25,7 @@ sosApp.controller('CreateGameController', ['$scope', '$uibModalInstance', '$time
     $uibModalInstance.close(newGame);
   }
 
-  $scope.getAllPlayersAndBye = function() {
+  function getAllPlayersAndBye(){
     var allPlayers = [];
     for (var i = 0; i < $scope.currentEvent.players.length; i++) {
       var player = $scope.currentEvent.players[i];
@@ -35,6 +37,7 @@ sosApp.controller('CreateGameController', ['$scope', '$uibModalInstance', '$time
 
     return allPlayers;
   }
+  $scope.allPlayersAndBye = getAllPlayersAndBye();
 
   $scope.getPlayers = function() {
     var players = [];

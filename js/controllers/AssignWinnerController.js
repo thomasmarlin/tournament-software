@@ -12,6 +12,8 @@ sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$ti
   $scope.round = $scope.gameToOpen.round;
   $scope.diff = $scope.gameToOpen.diff;
 
+  $scope.allPlayersAndBye = [];
+
   $scope.okClick = function() {
 
     var edittedGame = {
@@ -26,7 +28,7 @@ sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$ti
     $uibModalInstance.close(edittedGame);
   }
 
-  $scope.getAllPlayersAndBye = function() {
+  function getAllPlayersAndBye(){
     var allPlayers = [];
     for (var i = 0; i < $scope.currentEvent.players.length; i++) {
       var player = $scope.currentEvent.players[i];
@@ -38,6 +40,8 @@ sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$ti
 
     return allPlayers;
   }
+  $scope.allPlayersAndBye = getAllPlayersAndBye();
+
 
   $scope.getPlayers = function() {
     var players = [];
