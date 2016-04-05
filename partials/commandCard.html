@@ -1,0 +1,49 @@
+<div style="margin:20px">
+  <h3>Command Card: {{player.name}}</h3>
+
+  <!-- Headers -->
+  <div class='row' style='border-bottom: thin solid gray; margin-right: 0px; margin-left: 0px;'>
+    <div class="col-sm-2">
+      Game
+    </div>
+    <div class="col-sm-2">
+      Side
+    </div>
+    <div class="col-sm-4">
+      Opponent
+    </div>
+    <div class="col-sm-2">
+      Result & Diff
+    </div>
+    <div class="col-sm-2">
+      Cumulative Score
+    </div>
+  </div>
+
+  <!-- Games Data -->
+  <div data-ng-repeat="game in commandCardGames" >
+    <div class='row' style='border-bottom: thin solid lightgray; margin-right: 0px; margin-left: 0px;'>
+      <div class="col-sm-2">
+        {{game.num}}
+      </div>
+      <div class="col-sm-2">
+        {{game.side}}
+      </div>
+      <div class="col-sm-4">
+        {{game.opponentName}}
+      </div>
+      <div class="col-sm-2">
+        {{game.vp}} <span ng-if="isDiff">({{game.diff}})</span>
+      </div>
+      <div class="col-sm-2">
+        {{game.cumulativeVP}} <span ng-if="isDiff">({{game.cumulativeDiff}})</span>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <button class="btn btn-default" style="float: right" data-ng-click="okClick()">Close</button>
+  <div style="clear:both"></div>
+
+</div>

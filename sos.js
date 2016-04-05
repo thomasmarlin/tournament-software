@@ -277,6 +277,23 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       );
   }
 
+
+  $scope.viewCommandCard = function(player) {
+    var modalDialog = $uibModal.open({
+        template: commandCardHTML,
+        controller: 'CommandCardController',
+        scope: $scope,
+        resolve: {
+          currentEvent: function() {
+            return $scope.currentEvent;
+          },
+          player: function() {
+            return player
+          }
+        }
+      });
+  }
+
   function replacePlayer(playerId, newPlayer) {
 
     LoggerService.action("Replacing Player : " + playerId + " with: " + JSON.stringify(newPlayer));
