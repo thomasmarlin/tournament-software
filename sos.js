@@ -581,21 +581,29 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       var game = $scope.currentEvent.games[i];
       if ((UtilService.peopleEqual(game.playerDark, playerToDelete)) ||
           (UtilService.peopleEqual(game.playerLight, playerToDelete)) ||
-          (UtilService.peopleEqual(game.winner, playerToDelete))) {
-            alert("Can't delete player. Player has already played a game.");
-            return;
+          (UtilService.peopleEqual(game.winner, playerToDelete)))
+      {
+          MessageBoxService.infoMessage("This player has active games and cannot be deleted.", $scope, ["You may drop this player in the player 'Update' screen"]);
+          return;
       }
     }
 
-    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
-      var player = $scope.currentEvent.players[i];
-      if (UtilService.peopleEqual(player, playerToDelete)) {
-        $scope.currentEvent.players.splice(i, 1);
-        break;
-      }
-    }
+    var confirmDialog = MessageBoxService.confirmDialog("Are you sure you want to delete " + playerToDelete.name + "?", $scope, "Are you sure?");
+    confirmDialog.result.then(
+      function() {
+        // Confirmed!
+        for (var i = 0; i < $scope.currentEvent.players.length; i++) {
+          var player = $scope.currentEvent.players[i];
+          if (UtilService.peopleEqual(player, playerToDelete)) {
+            $scope.currentEvent.players.splice(i, 1);
+            break;
+          }
+        }
 
-    StatsService.updateVictoryPoints($scope.currentEvent);
+        StatsService.updateVictoryPoints($scope.currentEvent);
+      }
+    );
+
   };
 
 
