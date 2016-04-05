@@ -1,6 +1,6 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.service('StatsService', ['LoggerService', 'UtilService', function(LoggerService, UtilService) {
+sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsService', function(LoggerService, UtilService, ConstantsService) {
 
   var self = this;
 
@@ -120,6 +120,8 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', function(LoggerS
       var player = eventData.players[i];
       self.updateSosForPlayer(player, eventData);
     }
+
+    sortPlayersByScore(eventData.players, eventData.mode);
   };
 
 
@@ -152,6 +154,60 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', function(LoggerS
       currentPlayer.opponentsPlayed.push(opponent);
     }
   }
+
+  function getSortFunc(tournamentMode) {
+    if (tournamentMode == ConstantsService.TOURNAMENT_FORMAT.SOS) {
+      return personSortSosFunc;
+    } else {
+      return personSortDiffFunc;
+    }
+  }
+  this.getSortFunc = getSortFunc;
+
+
+  function personSortSosFunc(playerA, playerB) {
+    if (playerA.vp > playerB.vp) {
+      return -1;
+    } else if (playerA.vp < playerB.vp) {
+      return 1;
+    } else {
+      if (playerA.sos > playerB.sos) {
+        return -1;
+      } else if (playerA.sos < playerB.sos) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  }
+
+
+  function personSortDiffFunc(playerA, playerB) {
+    if (playerA.vp > playerB.vp) {
+      return -1;
+    } else if (playerA.vp < playerB.vp) {
+      return 1;
+    } else {
+      if (parseInt(playerA.diff) > parseInt(playerB.diff)) {
+        return -1;
+      } else if (parseInt(playerA.diff) < parseInt(playerB.diff)) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  };
+
+  function sortPlayersByScore(players, tournamentMode) {
+    var personSortFunc = getSortFunc(tournamentMode);
+
+    players.sort(personSortFunc);
+    LoggerService.decision("Sorting players by score...");
+    for (var i = 0; i < players.length; i++) {
+      LoggerService.decision("  " + i + ". " + UtilService.playerSummaryString(players[i]));
+    }
+  }
+  this.sortPlayersByScore = sortPlayersByScore;
 
 
 }]);

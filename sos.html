@@ -144,7 +144,7 @@
 
       <div data-ng-if="currentEvent.players.length > 0">
         <!-- Headers -->
-        <div ng-repeat="player in currentEvent.players | orderBy:['-vp', '-sos']"
+        <div ng-repeat="player in currentEvent.players"
              class="playerBox"
              ng-class="{'droppedPlayer': player.status === 'STATUS_DROPPED' }">
           <div style="margin:10px">

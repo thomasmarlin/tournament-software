@@ -9,11 +9,11 @@ sosApp.service('TournamentService', ['LoggerService', 'UtilService', 'ConstantsS
       vp: 0,
       sos: 0.5,
       wins: 0,
-      losses: 1
+      losses: 1,
+      id: UtilService.generateGUID()
     }
   }
   this.getByePlayer = getByePlayer;
-
 
 
 this.TournamentWizard = function(eventData, gameCreated) {
@@ -289,7 +289,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
     allPlayerList = UtilService.shuffle(allPlayerList);
 
     // Sort Players by their scores
-    sortPlayersByScore(allPlayerList);
+    StatsService.sortPlayersByScore(allPlayerList, eventData.mode);
 
 
     // Sort players into 2 piles (dark and light)
@@ -438,44 +438,12 @@ this.TournamentWizard = function(eventData, gameCreated) {
     removeFromPile(player, lightPile);
   }
 
-  function personSortHelper(playerA, playerB) {
-    if (playerA.vp > playerB.vp) {
-      return -1;
-    } else if (playerA.vp < playerB.vp) {
-      return 1;
-    } else {
-      if (eventData.mode === ConstantsService.TOURNAMENT_FORMAT.DIFF) {
-        if (playerA.diff > playerB.diff) {
-          return -1;
-        } else if (playerA.diff < playerB.diff) {
-          return 1;
-        } else {
-          return 0;
-        }
-      } else if (eventData.mode === ConstantsService.TOURNAMENT_FORMAT.SOS) {
-        if (playerA.sos > playerB.sos) {
-          return -1;
-        } else if (playerA.sos < playerB.sos) {
-          return 1;
-        } else {
-          return 0;
-        }
-      }
-    }
-  }
-
-
-  function sortPlayersByScore(players) {
-    players.sort(personSortHelper);
-    LoggerService.decision("Sorting players by score...");
-    for (var i = 0; i < players.length; i++) {
-      LoggerService.decision("  " + i + ". " + UtilService.playerSummaryString(players[i]));
-    }
-  }
-
 
   function getLowerRankedPlayer(playerA, playerB) {
-    if (personSortHelper(playerA, playerB) < 0) {
+
+    var personSortFunc = StatsService.getSortFunc(eventData.mode);
+
+    if (personSortFunc(playerA, playerB) < 0) {
       return playerA;
     }
     return playerB;

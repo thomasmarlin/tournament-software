@@ -6,11 +6,11 @@
       <div class="col-xs-6">
 
         <div>Player (DS)</div>
-        <select ng-model="playerDark" ng-options="player.name for player in getAllPlayersAndBye() | orderBy:'name' track by player.id" autofocus>
+        <select ng-model="playerDark" ng-options="player.name for player in allPlayersAndBye | orderBy:'name' track by player.id" autofocus>
         </select>
 
         <div style="margin-top: 10px;">Player (LS)</div>
-        <select ng-model="playerLight" ng-options="player.name for player in getAllPlayersAndBye() | orderBy:'name' track by player.id">
+        <select ng-model="playerLight" ng-options="player.name for player in allPlayersAndBye | orderBy:'name' track by player.id">
         </select>
 
         <!-- No reason to have this (I don't think )

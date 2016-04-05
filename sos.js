@@ -102,6 +102,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   function loadSpecificJson(evt) {
     $scope.currentEvent = JSON.parse(JSON.stringify(evt));
+
     StatsService.updateVictoryPoints($scope.currentEvent);
 
     selectCurrentRound();
@@ -117,7 +118,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   };
 
   $scope.getPlayerRecord = function(playerObject) {
-    var record = "ERR";
+    var record = "";
 
     for (var i = 0; i < $scope.currentEvent.players.length; i++) {
       var player = $scope.currentEvent.players[i];
