@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$timeout', function($scope, $uibModalInstance, $timeout) {
+sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$timeout', 'TournamentService', function($scope, $uibModalInstance, $timeout, TournamentService) {
 
   // Get the game to open from the parent scope
   $scope.gameToOpen = $scope.gameToOpen;
@@ -24,6 +24,19 @@ sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$ti
       round: $scope.round
     }
     $uibModalInstance.close(edittedGame);
+  }
+
+  $scope.getAllPlayersAndBye = function() {
+    var allPlayers = [];
+    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
+      var player = $scope.currentEvent.players[i];
+      allPlayers.push(player);
+    }
+
+    var byePlayer = TournamentService.getByePlayer();
+    allPlayers.push(byePlayer);
+
+    return allPlayers;
   }
 
   $scope.getPlayers = function() {

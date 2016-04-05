@@ -2,6 +2,20 @@
 var sosApp = angular.module('sosApp');
 sosApp.service('TournamentService', ['LoggerService', 'UtilService', 'ConstantsService', 'StatsService', function(LoggerService, UtilService, ConstantsService, StatsService) {
 
+  function getByePlayer() {
+    return {
+      name: "BYE",
+      isByePlayer: true,
+      vp: 0,
+      sos: 0.5,
+      wins: 0,
+      losses: 1
+    }
+  }
+  this.getByePlayer = getByePlayer;
+
+
+
 this.TournamentWizard = function(eventData, gameCreated) {
 
   function getCurrentRoundNumber() {
@@ -178,16 +192,6 @@ this.TournamentWizard = function(eventData, gameCreated) {
     return null;
   }
 
-  function getByePlayer() {
-    return {
-      name: "BYE",
-      isByePlayer: true,
-      vp: 0,
-      sos: 0.5,
-      wins: 0,
-      losses: 1
-    }
-  }
 
   function isByePlayer(player) {
     return player && player.hasOwnProperty('isByePlayer') && player.isByePlayer;
