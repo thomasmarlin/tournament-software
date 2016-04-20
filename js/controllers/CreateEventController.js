@@ -4,12 +4,14 @@ sosApp.controller('CreateEventController', ['$scope', '$uibModalInstance', '$tim
 
   $scope.existingTournament = false;
   $scope.datePickerData = {
-    opened: false
+    opened: false,
+    selectedDate: new Date()
   };
 
   if (eventData) {
     $scope.creatingEventData = angular.copy(eventData);
     $scope.existingTournament = true;
+    $scope.datePickerData.date = Date.parse(eventData.date);
   } else {
     $scope.creatingEventData = {
       name: "",
@@ -26,7 +28,7 @@ sosApp.controller('CreateEventController', ['$scope', '$uibModalInstance', '$tim
 
   $scope.okClick = function() {
 
-    if (!$scope.creatingEventData.date || $scope.creatingEventData.date == "") {
+    if (!$scope.datePickerData.selectedDate) {
       MessageBoxService.errorMessage("Please select a valid event date.", $scope);
       return;
     }
@@ -41,6 +43,7 @@ sosApp.controller('CreateEventController', ['$scope', '$uibModalInstance', '$tim
       return;
     }
 
+    $scope.creatingEventData.date = $scope.datePickerData.selectedDate.toISOString();
     $uibModalInstance.close($scope.creatingEventData);
   };
 

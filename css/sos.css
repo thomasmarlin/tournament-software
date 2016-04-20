@@ -19,6 +19,13 @@
   font-style: italic;
 }
 
+.tournamentDate {
+  text-align: center;
+  font-weight: normal;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
 .mainContentBox {
   border-radius: 12px;
   background-color: #f0f0f0;

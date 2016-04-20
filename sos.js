@@ -51,6 +51,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     players: [],
     games: [],
     rounds: [],
+    date: new Date().toISOString(),
     mode: ConstantsService.TOURNAMENT_FORMAT.SOS
   };
 
@@ -58,11 +59,21 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     return JSON.parse(JSON.stringify(newEventData));
   }
 
+  $scope.getDateString = function() {
+    var date = new Date($scope.currentEvent.date);
+    var dateString = "" + (date.getMonth()+1) + "-";
+    dateString += "" + date.getDate() + "-";
+    dateString += "" + date.getFullYear();
 
-  function createEventWithName(name, mode, password) {
+    return dateString;
+  };
+
+
+  function createEventWithName(name, mode, password, eventDate) {
     var newEvent = getNewBlankData();
     newEvent.name = name;
     newEvent.mode = mode;
+    newEvent.date = eventDate;
     newEvent.hash = CryptoService.generateHash(password);
     newEvent.id = UtilService.generateGUID();
     $scope.currentEvent = newEvent;
@@ -378,7 +389,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       // Success
       function(evtData) {
           LoggerService.action("Creating event with name: " + evtData.name + " mode: " + evtData.mode);
-          createEventWithName(evtData.name, evtData.mode, evtData.password);
+          createEventWithName(evtData.name, evtData.mode, evtData.password, evtData.date);
       },
       // Cancelled
       function() {

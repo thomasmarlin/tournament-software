@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html manifest="sos.appcache">
 
-
 <!-- Third Party -->
 <script src="/wp-content/plugins/swccg-tourny/js/spin.min.js.css"></script>
 <script src="/wp-content/plugins/swccg-tourny/jquery-2.1.4.min.js"></script>
@@ -125,6 +124,7 @@
   <div data-ng-if="currentEvent != null">
 
     <h1 class="tournamentTitle">{{currentEvent.name}}</h1>
+    <div class='tournamentDate'>{{ getDateString() }}</div>
     <h1 data-ng-if='currentEvent.finished' class='tournamentTitle'>Winner: {{currentEvent.players[0].name}}</h1>
 
     <hr>
