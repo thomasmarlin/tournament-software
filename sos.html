@@ -66,10 +66,31 @@
     <button class="btn btn-primary" data-ng-click="goHome()">&lt; Back</button>
   </div>
 
-  <div class="btn-group" style='position:absolute; top: 10px; right: 10px'>
-    <label class="btn btn-primary" ng-model="networkMode" uib-btn-radio="'NETWORK_ONLINE'" data-ng-click="toggleOnlineMode()">ONLINE</label>
-    <label class="btn btn-primary" ng-model="networkMode" uib-btn-radio="'NETWORK_OFFLINE'" data-ng-click="toggleOfflineMode()">OFFLINE</label>
+  <div>
+    <div data-ng-if="currentEvent && networkStatus.networkMode == 'NETWORK_OFFLINE'" class='offlineModeWarning'>
+      You are OFFLINE:  <span class="offlineModeRetryButton" data-ng-click="toggleOnlineMode()">Go Online?</span>
+    </div>
+    <div style="clear:both"></div>
   </div>
+
+
+  <div data-ng-if="!currentEvent" class="btn-group" style='position:absolute; top: 10px; right: 10px'>
+    <label style="margin-right: 20px">Active Mode:</label>
+    <label data-ng-class='{disabledObject: existingTournament}' >
+      <input type="radio" ng-model="networkStatus.networkMode" data-ng-click="toggleOnlineMode()" value="NETWORK_ONLINE" > Online
+    </label>
+    <label data-ng-class='{disabledObject: existingTournament}'>
+      <input type="radio" ng-model="networkStatus.networkMode" data-ng-click="toggleOfflineMode()" value="NETWORK_OFFLINE" style="margin-left:10px">  Offline
+    </label>
+  </div>
+
+  <!--
+  <div data-ng-if="!currentEvent" class="btn-group" style='position:absolute; top: 10px; right: 10px'>
+    <label class="btn btn-primary" ng-model="networkStatus.networkMode" uib-btn-radio="'NETWORK_ONLINE'" data-ng-click="toggleOnlineMode()">ONLINE</label>
+    <label class="btn btn-primary" ng-model="networkStatus.networkMode" uib-btn-radio="'NETWORK_OFFLINE'" data-ng-click="toggleOfflineMode()">OFFLINE</label>
+  </div>
+  -->
+
 
   <!-- No Event yet -->
   <div data-ng-if="currentEvent == null" style="padding:20px">
@@ -102,17 +123,18 @@
       </div>
 
 
-      <div style="margin-top: 300px; margin-left: 50px; text-align:center">
-        <div style="border: thin solid #DADADA; padding: 20px">
-          <div style="font-weight:bold">DEBUG TOOLS</div>
+      <div data-ng-if='enableDebugTools'>
+        <div style="margin-top: 300px; margin-left: 50px; text-align:center">
+          <div style="border: thin solid #DADADA; padding: 20px">
+            <div style="font-weight:bold">DEBUG TOOLS</div>
 
-          <div>
-            <button class="btn btn-info" data-ng-click="loadEventFromFile()">DEBUG: Load File</button>
-            <button class="btn btn-danger" data-ng-click="clearAllData()">DEBUG: Clear All Data</button>
-            <input style="display:none" type='file' id='fileinput'>
+            <div>
+              <button class="btn btn-info" data-ng-click="loadEventFromFile()">DEBUG: Load File</button>
+              <button class="btn btn-danger" data-ng-click="clearAllData()">DEBUG: Clear All Data</button>
+              <input style="display:none" type='file' id='fileinput'>
+            </div>
           </div>
         </div>
-
       </div>
 
     </div>
@@ -272,7 +294,6 @@
     <hr>
 
     <div style="margin-top:20px">
-      <div class="debugToolsLabel">Debug Tools</div>
       <button class="btn btn-success rightFloatButtons" data-ng-click="saveData()">Save Data</button>
       <button class="btn btn-success rightFloatButtons" data-ng-click="exportData()">Export Data</button>
       <div style="clear:both"></div>

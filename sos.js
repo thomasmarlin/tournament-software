@@ -2,9 +2,29 @@
 var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs', 'angularSpinner']);
 sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', '$window', 'MessageBoxService', 'DataStorage', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', 'CryptoService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, $window, MessageBoxService, DataStorage, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService, CryptoService) {
 
+  DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
   $scope.currentEvent = null;
+  $scope.enableDebugTools = false;
+  $scope.networkStatus = {
+    networkMode: DataStorage.getNetworkMode()
+  };
+
+  function setOfflineMode() {
+    DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
+    $scope.networkStatus.networkMode = DataStorage.getNetworkMode();
+  }
+
+  function setOnlineMode() {
+    DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
+    $scope.networkStatus.networkMode = DataStorage.getNetworkMode();
+  }
 
   $scope.toggleOnlineMode = function() {
+
+    function onSaveError() {
+      setOfflineMode();
+    }
+
     if (DataStorage.getNetworkMode() === DataStorage.NETWORK_MODES.NETWORK_ONLINE) {
       return;
     }
@@ -12,35 +32,39 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     var confirmDlg = MessageBoxService.confirmDialog("Continuing will enter ONLINE mode. Any changes you make to this event will be sent up to the SWCCG Server.\n\nAre you sure you want to continue?", $scope);
     confirmDlg.result.then(
       function() {
-        DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
-        $scope.networkMode = DataStorage.getNetworkMode();
+        setOnlineMode();
+        if ($scope.currentEvent) {
+          // Trigger a "Save" of this data now.
+          $scope.saveData(onSaveError);
+        }
       },
       //Cancel
       function() {
-        DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
-        $scope.networkMode = DataStorage.getNetworkMode();
+        setOfflineMode();
       }
     );
   };
 
-  $scope.toggleOfflineMode = function() {
+  $scope.toggleOfflineMode = function(skipPrompt) {
+
+    if (DataStorage.getNetworkMode() === DataStorage.NETWORK_MODES.NETWORK_OFFLINE) {
+      return;
+    }
 
     var confirmDlg = MessageBoxService.confirmDialog("Continuing will enter OFFLINE mode. All changes will be stored inside your browser. \n\nAre you sure you want to continue?", $scope);
     confirmDlg.result.then(
       function() {
-        DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
-        $scope.networkMode = DataStorage.getNetworkMode();
+        setOfflineMode();
       },
-      //Caancel
+      //Cancel
       function(){
-        DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
-        $scope.networkMode = DataStorage.getNetworkMode();
+        setOnlineMode();
       }
     );
   };
 
   function refreshNetworkStatus() {
-    $scope.networkMode = DataStorage.getNetworkMode();
+    $scope.networkStatus.networkMode = DataStorage.getNetworkMode();
   }
 
   refreshNetworkStatus();
@@ -563,7 +587,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     element.remove();
   }
 
-  $scope.saveData = function() {
+  $scope.saveData = function(callbackOnError) {
     var modalDialog = $uibModal.open({
         template: passwordPromptHTML,
         controller: 'PasswordPromptController',
@@ -578,6 +602,9 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       // Cancelled
       function() {
           LoggerService.log("Loading Event : Cancelled");
+          if (callbackOnError) {
+            callbackOnError();
+          }
       }
     );
   }
@@ -685,12 +712,12 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         // User wants to go offline!
         function() {
           DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
-          $scope.networkMode = DataStorage.getNetworkMode();
+          $scope.networkStatus.networkMode = DataStorage.getNetworkMode();
         },
         //Cancel
         function() {
           DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
-          $scope.networkMode = DataStorage.getNetworkMode();
+          $scope.networkStatus.networkMode = DataStorage.getNetworkMode();
         }
       );
     }
