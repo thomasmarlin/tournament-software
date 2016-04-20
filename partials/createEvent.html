@@ -6,27 +6,45 @@
     <div class='row'>
       <div class="col-md-7">
         <label>Event Name</label>
-        <input ng-model="creatingEventData.name" placeholder="ex: 2015 MPC" style="width:100%" autofocus>
+        <input ng-model="creatingEventData.name" placeholder="Enter Event Name..." style="width:100%" autofocus>
       </div>
 
+      <!-- Event Type -->
       <div class="col-md-5">
         <label>Event Type</label>
         <div style="clear:both;"></div>
-        <label><input type="radio" ng-model="creatingEventData.mode" value="SOS">  SOS  </label>
-        <label><input type="radio" ng-model="creatingEventData.mode" value="DIFF" style="margin-left:10px">  DIFF  </label>
+        <label data-ng-class='{disabledObject: existingTournament}'>
+          <input type="radio" ng-model="creatingEventData.mode" value="SOS" data-ng-disabled='existingTournament' > SOS
+        </label>
+        <label data-ng-class='{disabledObject: existingTournament}'>
+          <input type="radio" ng-model="creatingEventData.mode" value="DIFF" data-ng-disabled='existingTournament' style="margin-left:10px">  DIFF
+        </label>
+        <!--
+        <label><input type="radio" ng-model="creatingEventData.mode" disabled value="MATCH" style="margin-left:10px" >  Match Play  </label>
+        -->
       </div>
     </div>
 
     <div style="clear:both; margin-top:20px"></div>
 
+    <div>Date:</div>
+    <div>
+      <p class="input-group">
+         <input type="text" class="form-control" placeholder='Select Date...' uib-datepicker-popup="dd-MMMM-yyyy" ng-model="creatingEventData.date" is-open="datePickerData.opened" close-text="Close" alt-input-formats="altInputFormats" />
+         <span class="input-group-btn">
+           <button type="button" class="btn btn-default" ng-click="openDate()"><i class="glyphicon glyphicon-calendar"></i></button>
+         </span>
+       </p>
+     </div>
+
     <!-- Password Fields -->
-    <div style="font-weight:bold">Password:</div>
-    <input ng-model="creatingEventData.password">
+    <div style="font-weight:bold" data-ng-disabled='existingTournament' >Password:</div>
+    <input type="password" ng-model="creatingEventData.password" data-ng-disabled='existingTournament' >
 
     <div style="clear:both; margin-top:5px"></div>
 
     <div style="font-weight:bold">Confirm Password:</div>
-    <input ng-model="creatingEventData.confirmPassword">
+    <input type="password" ng-model="creatingEventData.confirmPassword" data-ng-disabled='existingTournament' >
 
     <hr>
 

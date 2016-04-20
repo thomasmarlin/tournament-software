@@ -366,7 +366,12 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     var modalDialog = $uibModal.open({
         template: createEventHTML,
         controller: 'CreateEventController',
-        scope: $scope
+        scope: $scope,
+        resolve: {
+          eventData: function() {
+            return null;
+          }
+        }
       });
 
     modalDialog.result.then(
@@ -378,6 +383,35 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       // Cancelled
       function() {
           LoggerService.log("Create Event : Cancelled");
+      }
+    );
+  }
+
+
+
+  $scope.editEvent = function() {
+    var modalDialog = $uibModal.open({
+        template: createEventHTML,
+        controller: 'CreateEventController',
+        scope: $scope,
+        resolve: {
+          eventData: function() {
+            return $scope.currentEvent;
+          }
+        }
+      });
+
+    modalDialog.result.then(
+      // Success
+      function(evtData) {
+        $scope.currentEvent.name = evtData.name;
+        $scope.currentEvent.date = evtData.date;
+
+        LoggerService.action("Updating event with name: " + evtData.name + " mode: " + evtData.mode);
+      },
+      // Cancelled
+      function() {
+          LoggerService.log("Update Event : Cancelled");
       }
     );
   }
