@@ -1,3 +1,17 @@
 .disabledObject {
   color: gray;
 }
+
+
+.offlineEventDataRow {
+  height: 50px;
+  border: thin solid black;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.offlineEventName {
+  font-weight: bold;
+  font-style: italic;
+}

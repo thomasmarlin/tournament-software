@@ -53,6 +53,9 @@ sosApp.service('DataStorage', ['RESTService', 'LocalData', '$q', function(APISer
 
     var deferred = $q.defer();
 
+    // Add the current timestamp
+    tournamentData.lastUpdate = new Date().toISOString();
+
     // Always save locally first, and the push to the server
     var localPromise = LocalData.updateTournament(tournamentData, password);
     localPromise.then(

@@ -23,6 +23,7 @@
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/EditPlayerController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/FindPlayerController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/LoadEventController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/ManageOfflineDataController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/MessageBoxController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/PasswordPromptController.js"></script>
 
@@ -48,6 +49,7 @@
 <script src="/wp-content/plugins/swccg-tourny/gen/editPlayerHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/findPlayerHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/loadEventHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/manageOfflineDataHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/messageBoxHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/passwordPromptHTML.js"></script>
 
@@ -62,10 +64,12 @@
 
 <div ng-app="sosApp" ng-controller="sos" style="margin:20px">
 
+  <!-- Back navigation -->
   <div class="btn-group" data-ng-if="currentEvent !== null" style='position:absolute; top: 10px; left: 10px'>
     <button class="btn btn-primary" data-ng-click="goHome()">&lt; Back</button>
   </div>
 
+  <!-- Offline Sync-up bar at the top-right -->
   <div>
     <div data-ng-if="currentEvent && networkStatus.networkMode == 'NETWORK_OFFLINE'" class='offlineModeWarning'>
       You are OFFLINE:  <span class="offlineModeRetryButton" data-ng-click="toggleOnlineMode()">Go Online?</span>
@@ -74,6 +78,7 @@
   </div>
 
 
+  <!-- Online / Offline Toggle -->
   <div data-ng-if="!currentEvent" class="btn-group" style='position:absolute; top: 10px; right: 10px'>
     <label style="margin-right: 20px">Active Mode:</label>
     <label data-ng-class='{disabledObject: existingTournament}' >
@@ -83,6 +88,14 @@
       <input type="radio" ng-model="networkStatus.networkMode" data-ng-click="toggleOfflineMode()" value="NETWORK_OFFLINE" style="margin-left:10px">  Offline
     </label>
   </div>
+
+
+  <!-- Manage Offline Data -->
+  <div data-ng-if="!currentEvent" style='position:fixed; bottom: 20px; right: 0px; left: 0px; margin: auto; text-align:center;'>
+    <hr>
+    <button class="btn btn-primary btn-lg" data-ng-click="manageOfflineData()">Manage Offline Data</button>
+  </div>
+
 
   <!--
   <div data-ng-if="!currentEvent" class="btn-group" style='position:absolute; top: 10px; right: 10px'>
@@ -119,6 +132,7 @@
         <div>
           <button class="btn btn-primary btn-lg" data-ng-click="createEvent()">Create New Event</button>
           <button class="btn btn-primary btn-lg" data-ng-click="loadEvent()">Load Existing Event</button>
+          <!--<button class="btn btn-primary btn-lg" data-ng-click="manageOfflineData()">Manage Offline Data</button>-->
         </div>
       </div>
 

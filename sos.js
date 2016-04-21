@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs', 'angularSpinner']);
-sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', '$window', 'MessageBoxService', 'DataStorage', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', 'CryptoService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, $window, MessageBoxService, DataStorage, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService, CryptoService) {
+sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', '$window', 'MessageBoxService', 'DataStorage', 'LocalData', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', 'CryptoService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, $window, MessageBoxService, DataStorage, LocalData, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService, CryptoService) {
 
   DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
   $scope.currentEvent = null;
@@ -84,12 +84,16 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   }
 
   $scope.getDateString = function() {
-    var date = new Date($scope.currentEvent.date);
-    var dateString = "" + (date.getMonth()+1) + "-";
-    dateString += "" + date.getDate() + "-";
-    dateString += "" + date.getFullYear();
+    if ($scope.currentEvent.date) {
+      var date = new Date($scope.currentEvent.date);
+      var dateString = "" + (date.getMonth()+1) + "-";
+      dateString += "" + date.getDate() + "-";
+      dateString += "" + date.getFullYear();
 
-    return dateString;
+      return dateString;
+    }
+
+    return "Unkonwn Date";
   };
 
 
@@ -127,7 +131,31 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   function loadEventById(tournamentId) {
     DataStorage.getEventInfo(tournamentId).then(
       function(data) {
-        loadSpecificJson(data);
+
+        // Let's make sure we don't have a newer Local copy before we load the remote one.
+        LocalData.getTournamentInfo(tournamentId).then(
+          function(localData) {
+            if ((localData.lastUpdate && data.lastUpdate) && localData.lastUpdate > data.lastUpdate) {
+              MessageBoxService.confirmDialog("You have OFFLINE data for this event which is more current than the web data.  Are you sure you want to load the web data?", $scope, "Use Old Data?").result.then(
+                function() {
+                  // Local data is older
+                  loadSpecificJson(data);
+                },
+                function() {
+                  console.log("Load data Cancelled. Offline data is better.");
+                  MessageBoxService.infoMessage("To use your OFFLINE data, return to the main page and select 'Manage Offline Data'", $scope);
+                }
+              )
+            } else {
+              // Local data is older
+              loadSpecificJson(data);
+            }
+          },
+          function() {
+            // no local data.  That's OK!
+            loadSpecificJson(data);
+          }
+        );
       },
       function(err) {
         MessageBoxService.errorMessage("Failed to load event. The event could not be found");
@@ -395,6 +423,30 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
             LoggerService.log("Add Player : Cancelled");
         }
       );
+  }
+
+
+  $scope.manageOfflineData = function() {
+    var modalDialog = $uibModal.open({
+        template: manageOfflineDataHTML,
+        controller: 'ManageOfflineDataController',
+        scope: $scope
+      });
+
+    modalDialog.result.then(
+      // Success
+      function(eventToLoad) {
+
+        // Move into Offline Mode and load the data
+        setOfflineMode();
+        loadEventById(eventToLoad.id);
+
+      },
+      // Cancelled
+      function() {
+        LoggerService.log("Closed Offlien Data");
+      }
+    );
   }
 
   $scope.createEvent = function() {

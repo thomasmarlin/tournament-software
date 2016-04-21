@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2016-04-19:v56
+# 2016-04-20:v35
 
 # Explicitly cached entries
 sos.html
@@ -30,6 +30,7 @@ gen/createPlayerHTML.js
 gen/editPlayerHTML.js
 gen/findPlayerHTML.js
 gen/loadEventHTML.js
+gen/manageOfflineDataHTML.js
 gen/messageBoxHTML.js
 gen/passwordPromptHTML.js
 
@@ -44,6 +45,7 @@ js/controllers/CreateGameController.js
 js/controllers/EditPlayerController.js
 js/controllers/FindPlayerController.js
 js/controllers/LoadEventController.js
+js/controllers/ManageOfflineDataController.js
 js/controllers/MessageBoxController.js
 js/controllers/PasswordPromptController.js
 

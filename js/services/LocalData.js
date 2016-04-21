@@ -139,6 +139,21 @@ sosApp.service('LocalData', ['$q', 'LoggerService', 'CryptoService', function($q
   };
 
 
+  this.removeTournamentById = function(tournamentId) {
+
+    var allEvents = self.loadData();
+    
+    for (var i = 0; i < allEvents.length; i++) {
+      var existingEvent = allEvents[i];
+      if (existingEvent.id === tournamentId) {
+        allEvents.splice(i, 1);
+        break;
+      }
+    }
+
+    self.saveData(allEvents);
+  };
+
   // Gets the specific Tournament Info
   this.getTournamentInfo = function(tournamentId) {
     var deferred = $q.defer();
