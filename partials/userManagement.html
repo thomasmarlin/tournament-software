@@ -1,0 +1,42 @@
+<div>
+  <h1 class="tournamentTitle">User Management</h1>
+  <hr>
+
+  <!-- Force login if not already -->
+  <div data-ng-if='!isLoggedIn()' style="text-align:center">
+    <button class="btn btn-primary btn-lg" data-ng-click="loginClick()">Login</button>
+  </div>
+
+  <!-- Data (requires Logged In ) -->
+  <div data-ng-if='isLoggedIn()'>
+
+    <div data-ng-repeat='user in userManagement.allUsers track by $index' class='playerBox'>
+
+      <div class="row" style='padding-top: 5px;'>
+
+        <div class="col-xs-2" style='text-align:center;'>
+          <div class="glyphicon glyphicon-user" style="font-size: 2.5em;"></div>
+        </div>
+
+        <div class="col-xs-4">
+          <div class="playerBoxHeader">{{user.username}}</div>
+        </div>
+
+        <div class="col-xs-2">
+          <div data-ng-if='!currentEvent.finished' style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deleteUser(user)" class="glyphicon glyphicon-remove"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <hr>
+
+    <!-- Add New Users -->
+    <div style="text-align:center">
+      <div>
+        <button class="btn btn-primary btn-lg" data-ng-click="addUser()">Add Tournament Director</button>
+      </div>
+    </div>
+  </div>
+</div>

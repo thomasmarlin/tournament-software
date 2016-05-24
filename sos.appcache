@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2016-04-20:v35
+# 2016-06-23:v11
 
 # Explicitly cached entries
 sos.html
@@ -22,32 +22,25 @@ fonts/glyphicons-halflings-regular.ttf
 fonts/glyphicons-halflings-regular.woff
 fonts/glyphicons-halflings-regular.woff2
 
-gen/commandCardHTML.js
-gen/confirmBoxHTML.js
-gen/createEditGameHTML.js
-gen/createEventHTML.js
-gen/createPlayerHTML.js
-gen/editPlayerHTML.js
-gen/findPlayerHTML.js
-gen/loadEventHTML.js
-gen/manageOfflineDataHTML.js
-gen/messageBoxHTML.js
-gen/passwordPromptHTML.js
-
 img/swccg_logo.png
 
 js/controllers/AddPlayerController.js
 js/controllers/AssignWinnerController.js
 js/controllers/CommandCardController.js
 js/controllers/ConfirmBoxController.js
+js/controllers/CreateEditUserController.js
 js/controllers/CreateEventController.js
 js/controllers/CreateGameController.js
+js/controllers/currentEvent.js
 js/controllers/EditPlayerController.js
 js/controllers/FindPlayerController.js
 js/controllers/LoadEventController.js
+js/controllers/LoginController.js
+js/controllers/homeScreen.js
 js/controllers/ManageOfflineDataController.js
 js/controllers/MessageBoxController.js
 js/controllers/PasswordPromptController.js
+js/controllers/userManagement.js
 
 js/services/ConstantsService.js
 js/services/CryptoService.js
@@ -59,6 +52,23 @@ js/services/RESTService.js
 js/services/StatsService.js
 js/services/TournamentService.js
 js/services/UtilService.js
+
+gen/commandCardHTML.js
+gen/confirmBoxHTML.js
+gen/createEditGameHTML.js
+gen/createEditUserHTML.js
+gen/createEventHTML.js
+gen/createPlayerHTML.js
+gen/currentEventHTML.js
+gen/editPlayerHTML.js
+gen/findPlayerHTML.js
+gen/loadEventHTML.js
+gen/loginHTML.js
+gen/homeScreenHTML.js
+gen/manageOfflineDataHTML.js
+gen/messageBoxHTML.js
+gen/passwordPromptHTML.js
+gen/userManagementHTML.js
 
 js/bootstrap.js
 js/bootstrap.min.js

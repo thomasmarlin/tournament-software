@@ -2,12 +2,18 @@
 var sosApp = angular.module('sosApp');
 sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $q, CryptoService) {
 
-  //var API_DOMAIN = 'http://192.168.33.10';
-  var API_DOMAIN = 'http://www.swtournamentbeta.com';
+  var API_DOMAIN = 'http://192.168.33.10';
+  //var API_DOMAIN = 'http://www.swtournamentbeta.com';
   var DEFAULT_ENDPOINT = API_DOMAIN + '/wp-content/plugins/swccg-tourny/api.php';
 
   var JSON_RESPONSE_START = "====================JSON_RESPONSE_START====================";
   var JSON_RESPONSE_END = "====================JSON_RESPONSE_END====================";
+
+  var currentUser = {
+    username: "",
+    password: ""
+  };
+
 
   function getJsonDataFromResponse(response) {
     if (response == null) {
@@ -46,7 +52,7 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
         deferred.reject(jsonContent);
       });
     return deferred.promise;
-  }
+  };
 
   this.get = function(url, config) {
     var deferred = $q.defer();
@@ -63,12 +69,84 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
         deferred.reject(jsonContent);
       });
     return deferred.promise;
+  };
+
+  this.delete = function(url) {
+    var deferred = $q.defer();
+    $http.delete(url)
+      .success(function(response) {
+        // Get just the JSON data out of the response
+        var jsonContent = getJsonDataFromResponse(response);
+        deferred.resolve(jsonContent);
+      })
+      .error(function(err) {
+        console.log(err);
+        // Get just the JSON data out of the response
+        var jsonContent = getJsonDataFromResponse(err);
+        deferred.reject(jsonContent);
+      });
+    return deferred.promise;
+  };
+
+  function updateCredentials(username, password) {
+    currentUser.username = username;
+    currentUser.password = password;
+
+    $http.defaults.headers.post['username'] = username;
+    $http.defaults.headers.post['password'] = password;
   }
+
+  this.isLoggedIn = function() {
+    if (currentUser.username !== '' && currentUser !== '') {
+      return true;
+    }
+    return false;
+  }
+
+  this.getCurrentUser = function() {
+    return currentUser.username;
+  }
+
+  function login(username, password) {
+    var url = DEFAULT_ENDPOINT + '?endpoint=login';
+
+    updateCredentials(username, password);
+
+    var deferred = $q.defer();
+    $http.post(url)
+      .success(function(response) {
+
+        // Get just the JSON data out of the response
+        var jsonContent = getJsonDataFromResponse(response);
+        deferred.resolve(jsonContent);
+      })
+      .error(function(err) {
+        console.log(err);
+
+        updateCredentials("", "");
+
+        // Get just the JSON data out of the response
+        var jsonContent = getJsonDataFromResponse(err);
+        deferred.reject(jsonContent);
+      });
+    return deferred.promise;
+  };
 
 
   //
   // API Functions
   //
+
+  this.login = function(username, password) {
+    return login(username, password);
+  };
+
+  this.logout = function(username, password) {
+    var deferred = $q.defer();
+    updateCredentials('', '');
+
+    deferred.resolve({});
+  };
 
   this.createTournament = function(tournamentData) {
     var url = DEFAULT_ENDPOINT + '?endpoint=tournaments&tournamentId=' + tournamentData.id;
@@ -96,6 +174,25 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
     return this.get(url);
   };
 
+  this.getUserList = function() {
+    var url = DEFAULT_ENDPOINT + '?endpoint=users';
+    return this.get(url);
+  };
+
+  this.createUser = function(userData) {
+    var url = DEFAULT_ENDPOINT + '?endpoint=users&userId=' + userData.id;
+    return this.post(url, userData);
+  };
+
+  this.updateUser = function(userData, password) {
+    var url = DEFAULT_ENDPOINT + '?endpoint=users&userId=' + userData.id;
+    return this.post(url, userData);
+  };
+
+  this.deleteUser = function(userData, password) {
+    var url = DEFAULT_ENDPOINT + '?endpoint=users&userId=' + userData.id
+    return this.delete(url);
+  };
 
   this.ping = function() {
     var url = DEFAULT_ENDPOINT + '?endpoint=ping';

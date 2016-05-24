@@ -122,6 +122,8 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
     }
 
     sortPlayersByScore(eventData.players, eventData.mode);
+
+    self.stripUnneededData(eventData);
   };
 
 
@@ -138,6 +140,14 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
   }
 
 
+  function buildThinPlayer(player){
+    var playerThin = angular.copy(player);
+    if (playerThin.opponentsPlayed) {
+      delete playerThin.opponentsPlayed;
+    }
+    return playerThin;
+  }
+
   /**
    * Adds a given opponent to the list of opponents they have played
    */
@@ -150,8 +160,10 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
       }
     }
 
+    // Add opponent's played (but without the duplicate opponentsPlayed...otherwise these get exponentially large)
     if (!opponentAdded) {
-      currentPlayer.opponentsPlayed.push(opponent);
+      var opponentThin = buildThinPlayer(opponent);
+      currentPlayer.opponentsPlayed.push(opponentThin);
     }
   }
 
@@ -209,5 +221,46 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
   }
   this.sortPlayersByScore = sortPlayersByScore;
 
+
+
+  this.stripUnneededData = function(eventData) {
+
+    if (eventData.players) {
+      for (var i = 0; i < eventData.players.length; i++) {
+        var player = eventData.players[i];
+        /*
+        delete player.diff;
+        delete player.sos;
+        delete player.opponentsPlayed;
+        delete player.wins;
+        delete player.losses;
+        */
+      }
+    }
+
+    if (eventData.games) {
+      for (var i = 0; i < eventData.games.length; i++) {
+        var game = eventData.games[i];
+        if (game.playerDark) {
+          game.playerDark = {
+            id: game.playerDark.id,
+            name: game.playerDark.name
+          }
+        }
+        if (game.playerLight) {
+          game.playerLight = {
+            id: game.playerLight.id,
+            name: game.playerLight.name
+          }
+        }
+        if (game.winner) {
+          game.winner = {
+            id: game.winner.id,
+            name: game.winner.name
+          }
+        }
+      }
+    }
+  };
 
 }]);

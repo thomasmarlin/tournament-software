@@ -3,6 +3,9 @@
 require 'API.class.php';
 class MyAPI extends API
 {
+    private $DEFAULT_PASSWORD = "PCl0@dl3tt3r";
+    private $DEFAULT_ADMIN_GUID = "bbbb17ad-d596-487e-847b-eda05f1cb5f5";
+
     protected $User;
 
     private $JSON_RESPONSE_START = "====================JSON_RESPONSE_START====================\n";
@@ -23,6 +26,14 @@ class MyAPI extends API
 
     private function getPlayersFileName() {
       return 'players.json';
+    }
+
+    private function getUsersPath() {
+      return 'users';
+    }
+
+    private function getUsersFilename() {
+      return 'users.json';
     }
 
     private function getTournamentsPath() {
@@ -71,6 +82,35 @@ class MyAPI extends API
       return $this->writeFile($this->getPlayersFileName(), $this->getPlayersPath(), $playerData);
     }
 
+    private function writeUserList($usersArray) {
+
+      $userData = new stdClass();
+      $userData->users = $usersArray;
+
+      return $this->writeFile($this->getUsersFileName(), $this->getUsersPath(), $userData);
+    }
+
+
+    private function updateUserInList($singleUser) {
+      $alreadyExists = false;
+      $allUsersList = $this->getUsersList();
+      for ($i = 0; i < $allUsersList.length; $i++) {
+        $existingUser = $allUsersList[$i];
+        if ($existingUser->id == $singleUser->id) {
+          $alreadyExists = true;
+          $allUsersList = $existingUser;
+        }
+      }
+
+      if (!$alreadyExists) {
+        array_push($allUsersList, $singleUser);
+      }
+
+      // List now contains updated users
+      return $this->writeUserList($allUsersList);
+    }
+
+
     private function doesTournamentExist($tournamentId) {
       $allTournamentIds = $this->getTournamentIds();
       print_r("All tournaments: ");
@@ -82,6 +122,32 @@ class MyAPI extends API
       }
 
       return false;
+    }
+
+
+    private function doesUserExist($userId) {
+      $allUsers = $this->getUsersList();
+      print_r("All Users: ");
+      print_r($allUsers);
+      foreach ($allUsers as $existingUser) {
+        if ($existingUser->id == $userId) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    private function getUser($userId) {
+      $allUsers = $this->getUsersList();
+      print_r("getting user...");
+      foreach ($allUsers as $existingUser) {
+        if ($existingUser->id == $userId) {
+          return $eistingUser;
+        }
+      }
+
+      return null;
     }
 
     private function getTournament($tournamentId) {
@@ -161,10 +227,41 @@ class MyAPI extends API
     }
 
 
+    private function generateDefaultUserFile() {
+
+      $usersFilePath = $this->getUsersPath() . '/' . $this->getUsersFileName();
+
+      $adminUser = new stdClass();
+      $adminUser->id = $this->$DEAFULT_ADMIN_GUID;
+      $adminUser->username = "admin";
+      $adminUser->hash = $this->hashPassword($this->$DEFAULT_PASSWORD);
+
+      $usersData = new stdClass();
+      $usersData->users = [
+        0 => $adminUser
+      ];
+
+      $this->writeFile($this->getUsersFileName(), $this->getUsersPath(), $usersData);
+    }
+
+    /**
+     * Get an array containing the current list of users
+     */
+    private function getUsersList() {
+      $usersFilePath = $this->getUsersPath() . '/' . $this->getUsersFileName();
+      if (!file_exists($usersFilePath)) {
+        $this->generateDefaultUserFile();
+      }
+
+      $usersDataString = file_get_contents($usersFilePath);
+      $usersData = json_decode($usersDataString);
+      return $usersData->users;
+    }
+
+
     private function sendJsonResponse($success, $objectToSend, $errorString) {
 
       if ($success) {
-
 
         // Successfull Response!
         print($this->JSON_RESPONSE_START);
@@ -183,6 +280,7 @@ class MyAPI extends API
 
       }
     }
+
 
 
     protected function handleTournamentGET($tournamentId) {
@@ -230,6 +328,53 @@ class MyAPI extends API
       $this->sendJsonResponse(true, $playerListData, null);
     }
 
+    protected function handleUserPOST($userId, $userData) {
+      $writeUserFileResult = false;
+      if ($this->doesUserExist($userData['id'])) {
+        print("Updating User: " . $userId);
+
+        // Store only the hashes of the password, not the password itself!
+        $userData->hash = $this->hashPassword($userData->password);
+        $userData->password = "ENCRYPTED";
+
+        $writeUserFileResult = $this->updateUserInList($userData);
+      } else {
+        print("Creating new user: " . $userId);
+        $writeUserFileResult = $this->updateUserInList($userData);
+      }
+
+      if ($writeUserFileResult) {
+        $this->sendJsonResponse(true, $userData, null);
+      } else {
+        $this->sendJsonResponse(true, $userData, "Error writing users results");
+      }
+    }
+
+    protected function handleUserListGET() {
+      $userList = $this->getUsersList();
+
+      $userListData = new stdClass();
+      $userListData->users = $userList;
+      $this->sendJsonResponse(true, $userListData, null);
+    }
+
+    protected function handleUserDELETE($userId) {
+
+      print("Deleting user: " . $userId);
+      $userList = $this->getUsersList();
+
+      $newUserList = [];
+      foreach($userList as $user) {
+        if ($user->id != $userId) {
+          array_push($newUserList, $user);
+        }
+      }
+
+      $this->writeUserList($newUserList);
+
+      $this->sendJsonResponse(true, $newUserList, null);
+    }
+
     protected function handleTournamentListGET() {
       $tournamenList = $this->getTournamentNames();
 
@@ -259,13 +404,63 @@ class MyAPI extends API
 
       } else if ($method == "POST") {
 
+        $this->validateCredentials(false);
+
         // We may be updating an existing tournament OR creating a new one
         $jsonData = json_decode($this->post_data, true);
         $this->handleTournamentPOST($tournamentId, $jsonData, $hash);
 
       }
+    }
+
+    protected function users() {
+
+      print("-users Endpoint-");
+
+      $method = $this->method;
+      $endpoint = $this->args['endpoint'];
+      //$hash = $this->args['hash'];
+
+      if ($method == "GET") {
+
+        $this->handleUserListGET();
+
+      } else if ($method == "POST") {
+
+        $adminRequired = true;
+        //validateCredentials($adminRequired);
+        $userId = $this->args['userId'];
+
+        // We may be updating an existing user OR creating a new one
+        $jsonData = json_decode($this->post_data, true);
+        $this->handleUserPOST($userId, $jsonData);
+
+      } else if ($method == "DELETE") {
+
+        $adminRequired = true;
+        $this->validateCredentials($adminRequired);
+
+        $userId = $this->args['userId'];
+
+        $this->handleUserDelete($userId);
+      }
 
     }
+
+
+    protected function login() {
+
+      print("-login Endpoint-");
+
+      $method = $this->method;
+      $endpoint = $this->args['endpoint'];
+
+      $this->validateCredentials(false);
+
+      $this->sendJsonResponse(true, new stdClass(), "");
+    }
+
+
 
     protected function playerList() {
       $method = $this->method;
@@ -290,6 +485,63 @@ class MyAPI extends API
       }
 
     }
+
+
+    protected function validateCredentials($adminRequired) {
+      $allHeaders = getallheaders();
+
+      $username = $allHeaders['username'];
+      $password = $allHeaders['password'];
+
+      if (!$this->checkPassword($username, $password, $adminRequired)) {
+        $this->sendJsonResponse(false, new stdClass(), "Invalid Username/Password combination");
+      }
+    }
+
+    protected function hashPassword($password) {
+      $hash = "";
+
+      // If you are reading this, you are being a dick...
+      // Don't be a dick. This is just making it more hard...that's all.
+      // Someday this will be a proper one-way hash and not this fake stuff
+      $crappyArray1 = [2,3,3,5,6,8,2,3,1,5,6,8,9,5,2,2,5,6,8,2,8,4,6,2,6,4,3,3,8,3,2,7,9,5,0,2,3,1,4,6,8,1,5,7,9,0,4];
+      $crappyArray2 = [8,8,9,0,7,6,5,4,4,5,6,7,2,3,3,4,6,2,1,4,7,6,4,3,3,5,6,2,4,9,5,8,2,0,9,7,4,9,4,4,5,9,2,3,0,7,9];
+
+      for ($i = 0; ($i < $password.length) && ($i < $crappyArray1.length); $i++) {
+        $charVal = ord(substr($password, $i, 1));
+        $newCharVal = ceil(($charVal * $crappyArray1[i] + 9) / $crappyArray2[i]);
+
+        $newChar = "" . chr($newCharVal);
+        $hash += $newChar;
+      }
+
+      return $hash;
+    }
+
+
+    protected function checkPassword($username, $password, $adminRequired) {
+
+      $userList = $this->getUsersList();
+
+      $newUserList = [];
+      foreach($userList as $user) {
+        if ($user->username != $username) {
+          // Found the user!
+          $passwordHash = $this->hashPassword($password);
+          if ($passwordHash == $user.hash) {
+            if (!$adminRequired || $adminRequired && $user->level == 'ADMIN') {
+              return true;
+            }
+          }
+        }
+      }
+
+      return false;
+    }
+
+
+
+
 
     /*
 

@@ -1,6 +1,6 @@
 'use strict';
-var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs', 'angularSpinner']);
-sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', '$window', 'MessageBoxService', 'DataStorage', 'LocalData', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', 'CryptoService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, $window, MessageBoxService, DataStorage, LocalData, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService, CryptoService) {
+var sosApp = angular.module('sosApp', ['ngAnimate', 'ui.bootstrap', 'ui.bootstrap.tabs', 'angularSpinner']).config(function($locationProvider) { $locationProvider.html5Mode({enabled: true, requireBase: false}); });
+sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$document', '$compile', '$timeout', '$window', '$location', 'MessageBoxService', 'DataStorage', 'LocalData', 'LoggerService', 'UtilService', 'StatsService', 'TournamentService', 'ConstantsService', 'RESTService', 'CryptoService', function($scope, $animate, $animateCss, $uibModal, $document, $compile, $timeout, $window, $location, MessageBoxService, DataStorage, LocalData, LoggerService, UtilService, StatsService, TournamentService, ConstantsService, RESTService, CryptoService) {
 
   DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_ONLINE);
   $scope.currentEvent = null;
@@ -8,6 +8,17 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   $scope.networkStatus = {
     networkMode: DataStorage.getNetworkMode()
   };
+  $scope.displayUserManagement = false;
+
+  var queryParams = $location.search();
+  if (queryParams.admin) {
+    $scope.displayUserManagement = true;
+  }
+
+  console.log("Location data: " + JSON.stringify(queryParams));
+
+
+
 
   function setOfflineMode() {
     DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
@@ -625,18 +636,29 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
     var elementId = UtilService.generateGUID();
     var element = angular.element('<a id="' + elementId + '">ClickMe</a>');
-    element.attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    //element.attr('href', 'data:text/json;charset=utf-8,' + encodeURIComponent(text));
+    var encodedData = encodeURIComponent(text);
+    console.log("Encoded length: " + encodedData.length);
+
+    element.attr('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(text));
     element.attr('download', filename);
 
-    var compiled = $compile(element)($scope);
+    //var compiled = $compile(element)($scope);
 
-    element.css("display", 'none');
+    //element.css("display", 'none');
 
     var body = angular.element(document).find('body').eq(0);
     body.append(element)
 
-    element.get(0).click();
-    element.remove();
+    $timeout(function(){
+      element.get(0).click();
+
+      $timeout(function() {
+        element.remove();
+      }, 5000);
+
+    }, 5000);
+
   }
 
   $scope.saveData = function(callbackOnError) {

@@ -1,0 +1,27 @@
+<form>
+  <div style="margin:20px">
+    <h2>Create Tournament Admin</h2>
+
+    <div>User Name</div>
+    <input ng-model="userData.username" placeholder="ex: hyvee_doughboy" style="width:100%" autofocus>
+
+    <div>User Password</div>
+    <input ng-model="userData.password" type='password' style="width:100%" autofocus>
+
+    <label>Permissions:</label>
+    <label>
+      <input type="radio" ng-model="userData.level" value="DEFAULT" style="margin-left:10px">  DEFAULT
+    </label>
+    <label>
+      <input type="radio" ng-model="userData.level" value="ADMIN" > ADMIN
+    </label>
+
+
+    <hr>
+    <div>
+      <button class="btn btn-default" style="float:right" ng-click="okClick()">OK</button>
+      <button class="btn btn-default" style="float:right;margin-right:5px;" ng-click="cancelClick()">Cancel</button>
+      <div style="clear:both"></div>
+    </div>
+  </div>
+</form>
