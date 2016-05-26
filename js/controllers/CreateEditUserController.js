@@ -26,10 +26,21 @@ sosApp.controller('CreateEditUserController', ['$scope', '$uibModalInstance', 'M
       id: UtilService.generateGUID(),
       username: $scope.userData.username,
       password: $scope.userData.password,
+      level: "DEFAULT"
     }
 
     if (existingUser) {
       dataToSave.id = existingUser.id;
+    }
+
+    if (dataToSave.username.trim() == "") {
+      MessageBoxService.errorMessage("Please enter a username for the tournament director", $scope);
+      return;
+    }
+
+    if (dataToSave.password.trim() == "") {
+      MessageBoxService.errorMessage("Please enter a password for the tournament director", $scope);
+      return;
     }
 
     $uibModalInstance.close(dataToSave);

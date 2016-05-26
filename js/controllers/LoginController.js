@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('LoginController', ['$scope', '$uibModalInstance', 'RESTService', function($scope, $uibModalInstance, RESTService) {
+sosApp.controller('LoginController', ['$scope', '$uibModalInstance', 'MessageBoxService', 'RESTService', function($scope, $uibModalInstance, MessageBoxService, RESTService) {
 
   $scope.username = "";
   $scope.password = "";

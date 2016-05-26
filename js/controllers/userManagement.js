@@ -70,7 +70,7 @@ sosApp.directive('userManagement', ['$uibModal', 'RESTService', 'LoggerService',
         modalDialog.result.then(
           // Success
           function(userData) {
-              LoggerService.action("Creating user with name: " + userData.name);
+              LoggerService.action("Creating user with name: " + userData.username);
 
               RESTService.createUser(userData).then(
                 function() {

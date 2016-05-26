@@ -153,9 +153,8 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
     return this.post(url, tournamentData);
   };
 
-  this.updateTournament = function(tournamentData, password) {
-    var hash = CryptoService.generateHash(password);
-    var url = DEFAULT_ENDPOINT + '?endpoint=tournaments&tournamentId=' + tournamentData.id + '&hash=' + hash;
+  this.updateTournament = function(tournamentData) {
+    var url = DEFAULT_ENDPOINT + '?endpoint=tournaments&tournamentId=' + tournamentData.id;
     return this.post(url, tournamentData);
   };
 

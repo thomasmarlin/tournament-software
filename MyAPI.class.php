@@ -6,6 +6,9 @@ class MyAPI extends API
     private $DEFAULT_PASSWORD = "PCl0@dl3tt3r";
     private $DEFAULT_ADMIN_GUID = "bbbb17ad-d596-487e-847b-eda05f1cb5f5";
 
+    private $TYPE_ADMIN = 'ADMIN';
+    private $TYPE_DEFAULT = 'DEFAULT';
+
     protected $User;
 
     private $JSON_RESPONSE_START = "====================JSON_RESPONSE_START====================\n";
@@ -57,15 +60,29 @@ class MyAPI extends API
       return $tournamentIds;
     }
 
+
     private function writeFile($fileName, $filePath, $fileContents) {
 
       $fullPath = $filePath . '/' . $fileName;
 
       $jsonString = json_encode($fileContents);
+      print("jsonString:\n");
+      print_r($jsonString);
 
       $openedFile = fopen($fullPath, "w");
-      fwrite($openedFile, $jsonString);
-      fclose($openedFile);
+
+      $writeResult = fwrite($openedFile, $jsonString);
+
+
+      print("WriteResult");
+      print_r($writeResult);
+
+      print("WroteData:\n");
+      print_r($jsonString);
+
+      $closeResult = fclose($openedFile);
+      print("closeResult");
+      print_r($closeResult);
 
       return true;
     }
@@ -94,9 +111,9 @@ class MyAPI extends API
     private function updateUserInList($singleUser) {
       $alreadyExists = false;
       $allUsersList = $this->getUsersList();
-      for ($i = 0; i < $allUsersList.length; $i++) {
+      for ($i = 0; $i < count($allUsersList); $i++) {
         $existingUser = $allUsersList[$i];
-        if ($existingUser->id == $singleUser->id) {
+        if (0 == strcmp($existingUser->id, $singleUser->id)) {
           $alreadyExists = true;
           $allUsersList = $existingUser;
         }
@@ -228,19 +245,23 @@ class MyAPI extends API
 
 
     private function generateDefaultUserFile() {
+      print("GENERATING DEFAULT FILE!");
 
       $usersFilePath = $this->getUsersPath() . '/' . $this->getUsersFileName();
 
       $adminUser = new stdClass();
-      $adminUser->id = $this->$DEAFULT_ADMIN_GUID;
+      $adminUser->id = $this->DEFAULT_ADMIN_GUID;
       $adminUser->username = "admin";
-      $adminUser->hash = $this->hashPassword($this->$DEFAULT_PASSWORD);
+      $adminUser->hash = $this->hashPassword($this->DEFAULT_PASSWORD);
 
       $usersData = new stdClass();
       $usersData->users = [
         0 => $adminUser
       ];
 
+      print("---DEFAULT FILE---\n");
+      print_r($usersData);
+      print("-------\n");
       $this->writeFile($this->getUsersFileName(), $this->getUsersPath(), $usersData);
     }
 
@@ -269,14 +290,20 @@ class MyAPI extends API
         print_r($encodedJson);
         print($this->JSON_RESPONSE_END);
 
+        http_response_code(200);
+
       } else {
 
         // Error Condition!  TODO:  Send back an HTTP error
+
         print($this->JSON_RESPONSE_START);
         $errorObject = new stdClass();
         $errorObject->errorMessage = $errorString;
         $encodedError = json_encode($errorObject);
+        print_r($encodedError);
         print($this->JSON_RESPONSE_END);
+
+        http_response_code(400);
 
       }
     }
@@ -330,17 +357,31 @@ class MyAPI extends API
 
     protected function handleUserPOST($userId, $userData) {
       $writeUserFileResult = false;
+
       if ($this->doesUserExist($userData['id'])) {
         print("Updating User: " . $userId);
 
         // Store only the hashes of the password, not the password itself!
-        $userData->hash = $this->hashPassword($userData->password);
-        $userData->password = "ENCRYPTED";
+        $updatedUserData = new stdClass();
+        $updatedUserData->id = $userId;
+        $updatedUserData->username = $userData['username'];
+        $updatedUserData->hash = $this->hashPassword($userData['password']);
+        $updatedUserData->level = $userData['level'];
+        $updatedUserData->password = "ENCRYPTED";
 
-        $writeUserFileResult = $this->updateUserInList($userData);
+        $writeUserFileResult = $this->updateUserInList($updatedUserData);
       } else {
         print("Creating new user: " . $userId);
-        $writeUserFileResult = $this->updateUserInList($userData);
+
+        // Store only the hashes of the password, not the password itself!
+        $updatedUserData = new stdClass();
+        $updatedUserData->id = $userId;
+        $updatedUserData->username = $userData['username'];
+        $updatedUserData->hash = $this->hashPassword($userData['password']);
+        $updatedUserData->level = $userData['level'];
+        $updatedUserData->password = "ENCRYPTED";
+
+        $writeUserFileResult = $this->updateUserInList($updatedUserData);
       }
 
       if ($writeUserFileResult) {
@@ -404,12 +445,11 @@ class MyAPI extends API
 
       } else if ($method == "POST") {
 
-        $this->validateCredentials(false);
-
-        // We may be updating an existing tournament OR creating a new one
-        $jsonData = json_decode($this->post_data, true);
-        $this->handleTournamentPOST($tournamentId, $jsonData, $hash);
-
+        if ($this->validateCredentials(false)) {
+          // We may be updating an existing tournament OR creating a new one
+          $jsonData = json_decode($this->post_data, true);
+          $this->handleTournamentPOST($tournamentId, $jsonData, $hash);
+        }
       }
     }
 
@@ -438,11 +478,11 @@ class MyAPI extends API
       } else if ($method == "DELETE") {
 
         $adminRequired = true;
-        $this->validateCredentials($adminRequired);
+        if ($this->validateCredentials($adminRequired)) {
+          $userId = $this->args['userId'];
 
-        $userId = $this->args['userId'];
-
-        $this->handleUserDelete($userId);
+          $this->handleUserDelete($userId);
+        }
       }
 
     }
@@ -455,9 +495,9 @@ class MyAPI extends API
       $method = $this->method;
       $endpoint = $this->args['endpoint'];
 
-      $this->validateCredentials(false);
-
-      $this->sendJsonResponse(true, new stdClass(), "");
+      if ($this->validateCredentials(false)) {
+        $this->sendJsonResponse(true, new stdClass(), "");
+      }
     }
 
 
@@ -488,31 +528,41 @@ class MyAPI extends API
 
 
     protected function validateCredentials($adminRequired) {
+      print("validateCredentials\n");
+
       $allHeaders = getallheaders();
 
       $username = $allHeaders['username'];
       $password = $allHeaders['password'];
 
       if (!$this->checkPassword($username, $password, $adminRequired)) {
-        $this->sendJsonResponse(false, new stdClass(), "Invalid Username/Password combination");
+        print("validation failed!\n");
+        $this->sendJsonResponse(false, null, "Invalid Username/Password combination");
+        return false;
       }
+
+      print("validation successful!\n");
+      return true;
     }
 
     protected function hashPassword($password) {
+
+      print("hashPassword: $password\n");
+
       $hash = "";
 
       // If you are reading this, you are being a dick...
       // Don't be a dick. This is just making it more hard...that's all.
       // Someday this will be a proper one-way hash and not this fake stuff
-      $crappyArray1 = [2,3,3,5,6,8,2,3,1,5,6,8,9,5,2,2,5,6,8,2,8,4,6,2,6,4,3,3,8,3,2,7,9,5,0,2,3,1,4,6,8,1,5,7,9,0,4];
-      $crappyArray2 = [8,8,9,0,7,6,5,4,4,5,6,7,2,3,3,4,6,2,1,4,7,6,4,3,3,5,6,2,4,9,5,8,2,0,9,7,4,9,4,4,5,9,2,3,0,7,9];
+      $crappyArray1 = [2,3,3,5,6,8,2,3,1,5,6,8,9,5,2,2,5,6,8,2,8,4,6,2,6,4,3,3,8,3,2,7,9,5,6,2,3,1,4,6,8,1,5,7,9,2,4];
+      $crappyArray2 = [8,8,9,1,7,6,5,4,4,5,6,7,2,3,3,4,6,2,1,4,7,6,4,3,3,5,6,2,4,9,5,8,2,9,9,7,4,9,4,4,5,9,2,3,2,7,9];
 
-      for ($i = 0; ($i < $password.length) && ($i < $crappyArray1.length); $i++) {
+      for ($i = 0; ($i < strlen($password)) && ($i < count($crappyArray1)); $i++) {
         $charVal = ord(substr($password, $i, 1));
-        $newCharVal = ceil(($charVal * $crappyArray1[i] + 9) / $crappyArray2[i]);
+        $newCharVal = ceil(($charVal * $crappyArray1[$i] + 9) / $crappyArray2[$i]) + floor(($charVal * $crappyArray2[$i] + 2) / $crappyArray1[$i]);
 
-        $newChar = "" . chr($newCharVal);
-        $hash += $newChar;
+        $newChar = "" . $newCharVal;
+        $hash = $hash . $newChar;
       }
 
       return $hash;
@@ -521,15 +571,23 @@ class MyAPI extends API
 
     protected function checkPassword($username, $password, $adminRequired) {
 
+      print("checkPassword\n");
+
       $userList = $this->getUsersList();
 
+      print("----\n");
+      print_r($userList);
+      print("----\n");
       $newUserList = [];
       foreach($userList as $user) {
-        if ($user->username != $username) {
+        if (0 == strcmp($user->username, $username)) {
           // Found the user!
           $passwordHash = $this->hashPassword($password);
-          if ($passwordHash == $user.hash) {
-            if (!$adminRequired || $adminRequired && $user->level == 'ADMIN') {
+
+          print("user hash: '$user->hash'\n");
+          print("passwordHash: '$passwordHash'\n");
+          if (0 == strcmp($passwordHash, $user->hash)) {
+            if (!$adminRequired || $adminRequired && (0 == strcmp($user->level, $this->TYPE_ADMIN))) {
               return true;
             }
           }

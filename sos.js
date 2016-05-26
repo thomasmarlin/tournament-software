@@ -661,6 +661,8 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   }
 
+
+  /*
   $scope.saveData = function(callbackOnError) {
     var modalDialog = $uibModal.open({
         template: passwordPromptHTML,
@@ -682,10 +684,35 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       }
     );
   }
+  */
 
-  function saveDataUsingPassword(password) {
+  $scope.saveData = function(callbackOnError) {
+    var modalDialog = $uibModal.open({
+        template: loginHTML,
+        controller: 'LoginController',
+        scope: $scope
+      });
 
-    DataStorage.saveEventInfo($scope.currentEvent, password).then(
+    modalDialog.result.then(
+      // Success
+      function() {
+        // User is logged in!
+        saveDataUsingPassword();
+      },
+      // Cancelled
+      function() {
+          LoggerService.log("Loading Event : Cancelled");
+          if (callbackOnError) {
+            callbackOnError();
+          }
+      }
+    );
+  }
+
+
+  function saveDataUsingPassword() {
+
+    DataStorage.saveEventInfo($scope.currentEvent).then(
       function(response) {
         console.log("Data successfully saved!");
       },

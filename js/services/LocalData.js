@@ -67,18 +67,12 @@ sosApp.service('LocalData', ['$q', 'LoggerService', 'CryptoService', function($q
 
 
   // Updates a tournament
-  this.updateTournament = function(tournamentData, password) {
+  this.updateTournament = function(tournamentData) {
 
     var deferred = $q.defer();
 
-    var hash = CryptoService.generateHash(password);
-    if (hash != tournamentData.hash) {
-      console.log("Error validating hash! 1: " + hash + "  2: " + tournamentData.hash);
-      deferred.reject("Invalid Password");
-    } else {
-      self.saveEvent(tournamentData);
-      deferred.resolve(tournamentData);
-    }
+    self.saveEvent(tournamentData);
+    deferred.resolve(tournamentData);
 
     return deferred.promise;
   };
@@ -142,7 +136,7 @@ sosApp.service('LocalData', ['$q', 'LoggerService', 'CryptoService', function($q
   this.removeTournamentById = function(tournamentId) {
 
     var allEvents = self.loadData();
-    
+
     for (var i = 0; i < allEvents.length; i++) {
       var existingEvent = allEvents[i];
       if (existingEvent.id === tournamentId) {
