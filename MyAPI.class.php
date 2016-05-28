@@ -66,23 +66,9 @@ class MyAPI extends API
       $fullPath = $filePath . '/' . $fileName;
 
       $jsonString = json_encode($fileContents);
-      print("jsonString:\n");
-      print_r($jsonString);
-
       $openedFile = fopen($fullPath, "w");
-
       $writeResult = fwrite($openedFile, $jsonString);
-
-
-      print("WriteResult");
-      print_r($writeResult);
-
-      print("WroteData:\n");
-      print_r($jsonString);
-
       $closeResult = fclose($openedFile);
-      print("closeResult");
-      print_r($closeResult);
 
       return true;
     }
@@ -259,9 +245,6 @@ class MyAPI extends API
         0 => $adminUser
       ];
 
-      print("---DEFAULT FILE---\n");
-      print_r($usersData);
-      print("-------\n");
       $this->writeFile($this->getUsersFileName(), $this->getUsersPath(), $usersData);
     }
 
@@ -528,8 +511,6 @@ class MyAPI extends API
 
 
     protected function validateCredentials($adminRequired) {
-      print("validateCredentials\n");
-
       $allHeaders = getallheaders();
 
       $username = $allHeaders['username'];
@@ -546,8 +527,6 @@ class MyAPI extends API
     }
 
     protected function hashPassword($password) {
-
-      print("hashPassword: $password\n");
 
       $hash = "";
 
@@ -575,17 +554,14 @@ class MyAPI extends API
 
       $userList = $this->getUsersList();
 
-      print("----\n");
-      print_r($userList);
-      print("----\n");
       $newUserList = [];
       foreach($userList as $user) {
         if (0 == strcmp($user->username, $username)) {
           // Found the user!
           $passwordHash = $this->hashPassword($password);
 
-          print("user hash: '$user->hash'\n");
-          print("passwordHash: '$passwordHash'\n");
+          //print("user hash: '$user->hash'\n");
+          //print("passwordHash: '$passwordHash'\n");
           if (0 == strcmp($passwordHash, $user->hash)) {
             if (!$adminRequired || $adminRequired && (0 == strcmp($user->level, $this->TYPE_ADMIN))) {
               return true;
