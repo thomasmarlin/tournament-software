@@ -1,6 +1,6 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.directive('currentEvent', ['DataStorage', function(DataStorage) {
+sosApp.directive('currentEvent', ['DataStorage', 'RESTService', function(DataStorage, RESTService) {
   return {
     restrict: 'A',
     template: currentEventHTML,
@@ -8,6 +8,10 @@ sosApp.directive('currentEvent', ['DataStorage', function(DataStorage) {
       console.log("Loaded Current Event!");
 
       var allowEditTournament = false;
+
+      scope.loggedInOrOffline = function() {
+        return RESTService.isLoggedIn() || !DataStorage.isOnline();
+      }
 
       scope.canEditTournament = function() {
         return allowEditTournament;

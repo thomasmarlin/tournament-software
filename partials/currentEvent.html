@@ -72,7 +72,7 @@
       <div class="mainContentHeader">
         <h2 class="mainContentHeaderName">Games</h2>
         <div class="mainContentHeaderButtons">
-          <button data-ng-if='isLoggedIn()' class="btn btn-default" style="float:right" data-ng-click="toggleTournamentFinished()">{{currentEvent.finished ? 'Re-Open Tournament' : 'Finish Tournament'}}</button>
+          <button data-ng-if='loggedInOrOffline()' class="btn btn-default" style="float:right" data-ng-click="toggleTournamentFinished()">{{currentEvent.finished ? 'Re-Open Tournament' : 'Finish Tournament'}}</button>
           <button data-ng-if="canEditTournament()" class="btn btn-default" style="float:right; margin-right: 15px;" data-ng-click="newRound()">Generate Next Game</button>
 
           <div style="clear:both"></div>
@@ -151,7 +151,7 @@
 
     <hr>
 
-    <div data-ng-if='canEditTournament()' style="margin-top:20px">
+    <div data-ng-if='loggedInOrOffline()' style="margin-top:20px">
       <button class="btn btn-success rightFloatButtons" data-ng-click="saveData()">Save Data</button>
       <button class="btn btn-success rightFloatButtons" data-ng-click="exportData()">Export Data</button>
       <div style="clear:both"></div>

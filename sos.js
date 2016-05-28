@@ -713,7 +713,13 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   $scope.saveData = function(callbackOnError) {
 
+    // If already logged in, just save it
+    if (RESTService.isLoggedIn()) {
+      saveDataUsingPassword();
+      return;
+    }
 
+    // Not logged in, so login first, then save.
     var loginSuccessFunc = saveDataUsingPassword;
     var loginFailedFunc = callbackOnError;
 
