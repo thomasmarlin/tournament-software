@@ -278,6 +278,8 @@ class MyAPI extends API
       } else {
 
         // Error Condition!  TODO:  Send back an HTTP error
+        print("WRITING ERROR 400!!");
+        http_response_code(400);
 
         print($this->JSON_RESPONSE_START);
         $errorObject = new stdClass();
@@ -286,7 +288,7 @@ class MyAPI extends API
         print_r($encodedError);
         print($this->JSON_RESPONSE_END);
 
-        http_response_code(400);
+
 
       }
     }
@@ -514,7 +516,12 @@ class MyAPI extends API
       $allHeaders = getallheaders();
 
       $username = $allHeaders['username'];
-      $password = $allHeaders['password'];
+      if (!$username) {
+        $username = $allHeaders['Username'];
+      }
+      if (!$password) {
+        $password = $allHeaders['Password'];
+      }
 
       if (!$this->checkPassword($username, $password, $adminRequired)) {
         print("validation failed!\n");
