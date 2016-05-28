@@ -43,6 +43,13 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
       .success(function(response) {
         // Get just the JSON data out of the response
         var jsonContent = getJsonDataFromResponse(response);
+
+        // HACK for PHP NOT SETTING HTTP STATUS CODE PROPERLY...
+        if (jsonContent.errorMessage) {
+          deferred.reject(jsonContent);
+          return;
+        }
+
         deferred.resolve(jsonContent);
       })
       .error(function(err) {
@@ -60,6 +67,13 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
       .success(function(response) {
         // Get just the JSON data out of the response
         var jsonContent = getJsonDataFromResponse(response);
+
+        // HACK for PHP NOT SETTING HTTP STATUS CODE PROPERLY...
+        if (jsonContent.errorMessage) {
+          deferred.reject(jsonContent);
+          return;
+        }
+
         deferred.resolve(jsonContent);
       })
       .error(function(err) {
@@ -77,6 +91,13 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
       .success(function(response) {
         // Get just the JSON data out of the response
         var jsonContent = getJsonDataFromResponse(response);
+
+        // HACK for PHP NOT SETTING HTTP STATUS CODE PROPERLY...
+        if (jsonContent.errorMessage) {
+          deferred.reject(jsonContent);
+          return;
+        }
+
         deferred.resolve(jsonContent);
       })
       .error(function(err) {
@@ -118,6 +139,13 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
 
         // Get just the JSON data out of the response
         var jsonContent = getJsonDataFromResponse(response);
+
+        // HACK for PHP NOT SETTING HTTP STATUS CODE PROPERLY...
+        if (jsonContent.errorMessage) {
+          deferred.reject(jsonContent);
+          return;
+        }
+
         deferred.resolve(jsonContent);
       })
       .error(function(err) {
