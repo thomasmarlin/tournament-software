@@ -192,6 +192,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   };
 
   $scope.getPlayerRecord = function(playerObject) {
+    //return "(444 - 333)";
     var record = "";
 
     for (var i = 0; i < $scope.currentEvent.players.length; i++) {
@@ -768,7 +769,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   function gameCreated(newGame){
     newGame.id = UtilService.generateGUID();
     $scope.currentEvent.games.push(newGame);
-    StatsService.updateVictoryPoints($scope.currentEvent);
+    //StatsService.updateVictoryPoints($scope.currentEvent);
   }
 
   $scope.deleteGame = function(gameToDelete) {

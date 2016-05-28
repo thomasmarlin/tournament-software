@@ -71,11 +71,20 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
   };
 
 
+  function perfLog(str) {
+    var d = new Date();
+    var n = d.getTime();
+    console.log("" + n + str);
+  }
+
 
   /**
    * Updates all of the Victory Points, SOS, and DIFF totals for all users
    */
   this.updateVictoryPoints = function(eventData) {
+
+    perfLog("updateVictoryPoints()...");
+
     for (var i = 0; i < eventData.players.length; i++){
       var player = eventData.players[i];
       player.wins = 0;
@@ -121,9 +130,13 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
       self.updateSosForPlayer(player, eventData);
     }
 
+    perfLog("Before player sorting.");
+
     sortPlayersByScore(eventData.players, eventData.mode);
 
     self.stripUnneededData(eventData);
+
+    perfLog("updateVictoryPoints().");
   };
 
 

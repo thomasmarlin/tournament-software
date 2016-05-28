@@ -33,6 +33,7 @@ sosApp.controller('CreateEventController', ['$scope', '$uibModalInstance', '$tim
       return;
     }
 
+    /*
     if ($scope.creatingEventData.password === "") {
       MessageBoxService.errorMessage("Please enter a password for this event", $scope);
       return;
@@ -42,6 +43,7 @@ sosApp.controller('CreateEventController', ['$scope', '$uibModalInstance', '$tim
       MessageBoxService.errorMessage("Passwords do not match.", $scope);
       return;
     }
+    */
 
     $scope.creatingEventData.date = $scope.datePickerData.selectedDate.toISOString();
     $uibModalInstance.close($scope.creatingEventData);

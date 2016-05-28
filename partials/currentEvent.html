@@ -21,7 +21,8 @@
       <hr>
 
       <div data-ng-if="currentEvent.players.length == 0" style="margin:50px">
-        <h3 style="font-style:italic; color:gray">Click 'Add Player' to add players...</h3>
+        <h3 data-ng-if='!canEditTournament()' style="font-style:italic; color:gray">To edit this tournament in Online mode, you much Log In (top-right corner).</h3>
+        <h3 data-ng-if='canEditTournament()' style="font-style:italic; color:gray">Click 'Add Player' to add players...</h3>
       </div>
 
       <div data-ng-if="currentEvent.players.length > 0">
@@ -104,7 +105,7 @@
                 </div>
               </div>
 
-              <div ng-repeat="game in currentEvent.games" style="margin-left:20px; margin-right:20px" ng-show='game.round.num == round.num'>
+              <div ng-repeat="game in currentEvent.games" style="margin-left:20px; margin-right:20px" ng-if='game.round.num == round.num'>
 
                 <div>
 
