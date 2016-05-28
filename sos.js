@@ -686,7 +686,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   }
   */
 
-  $scope.saveData = function(callbackOnError) {
+  function loginThen(loginSuccessFunc, loginFailedFunc) {
     var modalDialog = $uibModal.open({
         template: loginHTML,
         controller: 'LoginController',
@@ -697,16 +697,32 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       // Success
       function() {
         // User is logged in!
-        saveDataUsingPassword();
+        if (loginSuccessFunc) {
+          loginSuccessFunc();
+        }
       },
       // Cancelled
       function() {
-          LoggerService.log("Loading Event : Cancelled");
-          if (callbackOnError) {
-            callbackOnError();
-          }
+        LoggerService.log("Login  : Cancelled");
+        if (loginFailedFunc) {
+          loginFailedFunc();
+        }
       }
     );
+  }
+
+  $scope.saveData = function(callbackOnError) {
+
+
+    var loginSuccessFunc = saveDataUsingPassword;
+    var loginFailedFunc = callbackOnError;
+
+    if ($scope.networkStatus.networkMode === DataStorage.NETWORK_MODES.NETWORK_ONLINE) {
+      loginThen(loginSuccessFunc, loginFailedFunc);
+    } else {
+      saveDataUsingPassword();
+    }
+
   }
 
 
@@ -715,6 +731,11 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     DataStorage.saveEventInfo($scope.currentEvent).then(
       function(response) {
         console.log("Data successfully saved!");
+        if (DataStorage.isOnline()) {
+          MessageBoxService.infoMessage('Save Successful', $scope);
+        } else {
+          MessageBoxService.infoMessage('IMPORTANT: This data has been saved into your computer (in your browser) and is NOT on the SWCCG Server. To submit data to the Players Committee, you must login.', $scope);
+        }
       },
       function(err) {
         MessageBoxService.errorMessage("Error saving event data.");
@@ -797,9 +818,23 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   };
 
+  $scope.isLoggedIn = function() {
+    return RESTService.isLoggedIn();
+  };
+  $scope.getCurrentUser = function() {
+    return RESTService.getCurrentUser();
+  };
+  $scope.logout = function() {
+    RESTService.logout();
+  };
+  $scope.login = function() {
+    loginThen(null, null);
+  };
 
   // See if we are online or not by trying to fetch the tournament list
   $scope.checkingNetworkStatus = true;
+
+
   RESTService.ping().then(
     function() {
       $scope.checkingNetworkStatus = false;

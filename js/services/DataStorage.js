@@ -13,11 +13,15 @@ sosApp.service('DataStorage', ['RESTService', 'LocalData', '$q', function(APISer
 
   this.setNetworkMode = function(newMode) {
     networkMode = newMode;
-  }
+  };
 
   this.getNetworkMode = function() {
     return networkMode;
-  }
+  };
+
+  this.isOnline = function() {
+    return self.getNetworkMode() == self.NETWORK_MODES.NETWORK_ONLINE;
+  };
 
   this.getPlayerList = function() {
     var promise = null;

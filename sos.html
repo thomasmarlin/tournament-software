@@ -73,18 +73,73 @@
 <link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/shared.css">
 
 
-<div ng-app="sosApp" ng-controller="sos" style="margin:20px">
+<div ng-app="sosApp" ng-controller="sos">
 
-  <!-- Current Event -->
-  <div data-ng-if='currentEvent != null' current-event>
+  <!-- Back/Login/Status bar navigation -->
+  <div style='padding: 10px; padding-left: 20px; padding-right: 20px; border-bottom: thin solid lightgray; background-color: #EEE;'>
+
+    <!-- Back Button -->
+    <div class="btn-group">
+      <button data-ng-if="currentEvent" class="btn btn-primary" data-ng-click="goHome()">&lt; Back</button>
+      <button class='btn btn-primary' style="visibility: hidden">Hidden</button>
+    </div>
+
+    <div style="position:absolute; top: 10px; right: 20px">
+
+      <!-- Current User + Login -->
+      <div data-ng-if="isLoggedIn()">
+        <div style="font-style:italic; float:left;">{{getCurrentUser()}}</div>
+        <a data-ng-click='logout()' style='float:left; margin-left: 10px'>Logout</a>
+      </div>
+
+      <!-- Current User + Login -->
+      <div data-ng-if="!isLoggedIn()">
+        <a data-ng-click='login()'>Tournament Director Login</a>
+      </div>
+
+      <!-- Offline Sync-up bar at the top-right -->
+      <!--
+      <div>
+        <div data-ng-if="networkStatus.networkMode == 'NETWORK_OFFLINE'" class='offlineModeWarning'>
+          You are OFFLINE:  <span class="offlineModeRetryButton" data-ng-click="toggleOnlineMode()">Go Online?</span>
+        </div>
+        <div style="clear:both"></div>
+      </div>
+      -->
+
+      <!-- Online / Offline Toggle -->
+      <div data-ng-if="currentEvent" class="btn-group">
+        <div>
+          <label style="margin-right: 20px">Active Mode:</label>
+          <label data-ng-class='{disabledObject: existingTournament}' >
+            <input type="radio" ng-model="networkStatus.networkMode" data-ng-click="toggleOnlineMode()" value="NETWORK_ONLINE" > Online
+          </label>
+          <label data-ng-class='{disabledObject: existingTournament}'>
+            <input type="radio" ng-model="networkStatus.networkMode" data-ng-click="toggleOfflineMode()" value="NETWORK_OFFLINE" style="margin-left:10px">  Offline
+          </label>
+        </div>
+      </div>
+
+    </div>
+
   </div>
 
-  <!-- Home Screen -->
-  <div data-ng-if='!currentEvent && !displayUserManagement' home-screen>
-  </div>
 
-  <!-- User Management -->
-  <div data-ng-if='!currentEvent && displayUserManagement' user-management>
+
+  <div style='margin-left: 20px; margin-right: 20px; margin-bottom: 20px'>
+
+    <!-- Current Event -->
+    <div data-ng-if='currentEvent != null' current-event>
+    </div>
+
+    <!-- Home Screen -->
+    <div data-ng-if='!currentEvent && !displayUserManagement' home-screen>
+    </div>
+
+    <!-- User Management -->
+    <div data-ng-if='!currentEvent && displayUserManagement' user-management>
+    </div>
+
   </div>
 
 </div>

@@ -1,24 +1,5 @@
 <div>
 
-  <!-- Back navigation -->
-  <div class="btn-group" style='position:absolute; top: 10px; left: 10px'>
-    <button class="btn btn-primary" data-ng-click="goHome()">&lt; Back</button>
-  </div>
-
-
-  <!-- Online / Offline Toggle -->
-  <div data-ng-if="!currentEvent" class="btn-group" style='position:absolute; top: 10px; right: 10px'>
-    <label style="margin-right: 20px">Active Mode:</label>
-    <label data-ng-class='{disabledObject: existingTournament}' >
-      <input type="radio" ng-model="networkStatus.networkMode" data-ng-click="toggleOnlineMode()" value="NETWORK_ONLINE" > Online
-    </label>
-    <label data-ng-class='{disabledObject: existingTournament}'>
-      <input type="radio" ng-model="networkStatus.networkMode" data-ng-click="toggleOfflineMode()" value="NETWORK_OFFLINE" style="margin-left:10px">  Offline
-    </label>
-  </div>
-
-
-
   <!-- Event Loaded! -->
   <div data-ng-if="currentEvent != null">
 
@@ -33,7 +14,7 @@
       <div class="mainContentHeader">
         <h2 class="mainContentHeaderName">Players: {{currentEvent.players.length}}</h2>
         <div class="mainContentHeaderButtons">
-          <button data-ng-if='!currentEvent.finished' class="btn btn-default" style="float:right;" data-ng-click="addPlayer()">Add Player</button>
+          <button data-ng-if='canEditTournament()' class="btn btn-default" style="float:right;" data-ng-click="addPlayer()">Add Player</button>
         </div>
       </div>
 
@@ -53,7 +34,7 @@
 
               <div class="col-xs-2" style='text-align:center'>
                 <div class="glyphicon glyphicon-user" style="font-size: 2.5em;"></div>
-                <div style="color:blue; text-decoration:underline; cursor: pointer;" data-ng-click="editPlayer(player)">Edit Player</div>
+                <div data-ng-if='canEditTournament()' style="color:blue; text-decoration:underline; cursor: pointer;" data-ng-click="editPlayer(player)">Edit Player</div>
                 <div style="color:blue; text-decoration:underline; cursor: pointer;" data-ng-click="viewCommandCard(player)">Game Results</div>
               </div>
 
@@ -75,7 +56,7 @@
               </div>
 
               <div class="col-xs-2">
-                <div data-ng-if='!currentEvent.finished' style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deletePlayer(player)" class="glyphicon glyphicon-remove"></div>
+                <div data-ng-if='canEditTournament()' style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deletePlayer(player)" class="glyphicon glyphicon-remove"></div>
               </div>
 
             </div>
@@ -91,8 +72,8 @@
       <div class="mainContentHeader">
         <h2 class="mainContentHeaderName">Games</h2>
         <div class="mainContentHeaderButtons">
-          <button class="btn btn-default" style="float:right" data-ng-click="toggleTournamentFinished()">{{currentEvent.finished ? 'Re-Open Tournament' : 'Finish Tournament'}}</button>
-          <button data-ng-if="!currentEvent.finished" class="btn btn-default" style="float:right; margin-right: 15px;" data-ng-click="newRound()">Generate Next Game</button>
+          <button data-ng-if='isLoggedIn()' class="btn btn-default" style="float:right" data-ng-click="toggleTournamentFinished()">{{currentEvent.finished ? 'Re-Open Tournament' : 'Finish Tournament'}}</button>
+          <button data-ng-if="canEditTournament()" class="btn btn-default" style="float:right; margin-right: 15px;" data-ng-click="newRound()">Generate Next Game</button>
 
           <div style="clear:both"></div>
         </div>
@@ -140,11 +121,11 @@
                               <div style="font-weight:bold">{{game.winner.name}}
                                 <span data-ng-if='currentEvent.mode !== "SOS"' style="margin-left: 5px"> (+{{game.diff}})</span>
                               </div>
-                              <button data-ng-if='!currentEvent.finished' class="btn btn-default" data-ng-click="addResult(game)">Change</button>
-                              <div data-ng-if='!currentEvent.finished' style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
+                              <button data-ng-if='canEditTournament()' class="btn btn-default" data-ng-click="addResult(game)">Change</button>
+                              <div data-ng-if='canEditTournament()' style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
                           </div>
 
-                          <div data-ng-if="!game.winner && !currentEvent.finished">
+                          <div data-ng-if="!game.winner && canEditTournament()">
                               <button class="btn btn-default" data-ng-click="addResult(game)">Add Result</button>
                               <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
                           </div>
@@ -159,8 +140,8 @@
 
             <div style="height: 10px; width: 10px"></div>
 
-            <button data-ng-if="currentEvent.rounds.length > 0 && !currentEvent.finished" class="btn btn-default" style="float:right; margin-right: 5px;" data-ng-click="deleteRound()">Delete Matchups</button>
-            <button data-ng-if="currentEvent.rounds.length > 0 && !currentEvent.finished" class="btn btn-default" style="float:right; margin-right: 15px" data-ng-click="createGame()">Add Single Game</button>
+            <button data-ng-if="currentEvent.rounds.length > 0 && canEditTournament()" class="btn btn-default" style="float:right; margin-right: 5px;" data-ng-click="deleteRound()">Delete Matchups</button>
+            <button data-ng-if="currentEvent.rounds.length > 0 && canEditTournament()" class="btn btn-default" style="float:right; margin-right: 15px" data-ng-click="createGame()">Add Single Game</button>
             <div style="clear:both"></div>
 
           </div>
@@ -170,7 +151,7 @@
 
     <hr>
 
-    <div style="margin-top:20px">
+    <div data-ng-if='canEditTournament()' style="margin-top:20px">
       <button class="btn btn-success rightFloatButtons" data-ng-click="saveData()">Save Data</button>
       <button class="btn btn-success rightFloatButtons" data-ng-click="exportData()">Export Data</button>
       <div style="clear:both"></div>

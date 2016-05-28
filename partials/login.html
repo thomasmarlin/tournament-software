@@ -1,6 +1,7 @@
 <div style="margin: 20px">
   <h3>Log In</h3>
 
+  <form>
   <!-- Username -->
   <div>
     <label>Username</label>
@@ -19,10 +20,14 @@
   </div>
 
 
+
   <hr>
-  <div>
-    <button class="btn btn-default" style="float:right; margin-left:10px" ng-click="okClick()">Login</button>
+  <h3 data-ng-if='doingLogin'>Logging in. Please wait...</h3>
+  <div data-ng-if='!doingLogin'>
+    <button class="btn btn-default" style="float:right; margin-left:10px" ng-click="okClick()" ng-disabled='doingLogin'>Login</button>
     <button class="btn btn-default" style="float:right; margin-left:10px" ng-click="cancelClick()">Cancel</button>
     <div style="clear:both"></div>
   </div>
+
+  </form>
 </div>

@@ -1,20 +1,5 @@
 <div>
 
-  <!-- Offline Sync-up bar at the top-right -->
-  <div>
-    <div data-ng-if="networkStatus.networkMode == 'NETWORK_OFFLINE'" class='offlineModeWarning'>
-      You are OFFLINE:  <span class="offlineModeRetryButton" data-ng-click="toggleOnlineMode()">Go Online?</span>
-    </div>
-    <div style="clear:both"></div>
-  </div>
-
-
-  <!-- Manage Offline Data -->
-  <div style='position:fixed; bottom: 20px; right: 0px; left: 0px; margin: auto; text-align:center;'>
-    <hr>
-    <button class="btn btn-primary btn-lg" data-ng-click="manageOfflineData()">Manage Offline Data</button>
-  </div>
-
 
   <!--
   <div data-ng-if="!currentEvent" class="btn-group" style='position:absolute; top: 10px; right: 10px'>
@@ -72,6 +57,12 @@
 
     </div>
 
+  </div>
+
+  <!-- Manage Offline Data -->
+  <div style='position:fixed; bottom: 20px; right: 0px; left: 0px; margin: auto; text-align:center;'>
+    <hr>
+    <button class="btn btn-primary btn-lg" data-ng-click="manageOfflineData()">Manage Offline Data</button>
   </div>
 
 </div>
