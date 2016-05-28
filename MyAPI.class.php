@@ -519,6 +519,8 @@ class MyAPI extends API
       if (!$username) {
         $username = $allHeaders['Username'];
       }
+
+      $password = $allHeaders['password'];
       if (!$password) {
         $password = $allHeaders['Password'];
       }
