@@ -113,8 +113,13 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
     currentUser.username = username;
     currentUser.password = password;
 
+    /*
     $http.defaults.headers.post['username'] = username;
     $http.defaults.headers.post['password'] = password;
+    */
+
+    $http.defaults.headers.common['username'] = username;
+    $http.defaults.headers.common['password'] = password;
   }
 
   this.isLoggedIn = function() {
