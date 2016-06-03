@@ -386,11 +386,12 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
     for (var i = 0; i < pile.length; i++) {
       var pilePlayer = pile[i];
-      if (UtilService.peopleEqual(pilePlayer,playerToMoveDown)) {
+      if (UtilService.peopleEqual(pilePlayer, playerToMoveDown)) {
         if (pile.length > (i+1)) {
           pile[i] = pile[i+1];
           pile[i+1] = playerToMoveDown;
           LoggerService.log("Succesfully downgraded player...");
+          return true;
         } else {
           LoggerService.error("*sigh....nobody to swap places with...");
           return false;
