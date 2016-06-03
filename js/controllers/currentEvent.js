@@ -36,6 +36,77 @@ sosApp.directive('currentEvent', ['DataStorage', 'RESTService', function(DataSto
         }
       }
 
+      var shouldStop = false;
+      scope.stop = function() {
+        shouldStop = true;
+      }
+
+      scope.assignRandomWinners = function() {
+        shouldStop = false;
+        setTimeout(assignNextWinner);
+      };
+
+      function testNextRound() {
+        var generateStartButton = $('.generateRoundButton');
+        if (generateStartButton.length == 0) {
+          alert("Can't find next round button!");
+        } else {
+          generateStartButton.click();
+          setTimeout(function() {
+            assignNextWinner();
+          }, 20*1000);
+        }
+      }
+
+      function assignNextWinner() {
+        if (shouldStop) {
+          return;
+        }
+        
+        var pendingGames = $('.gamePending');
+        if (pendingGames.length == 0) {
+          testNextRound();
+        } else {
+          var addResultButton = pendingGames.first().find('.addResultButton');
+          addResultButton.click();
+
+          setTimeout(function() {
+            $('.winnerSelector').click();
+
+            setTimeout(function() {
+              var indexToSelect = Math.round(Math.random()) + 1; //use option 1 or 2 (first is a blank)
+              var randomWinnerSelector = ".winnerSelector option:eq(RANDOPTION)";
+              randomWinnerSelector = randomWinnerSelector.replace('RANDOPTION', indexToSelect);
+
+              var randomWinner = $(randomWinnerSelector);
+              if (randomWinner.length == 0) {
+                alert("Failed to find player to select...");
+
+              } else {
+                randomWinner.prop('selected', true).change();
+
+                setTimeout(function() {
+
+                  setTimeout(function() {
+                    var assignWinnerButton = $('#assingWinnerOkButton');
+                    if (assignWinnerButton.length == 0) {
+                      alert("Failed to find assign winner button");
+                    } else {
+                      assignWinnerButton.click();
+                      setTimeout(assignNextWinner, 3000);
+                    }
+
+                  }, 500);
+
+                }, 500);
+              }
+
+            }, 500);
+
+          }, 500);
+        }
+      }
+
 
       // Watch this funciton and update our bound variable when needed (performance)
       scope.$watch(

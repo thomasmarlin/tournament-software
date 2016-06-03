@@ -74,7 +74,7 @@
         <h2 class="mainContentHeaderName">Games</h2>
         <div class="mainContentHeaderButtons">
           <button data-ng-if='loggedInOrOffline()' class="btn btn-default" style="float:right" data-ng-click="toggleTournamentFinished()">{{currentEvent.finished ? 'Re-Open Tournament' : 'Finish Tournament'}}</button>
-          <button data-ng-if="canEditTournament()" class="btn btn-default" style="float:right; margin-right: 15px;" data-ng-click="newRound()">Generate Next Game</button>
+          <button data-ng-if="canEditTournament()" class="generateRoundButton btn btn-default" style="float:right; margin-right: 15px;" data-ng-click="newRound()">Generate Next Game</button>
 
           <div style="clear:both"></div>
         </div>
@@ -127,7 +127,7 @@
                           </div>
 
                           <div data-ng-if="!game.winner && canEditTournament()">
-                              <button class="btn btn-default" data-ng-click="addResult(game)">Add Result</button>
+                              <button class="addResultButton btn btn-default" data-ng-click="addResult(game)">Add Result</button>
                               <div style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
                           </div>
 
@@ -157,6 +157,10 @@
       <button class="btn btn-success rightFloatButtons" data-ng-click="exportData()">Export Data</button>
       <div style="clear:both"></div>
     </div>
+
+    <button data-ng-click='assignRandomWinners()'>Assign Random Winners </button>
+
+    <button data-ng-click='stop()'>STOP AUTO TEST</button>
 
   </div>
 
