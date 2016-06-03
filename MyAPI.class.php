@@ -239,6 +239,7 @@ class MyAPI extends API
       $adminUser->id = $this->DEFAULT_ADMIN_GUID;
       $adminUser->username = "admin";
       $adminUser->hash = $this->hashPassword($this->DEFAULT_PASSWORD);
+      $adminUser->level = $this->TYPE_ADMIN;
 
       $usersData = new stdClass();
       $usersData->users = [
@@ -572,7 +573,7 @@ class MyAPI extends API
           //print("user hash: '$user->hash'\n");
           //print("passwordHash: '$passwordHash'\n");
           if (0 == strcmp($passwordHash, $user->hash)) {
-            if (!$adminRequired || $adminRequired && (0 == strcmp($user->level, $this->TYPE_ADMIN))) {
+            if (!$adminRequired || ($adminRequired && property_exists($user, "level") && (0 == strcmp($user->level, $this->TYPE_ADMIN)))) {
               return true;
             }
           }
