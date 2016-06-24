@@ -5,7 +5,6 @@ sosApp.service('TournamentService', ['LoggerService', 'UtilService', 'ConstantsS
   function getByePlayer() {
     return {
       name: "BYE",
-      isByePlayer: true,
       vp: 0,
       sos: 0.5,
       wins: 0,
@@ -185,10 +184,11 @@ this.TournamentWizard = function(eventData, gameCreated) {
     return byeCount;
   }
 
-  function getWorstPlayerWithByeCount(pile, desiredByCount) {
+  function getWorstPlayerWithByeCount(pile, desiredByeCount) {
+
     for (var i = pile.length-1; i >= 0; i--) {
       var player = pile[i];
-      if (desiredByCount == getPlayerByeCount(player)) {
+      if (desiredByeCount == getPlayerByeCount(player)) {
         return player;
       }
     }
@@ -198,7 +198,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
 
   function isByePlayer(player) {
-    return player && player.hasOwnProperty('isByePlayer') && player.isByePlayer;
+    return player && (player.name === "BYE");
   }
 
 
