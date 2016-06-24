@@ -96,6 +96,11 @@ sosApp.controller('EditPlayerController', ['$scope', '$uibModal', '$uibModalInst
 
   $scope.okClick = function() {
 
+    if ($scope.player.name.trim() == "") {
+      MessageBoxService.errorMessage("You must enter the player name. Check your entry and try again.", $scope);
+      return;
+    }
+
     if (!verifyNameDoesntExist($scope.player.name)) {
       MessageBoxService.errorMessage("A player with that name has already been added. Check your entry and try again.", $scope);
       return;
