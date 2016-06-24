@@ -1,0 +1,19 @@
+<form>
+  <div style="margin:20px">
+    <h2>Assign Winner: {{gameToOpen.winner.name}}</h2>
+
+    <div>
+      <div style="margin-top: 10px;">Differential</div>
+      <input ng-model="diff">
+    </div>
+
+    <hr>
+
+    <div>
+      <button id='assingWinnerOkButton' class="btn btn-default" style="float:right;" ng-click="okClick()">OK</button>
+      <button class="btn btn-default" style="float:right;margin-right:5px;" ng-click="cancelClick()">Cancel</button>
+      <div style="clear:both"></div>
+    </div>
+
+  </div>
+</form>

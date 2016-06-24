@@ -210,6 +210,39 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
    */
   $scope.newRound = function() {
 
+    // TODO:  If there are any unfinished games, issue a warning
+    // Ensure no games in this round
+    var currentRoundNum = getCurrentRoundNumber();
+
+    var unfinishedGames = false;
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
+      if (game.round.num == currentRoundNum) {
+        if (!game.winner) {
+          unfinishedGames = true;
+        }
+      }
+    }
+
+    if (unfinishedGames) {
+      var confirmDialog = MessageBoxService.confirmDialog("This round has games which are not finished. Continuing may create incorrect pairings! Are  you sure?", $scope, "Warning: Unfinished Games!");
+      confirmDialog.result.then(
+        function() {
+          newRoundConfirmed();
+        },
+        function() {
+          console.log("Generate Round with unfinished games:  CANCELLED");
+        }
+      );
+    } else {
+      // No unfinished games. We're good to go!
+      newRoundConfirmed();
+    }
+
+  };
+
+  function newRoundConfirmed() {
+
     var tournamentWizard = new TournamentService.TournamentWizard($scope.currentEvent, gameCreated);
     var warningMessages = tournamentWizard.newRound();
 
@@ -597,6 +630,39 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       }
     );
   }
+
+
+  $scope.declareWinner = function(gameToUpdate, winner) {
+    $scope.gameToOpen = JSON.parse(JSON.stringify(gameToUpdate));
+    $scope.gameToOpen.winner = winner;
+    var modalDialog = $uibModal.open({
+        template: declareWinnerHTML,
+        controller: 'DeclareWinnerController',
+        scope: $scope
+      });
+
+    modalDialog.result.then(
+      // Success
+      function(updatedGame) {
+          LoggerService.action("Manual Game Updated  : " + JSON.stringify(updatedGame));
+
+          for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+            var game = $scope.currentEvent.games[i];
+            if (game.id == updatedGame.id) {
+              $scope.currentEvent.games[i] = updatedGame;
+            }
+          }
+
+          StatsService.updateVictoryPoints($scope.currentEvent);
+
+      },
+      // Cancelled
+      function() {
+          LoggerService.log("Game Update : Cancelled");
+      }
+    );
+  };
+
 
 
   $scope.addResult = function(gameToUpdate) {
