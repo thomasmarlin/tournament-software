@@ -108,17 +108,37 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   };
 
 
-  function createEventWithName(name, mode, password, eventDate) {
+  function createEventWithName(name, mode, players, password, eventDate) {
+
     var newEvent = getNewBlankData();
     newEvent.name = name;
     newEvent.mode = mode;
     newEvent.date = eventDate;
+    newEvent.players = players;
     newEvent.hash = CryptoService.generateHash(password);
     newEvent.id = UtilService.generateGUID();
+
+
+    if (mode == ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY) {
+      newEvent.seedData = [];
+      for (var i = 0; i < players.length; i++) {
+        newEvent.seedData.push({
+          seedNum: i+1,
+          playerId: players[i].id
+        });
+      }
+    }
+
     $scope.currentEvent = newEvent;
+    updateAllStats();
   }
 
   function selectCurrentRound() {
+
+    if ($scope.currentEvent.mode == ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY) {
+      return;
+    }
+
     $timeout(function(){
 
       var currentRound = UtilService.getCurrentRound($scope.currentEvent);
@@ -177,7 +197,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   function loadSpecificJson(evt) {
     $scope.currentEvent = JSON.parse(JSON.stringify(evt));
 
-    StatsService.updateVictoryPoints($scope.currentEvent);
+    updateAllStats();
 
     selectCurrentRound();
   }
@@ -241,6 +261,15 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   };
 
+
+  function updateAllStats() {
+    var tournamentWizard = new TournamentService.TournamentWizard($scope.currentEvent, gameCreated);
+    tournamentWizard.updateMatchplayStandings();
+
+    StatsService.updateVictoryPoints($scope.currentEvent);
+  }
+
+
   function newRoundConfirmed() {
 
     var tournamentWizard = new TournamentService.TournamentWizard($scope.currentEvent, gameCreated);
@@ -269,7 +298,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
 
   $scope.toggleTournamentFinished = function() {
-    StatsService.updateVictoryPoints($scope.currentEvent);
+    updateAllStats();
 
     $scope.currentEvent.finished = !$scope.currentEvent.finished;
 
@@ -374,6 +403,9 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         resolve: {
           playerToEdit: function() {
             return player;
+          },
+          allPlayers: function() {
+            return $scope.currentEvent.players;
           }
         }
       });
@@ -446,6 +478,9 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         resolve: {
           playerToEdit: function() {
             return newPlayer;
+          },
+          allPlayers: function() {
+            return $scope.currentEvent.players;
           }
         }
       });
@@ -510,7 +545,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       // Success
       function(evtData) {
           LoggerService.action("Creating event with name: " + evtData.name + " mode: " + evtData.mode);
-          createEventWithName(evtData.name, evtData.mode, evtData.password, evtData.date);
+          createEventWithName(evtData.name, evtData.mode, evtData.players, evtData.password, evtData.date);
       },
       // Cancelled
       function() {
@@ -622,7 +657,8 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       function(newGame) {
           LoggerService.action("Manual Game Created  : " + JSON.stringify(newGame));
           gameCreated(newGame);
-          StatsService.updateVictoryPoints($scope.currentEvent);
+
+          updateAllStats();
       },
       // Cancelled
       function() {
@@ -653,7 +689,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
             }
           }
 
-          StatsService.updateVictoryPoints($scope.currentEvent);
+          updateAllStats();
 
       },
       // Cancelled
@@ -685,7 +721,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
             }
           }
 
-          StatsService.updateVictoryPoints($scope.currentEvent);
+          updateAllStats();
 
       },
       // Cancelled
@@ -835,7 +871,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   function gameCreated(newGame){
     newGame.id = UtilService.generateGUID();
     $scope.currentEvent.games.push(newGame);
-    //StatsService.updateVictoryPoints($scope.currentEvent);
+    return newGame;
   }
 
   $scope.deleteGame = function(gameToDelete) {
@@ -852,7 +888,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
             break;
           }
         }
-        StatsService.updateVictoryPoints($scope.currentEvent);
+        updateAllStats();
       },
       // Cancelled
       function(){
@@ -885,7 +921,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
           }
         }
 
-        StatsService.updateVictoryPoints($scope.currentEvent);
+        updateAllStats();
       }
     );
 

@@ -1,6 +1,6 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.directive('currentEvent', ['DataStorage', 'RESTService', function(DataStorage, RESTService) {
+sosApp.directive('currentEvent', ['ConstantsService', 'DataStorage', 'RESTService', function(ConstantsService, DataStorage, RESTService) {
   return {
     restrict: 'A',
     template: currentEventHTML,
@@ -8,6 +8,7 @@ sosApp.directive('currentEvent', ['DataStorage', 'RESTService', function(DataSto
       console.log("Loaded Current Event!");
 
       var allowEditTournament = false;
+      var allowAddRemoveGames = false;
 
       scope.loggedInOrOffline = function() {
         return RESTService.isLoggedIn() || !DataStorage.isOnline();
@@ -15,6 +16,10 @@ sosApp.directive('currentEvent', ['DataStorage', 'RESTService', function(DataSto
 
       scope.canEditTournament = function() {
         return allowEditTournament;
+      };
+
+      scope.canAddRemoveGames = function() {
+        return allowEditTournament && allowAddRemoveGames;
       };
 
       function checkTournamentEdittable() {
@@ -62,7 +67,7 @@ sosApp.directive('currentEvent', ['DataStorage', 'RESTService', function(DataSto
         if (shouldStop) {
           return;
         }
-        
+
         var pendingGames = $('.gamePending');
         if (pendingGames.length == 0) {
           testNextRound();
@@ -115,6 +120,7 @@ sosApp.directive('currentEvent', ['DataStorage', 'RESTService', function(DataSto
         },
         function() {
           allowEditTournament = checkTournamentEdittable();
+          allowAddRemoveGames = (scope.currentEvent.mode !== ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY);
         }
       );
 

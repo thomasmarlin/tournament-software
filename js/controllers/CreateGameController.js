@@ -1,25 +1,29 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('CreateGameController', ['$scope', '$uibModalInstance', '$timeout', 'TournamentService', function($scope, $uibModalInstance, $timeout, TournamentService) {
+sosApp.controller('CreateGameController', ['$scope', '$uibModalInstance', '$timeout', 'ConstantsService', 'TournamentService', function($scope, $uibModalInstance, $timeout, ConstantsService, TournamentService) {
 
-  $scope.winner = null;
-  $scope.playerDark = null;
-  $scope.playerLight = null;
-  $scope.vp = 2;
-  $scope.round = $scope.getCurrentRound();
-  $scope.diff = $scope.diff;
+  $scope.gameToOpen = {
+    playerDark: null,
+    playerLight: null,
+    winner: null,
+    vp: 2,
+    round: $scope.getCurrentRound(),
+    diff: 0
+  }
+  $scope.showLostPiles = ($scope.currentEvent.mode == ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY);
+
 
   $scope.allPlayersAndBye = [];
 
   $scope.okClick = function() {
 
     var newGame = {
-      playerDark: $scope.playerDark,
-      playerLight: $scope.playerLight,
-      winner: $scope.winner,
+      playerDark: $scope.gameToOpen.playerDark,
+      playerLight: $scope.gameToOpen.playerLight,
+      winner: $scope.gameToOpen.winner,
       vp: 2,
-      round: $scope.round,
-      diff: parseInt($scope.diff)
+      round: $scope.gameToOpen.round,
+      diff: parseInt($scope.gameToOpen.diff)
     };
 
     $uibModalInstance.close(newGame);
@@ -41,17 +45,16 @@ sosApp.controller('CreateGameController', ['$scope', '$uibModalInstance', '$time
 
   $scope.getPlayers = function() {
     var players = [];
-    if ($scope.playerDark) {
-      players.push($scope.playerDark);
+    if ($scope.gameToOpen.playerDark) {
+      players.push($scope.gameToOpen.playerDark);
     }
-    if ($scope.playerLight) {
-      players.push($scope.playerLight);
+    if ($scope.gameToOpen.playerLight) {
+      players.push($scope.gameToOpen.playerLight);
     }
     return players;
   };
 
   $scope.cancelClick = function() {
-    $scope.newPlayerName = null;
     $uibModalInstance.dismiss(null);
   }
 

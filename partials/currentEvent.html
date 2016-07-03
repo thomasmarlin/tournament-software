@@ -9,157 +9,24 @@
 
     <hr>
 
-    <!-- Players -->
-    <div class="mainContentBox">
-      <div class="mainContentHeader">
-        <h2 class="mainContentHeaderName">Players: {{currentEvent.players.length}}</h2>
-        <div class="mainContentHeaderButtons">
-          <button data-ng-if='canEditTournament()' class="btn btn-default" style="float:right;" data-ng-click="addPlayer()">Add Player</button>
-        </div>
-      </div>
+    <!-- For non-match-play, only show player data -->
+    <div ng-if='currentEvent.mode !== "MATCH_PLAY"' player-display></div>
 
-      <hr>
+    <!-- For match play, show Brackets + Players -->
+    <uib-tabset data-ng-if='currentEvent.mode === "MATCH_PLAY"'>
+      <uib-tab active='true' heading='Bracket'>
+        <div match-play-display></div>
+      </uib-tab>
+      <uib-tab active='false' heading='Standings'>
+        <div player-display></div>
+      </uib-tab>
+    </uib-tabset>
 
-      <div data-ng-if="currentEvent.players.length == 0" style="margin:50px">
-        <h3 data-ng-if='!canEditTournament()' style="font-style:italic; color:gray">To edit this tournament in Online mode, you much Log In (top-right corner).</h3>
-        <h3 data-ng-if='canEditTournament()' style="font-style:italic; color:gray">Click 'Add Player' to add players...</h3>
-      </div>
-
-      <div data-ng-if="currentEvent.players.length > 0">
-        <!-- Headers -->
-        <div ng-repeat="player in currentEvent.players"
-             class="playerBox"
-             ng-class="{'droppedPlayer': player.status === 'STATUS_DROPPED' }">
-          <div style="margin:10px">
-            <div class="row">
-
-              <div class="col-xs-2" style='text-align:center'>
-                <div class="glyphicon glyphicon-user" style="font-size: 2.5em;"></div>
-                <div data-ng-if='canEditTournament()' style="color:blue; text-decoration:underline; cursor: pointer;" data-ng-click="editPlayer(player)">Edit Player</div>
-                <div style="color:blue; text-decoration:underline; cursor: pointer;" data-ng-click="viewCommandCard(player)">Game Results</div>
-              </div>
-
-              <div class="col-xs-4">
-                <div class="playerBoxHeader">{{player.name}}</div>
-                <div data-ng-if='player.forum_handle' class="swccg_forum_handle">{{player.forum_handle}}</div>
-                <div>SoS: {{player.sos}}</div>
-                <div>Diff:
-                  <span data-ng-if="player.diff >= 0" style="color:green"> ({{player.diff}}) </span>
-                  <span data-ng-if="player.diff < 0" style="color:red"> ({{player.diff}}) </span>
-                </div>
-
-              </div>
-
-              <div class="col-xs-4">
-                <div class="playerBoxHeader">Victory Points: {{player.vp}}</div>
-                <div>Record: {{player.wins}}-{{player.losses}}</div>
-                <div>Status: {{player.status == 'STATUS_ACTIVE' ? 'Active' : 'DROPPED' }}</div>
-              </div>
-
-              <div class="col-xs-2">
-                <div data-ng-if='canEditTournament()' style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deletePlayer(player)" class="glyphicon glyphicon-remove"></div>
-              </div>
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <hr>
 
-    <!-- Games -->
-    <div class="mainContentBox">
-      <div class="mainContentHeader">
-        <h2 class="mainContentHeaderName">Games</h2>
-        <div class="mainContentHeaderButtons">
-          <button data-ng-if='loggedInOrOffline()' class="btn btn-default" style="float:right" data-ng-click="toggleTournamentFinished()">{{currentEvent.finished ? 'Re-Open Tournament' : 'Finish Tournament'}}</button>
-          <button data-ng-if="canEditTournament()" class="generateRoundButton btn btn-default" style="float:right; margin-right: 15px;" data-ng-click="newRound()">Generate Next Game</button>
-
-          <div style="clear:both"></div>
-        </div>
-      </div>
-
-      <hr>
-
-      <uib-tabset>
-        <uib-tab active='round.active'
-              heading='Game {{round.num}}'
-              ng-repeat='round in currentEvent.rounds'>
-          <div style="border: 3px solid white; border-radius: 5px; padding-top: 5px; padding-bottom: 5px;">
-
-            <div data-ng-if="currentEvent.games.length == 0" style="margin:50px">
-              <h3 style="font-style:italic; color:gray">Click 'Generate Next Game' to generate matchups...</h3>
-            </div>
-
-            <div data-ng-if="currentEvent.games.length > 0">
-              <!-- Headers -->
-              <div style="margin-left:20px; margin-right:20px">
-                <div class="row" >
-                    <div class="col-xs-5">
-                      <h5>Players</h5>
-                    </div>
-                    <div class="col-xs-7">
-                      <h5 style='text-align:center'>Winner</h5>
-                    </div>
-                </div>
-              </div>
-
-              <div ng-repeat="game in currentEvent.games" style="margin-left:20px; margin-right:20px" ng-if='game.round.num == round.num'>
-
-                <div>
-
-                  <!-- Games Table -->
-                  <div class="row playerBox" ng-class="{'gameFinished': game.winner, 'gamePending': !game.winner }">
-
-                      <div class="col-xs-5" style="margin-top:5px">
-                          <div>Dark: <span style="font-weight:bold; font-style:italic;">{{game.playerDark.name}}</span><span style="margin-left:10px; height: 10px; width: 10px"></span>{{getPlayerRecord(game.playerDark)}}</div>
-                          <div>Light: <span style="font-weight:bold; font-style:italic;">{{game.playerLight.name}}</span><span style="margin-left:10px; height: 10px; width: 10px"></span>{{getPlayerRecord(game.playerLight)}}</div>
-                      </div>
-                      <div class="col-xs-7" style="margin-top:5px">
-
-                          <div data-ng-if="game.winner" style='text-align:center'>
-                              <div style="font-weight:bold">{{game.winner.name}}
-                                <span data-ng-if='currentEvent.mode !== "SOS"' style="margin-left: 5px"> (+{{game.diff}})</span>
-                              </div>
-                              <button data-ng-if='canEditTournament()' class="btn btn-default" data-ng-click="addResult(game)">Change</button>
-                              <div data-ng-if='canEditTournament()' style="color:red; position:absolute; right: 20px; top: 11px; font-size:1.5em;" data-ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
-                          </div>
-
-                          <div data-ng-if="!game.winner && canEditTournament()">
-                            <div style="text-decoration: underline; font-style: italic; text-align: center;">Declare Winner:</div>
-
-                            <div style="text-align: center;">
-                             	<button class="addResultButton btn btn-default" style='max-width: 250px' data-ng-click="declareWinner(game, game.playerDark)">{{game.playerDark.name}}</button>
-                            	<button class="addResultButton btn btn-default" style='max-width: 250px' data-ng-click="declareWinner(game, game.playerLight)">{{game.playerLight.name}}</button>
-                            </div>
-
-                            <!--
-                            <button class="addResultButton btn btn-default" data-ng-click="addResult(game)">Add Result</button>
-                            -->
-
-                            <div style="color:red; position:absolute; right: 10px; top: 5px; font-size:1.5em;" data-ng-click="deleteGame(game)" class="glyphicon glyphicon-remove"></div>
-
-                          </div>
-
-                      </div>
-                  </div>
-                </div>
-
-              </div>
-
-            </div>
-
-            <div style="height: 10px; width: 10px"></div>
-
-            <button data-ng-if="currentEvent.rounds.length > 0 && canEditTournament()" class="btn btn-default" style="float:right; margin-right: 5px;" data-ng-click="deleteRound()">Delete Matchups</button>
-            <button data-ng-if="currentEvent.rounds.length > 0 && canEditTournament()" class="btn btn-default" style="float:right; margin-right: 15px" data-ng-click="createGame()">Add Single Game</button>
-            <div style="clear:both"></div>
-
-          </div>
-        </uib-tab>
-      </uib-tabset>
-    </div>
+    <!-- Display of all of the games -->
+    <div games-display></div>
 
     <hr>
 

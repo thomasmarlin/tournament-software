@@ -9,11 +9,16 @@
 <script src="/wp-content/plugins/swccg-tourny/js/bootstrap.min.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/angular-spinner.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/ui-bootstrap-tpls-1.1.0.min.js.css"></script>
+<!--
+<script src="/wp-content/plugins/swccg-tourny/jquery.bracket.min.js"></script>
+-->
+
 
 <!-- Main App -->
 <script src="/wp-content/plugins/swccg-tourny/sos.js"></script>
 
 <!-- Dialog Box Controllers -->
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/AddEightPlayerController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/AddPlayerController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/AssignWinnerController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/CommandCardController.js"></script>
@@ -25,12 +30,15 @@
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/DeclareWinnerController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/EditPlayerController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/FindPlayerController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/gamesDisplay.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/LoadEventController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/LoginController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/homeScreen.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/ManageOfflineDataController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/matchPlayDisplay.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/MessageBoxController.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/PasswordPromptController.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/js/controllers/playerDisplay.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/js/controllers/userManagement.js"></script>
 
 
@@ -48,6 +56,7 @@
 
 
 <!-- HTML Files -->
+<script src="/wp-content/plugins/swccg-tourny/gen/addEightPlayerHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/commandCardHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/confirmBoxHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/createEditGameHTML.js"></script>
@@ -58,12 +67,15 @@
 <script src="/wp-content/plugins/swccg-tourny/gen/declareWinnerHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/editPlayerHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/findPlayerHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/gamesDisplayHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/loadEventHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/loginHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/homeScreenHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/manageOfflineDataHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/matchPlayDisplayHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/messageBoxHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/passwordPromptHTML.js"></script>
+<script src="/wp-content/plugins/swccg-tourny/gen/playerDisplayHTML.js"></script>
 <script src="/wp-content/plugins/swccg-tourny/gen/userManagementHTML.js"></script>
 
 
@@ -73,6 +85,10 @@
 <link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/findPlayer.css">
 <link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/progress.css">
 <link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/shared.css">
+
+<!--
+<link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/jquery.bracket.min.css" />
+-->
 
 
 <div ng-app="sosApp" ng-controller="sos">
@@ -96,7 +112,7 @@
 
       <!-- Current User + Login -->
       <div data-ng-if="!isLoggedIn()">
-        <a data-ng-click='login()'>Tournament Director Login</a>
+        <a data-ng-click='login()' style='cursor: pointer;'>Tournament Director Login</a>
       </div>
 
       <!-- Offline Sync-up bar at the top-right -->

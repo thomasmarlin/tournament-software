@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2016-06-23:v18
+# 2016-07-02:v84
 
 # Explicitly cached entries
 sos.html
@@ -24,6 +24,7 @@ fonts/glyphicons-halflings-regular.woff2
 
 img/swccg_logo.png
 
+js/controllers/AddEightPlayerController.js
 js/controllers/AddPlayerController.js
 js/controllers/AssignWinnerController.js
 js/controllers/CommandCardController.js
@@ -35,12 +36,15 @@ js/controllers/currentEvent.js
 js/controllers/DeclareWinnerController.js
 js/controllers/EditPlayerController.js
 js/controllers/FindPlayerController.js
+js/controllers/gamesDisplay.js
 js/controllers/LoadEventController.js
 js/controllers/LoginController.js
 js/controllers/homeScreen.js
 js/controllers/ManageOfflineDataController.js
+js/controllers/matchPlayDisplay.js
 js/controllers/MessageBoxController.js
 js/controllers/PasswordPromptController.js
+js/controllers/playerDisplay.js
 js/controllers/userManagement.js
 
 js/services/ConstantsService.js
@@ -54,6 +58,7 @@ js/services/StatsService.js
 js/services/TournamentService.js
 js/services/UtilService.js
 
+gen/addEightPlayerHTML.js
 gen/commandCardHTML.js
 gen/confirmBoxHTML.js
 gen/createEditGameHTML.js
@@ -64,12 +69,15 @@ gen/currentEventHTML.js
 gen/declareWinnerHTML.js
 gen/editPlayerHTML.js
 gen/findPlayerHTML.js
+gen/gamesDisplayHTML.js
 gen/loadEventHTML.js
 gen/loginHTML.js
 gen/homeScreenHTML.js
 gen/manageOfflineDataHTML.js
+gen/matchPlayDisplayHTML.js
 gen/messageBoxHTML.js
 gen/passwordPromptHTML.js
+gen/playerDisplayHTML.js
 gen/userManagementHTML.js
 
 js/bootstrap.js
@@ -81,6 +89,8 @@ angular-animate.min.js
 angular.1.4.8.min.js
 angular.min.js
 jquery-2.1.4.min.js
+#jquery.bracket.min.js
+#jquery.bracket.min.css
 ui-bootstrap-tpls-1.1.0.min.js.css
 
 

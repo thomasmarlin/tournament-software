@@ -19,6 +19,9 @@
         <label data-ng-class='{disabledObject: existingTournament}'>
           <input type="radio" ng-model="creatingEventData.mode" value="DIFF" data-ng-disabled='existingTournament' style="margin-left:10px">  DIFF
         </label>
+        <label data-ng-class='{disabledObject: existingTournament}'>
+          <input type="radio" ng-model="creatingEventData.mode" value="MATCH_PLAY" data-ng-disabled='existingTournament' style="margin-left:10px"> TOP-8
+        </label>
         <!--
         <label><input type="radio" ng-model="creatingEventData.mode" disabled value="MATCH" style="margin-left:10px" >  Match Play  </label>
         -->

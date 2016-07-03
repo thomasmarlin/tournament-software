@@ -6,28 +6,40 @@
       <div class="col-xs-6">
 
         <div>Player (DS)</div>
-        <select ng-model="playerDark" ng-options="player.name for player in allPlayersAndBye | orderBy:'name' track by player.id" autofocus>
+        <select ng-model="gameToOpen.playerDark" ng-options="player.name for player in allPlayersAndBye | orderBy:'name' track by player.id" autofocus>
         </select>
 
         <div style="margin-top: 10px;">Player (LS)</div>
-        <select ng-model="playerLight" ng-options="player.name for player in allPlayersAndBye | orderBy:'name' track by player.id">
+        <select ng-model="gameToOpen.playerLight" ng-options="player.name for player in allPlayersAndBye | orderBy:'name' track by player.id">
         </select>
-
-        <!-- No reason to have this (I don't think )
-        <div>Round {{round.num}}</div>
-          <select ng-model="round" ng-options="roundObj.num for roundObj in currentEvent.rounds track by roundObj.num">
-          </select>
-        -->
 
       </div>
 
       <div class="col-xs-6">
 
         <div>Winner</div>
-        <select class='winnerSelector' ng-model="winner" ng-options="player.name for player in getPlayers() | orderBy:'name' track by player.id">
+        <select class='winnerSelector' ng-model="gameToOpen.winner" ng-options="player.name for player in getPlayers() | orderBy:'name' track by player.id">
         </select>
-        <div style="margin-top: 10px;">Differential</div>
-        <input ng-model="diff">
+
+        <!-- Game Stats -->
+        <div class='row' style='margin-top: 10px'>
+
+          <div class='col-xs-4'>
+            <div>Differential</div>
+            <input ng-model="gameToOpen.diff" style='width: 50px;'>
+          </div>
+
+          <div data-ng-if='showLostPiles' class='col-xs-4'>
+            <div>DS Lost</div>
+            <input ng-model="gameToOpen.darkLostCards" style='width: 50px;'>
+          </div>
+
+          <div data-ng-if='showLostPiles' class='col-xs-4'>
+            <div>LS Lost</div>
+            <input ng-model="gameToOpen.lightLostCards" style='width: 50px;'>
+          </div>
+
+        </div>
 
       </div>
 

@@ -2,9 +2,24 @@
   <div style="margin:20px">
     <h2>Assign Winner: {{gameToOpen.winner.name}}</h2>
 
-    <div>
-      <div style="margin-top: 10px;">Differential</div>
-      <input ng-model="diff">
+    <!-- Game Stats -->
+    <div class='row' style='margin-top: 10px'>
+
+      <div class='col-xs-4'>
+        <div>Differential</div>
+        <input ng-model="gameToOpen.diff" autofocus style='width: 50px;'>
+      </div>
+
+      <div data-ng-if='showLostPiles' class='col-xs-4'>
+        <div>DS Lost</div>
+        <input ng-model="gameToOpen.darkLostCards" style='width: 50px;'>
+      </div>
+
+      <div data-ng-if='showLostPiles' class='col-xs-4'>
+        <div>LS Lost</div>
+        <input ng-model="gameToOpen.lightLostCards" style='width: 50px;'>
+      </div>
+
     </div>
 
     <hr>

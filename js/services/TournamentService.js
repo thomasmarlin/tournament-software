@@ -1,6 +1,6 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.service('TournamentService', ['LoggerService', 'UtilService', 'ConstantsService', 'StatsService', function(LoggerService, UtilService, ConstantsService, StatsService) {
+sosApp.service('TournamentService', ['MessageBoxService', 'LoggerService', 'UtilService', 'ConstantsService', 'StatsService', function(MessageBoxService, LoggerService, UtilService, ConstantsService, StatsService) {
 
   function getByePlayer() {
     return {
@@ -275,6 +275,465 @@ this.TournamentWizard = function(eventData, gameCreated) {
     LoggerService.log("Bye Assignment complete: " + byeAssigned);
   }
 
+  function getLostCards(player, game) {
+    if (player.id == game.playerDark.id) {
+      return game.darkLostCards;
+    }
+
+    if (player.id == game.playerLight.id) {
+      return game.lightCards;
+    }
+  }
+
+
+  function areGamesEquivilent(first, second) {
+    if ((first.round.num == second.round.num) &&
+        (first.playerDark.id == second.playerDark.id) &&
+        (first.playerLight.id == second.playerLight.id))
+    {
+      return true;
+    }
+    return false;
+  }
+
+  function updateGameIfInMatch(game, match) {
+    if (!match) { return; }
+
+    if (areGamesEquivilent(match.game1, game)) {
+      match.game1 = game;
+    } else if (areGamesEquivilent(match.game2, game)) {
+      match.game2 = game;
+    }
+  }
+
+  function propogateGamesToMatchPlay() {
+    for (var i = 0; i < eventData.games.length; i++) {
+      var game = eventData.games[i];
+      updateGameIfInMatch(game, eventData.matches.matchA);
+      updateGameIfInMatch(game, eventData.matches.matchB);
+      updateGameIfInMatch(game, eventData.matches.matchC);
+      updateGameIfInMatch(game, eventData.matches.matchD);
+      updateGameIfInMatch(game, eventData.matches.matchE);
+      updateGameIfInMatch(game, eventData.matches.matchF);
+      updateGameIfInMatch(game, eventData.matches.matchG);
+    }
+  }
+
+  function resolveMatch(match) {
+    if (!match || !match.game1.winner || !match.game2.winner) { return; }
+
+    // Winner is the person with the highest differential.
+    // Tiebreakers are:
+    // 1) Fewest cards in lost pile
+    // 2) Fewest cards out of play
+
+    var player1 = match.game1.playerDark;
+    var player2 = match.game1.playerLight;
+    var player1Diff = 0;
+    var player2Diff = 0;
+    var player1LostCards = 0;
+    var player2LostCards = 0;
+
+    if (match.game1.winner.id == player1.id) {
+      player1Diff += match.game1.diff;
+      player2Diff -= match.game1.diff;
+      player1LostCards += getLostCards(player1, match.game1);
+      player2LostCards += getLostCards(player2, match.game1);
+    } else {
+      player1Diff -= match.game1.diff;
+      player2Diff += match.game1.diff;
+      player1LostCards += getLostCards(player1, match.game1);
+      player2LostCards += getLostCards(player2, match.game1);
+    }
+
+    if (match.game2.winner.id == player1.id) {
+      player1Diff += match.game2.diff;
+      player2Diff -= match.game2.diff;
+      player1LostCards += getLostCards(player1, match.game2);
+      player2LostCards += getLostCards(player2, match.game2);
+    } else {
+      player1Diff -= match.game2.diff;
+      player2Diff += match.game2.diff;
+      player1LostCards += getLostCards(player1, match.game2);
+      player2LostCards += getLostCards(player2, match.game2);
+    }
+
+    if (player1Diff > player2Diff) {
+      match.winner = player1;
+    } else if (player1Diff < player2Diff) {
+      match.winner = player2;
+    } else if (player1Diff == player2Diff) {
+      if (player1LostCards > player2LostCards) {
+        match.winner = player2;
+      } else if (player1LostCards < player2LostCards) {
+        match.winner = player1;
+      } else {
+        MessageBoxService.errorMessage("Match has a true tie (equal diff, equal cards lost). To resolve this, please modify the Diff of one of the games.", null);
+      }
+    }
+  }
+
+
+  /*
+    For 8-player match play, we use the following system:
+
+    Match A: 1v8
+    ......................Match E: Winner-A vs Winner B
+    Match B: 4v5
+
+    .................................................................. Match G: Winner-E vs Winner-F
+
+    Match C: 2v7
+    ......................Match F: Winner-C vs Winner-D
+    Match D: 3v6
+
+  */
+  this.updateMatchplayStandings = function() {
+    if (eventData.mode !== ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY) {
+      return;
+    }
+
+    console.log("updateMatchplayStandings...");
+    /*
+    var currentRound = getCurrentRound();
+    var currentRoundNum = currentRound.num;
+    */
+
+    if (!eventData.matches) {
+      eventData.matches = {
+        matchA: null,
+        matchB: null,
+        matchC: null,
+        matchD: null,
+        matchE: null,
+        matchF: null,
+        matchG: null
+      },
+      eventData.rounds = [
+        {
+          num: 1
+        },
+        {
+          num: 2
+        },
+        {
+          num: 3
+        }
+      ]
+    }
+
+    // Update all of the match play games from the standard games
+    propogateGamesToMatchPlay();
+
+    // Declare winners of matches (if applicable)
+    resolveMatch(eventData.matches.matchA);
+    resolveMatch(eventData.matches.matchB);
+    resolveMatch(eventData.matches.matchC);
+    resolveMatch(eventData.matches.matchD);
+    resolveMatch(eventData.matches.matchE);
+    resolveMatch(eventData.matches.matchF);
+    resolveMatch(eventData.matches.matchG);
+
+
+    // First-round pairings
+    if (eventData.matches.matchA == null) {
+      var seed1 = getPlayerWithSeedNumber(1);
+      var seed2 = getPlayerWithSeedNumber(2);
+      var seed3 = getPlayerWithSeedNumber(3);
+      var seed4 = getPlayerWithSeedNumber(4);
+      var seed5 = getPlayerWithSeedNumber(5);
+      var seed6 = getPlayerWithSeedNumber(6);
+      var seed7 = getPlayerWithSeedNumber(7);
+      var seed8 = getPlayerWithSeedNumber(8);
+
+      var round1 = UtilService.getRoundNum(1, eventData);
+
+
+      // Match A:
+      var matchAGame1 = addNewGame(seed1, seed8, round1, [], [], [], false);
+      var matchAGame2 = addNewGame(seed8, seed1, round1, [], [], [], false);
+      eventData.matches.matchA = {
+        game1: matchAGame1,
+        game2: matchAGame2,
+        player1: seed1,
+        player2: seed8,
+        winner: null
+      }
+
+      // Match B:
+      var matchBGame1 = addNewGame(seed4, seed5, round1, [], [], [], false);
+      var matchBGame2 = addNewGame(seed5, seed4, round1, [], [], [], false);
+      eventData.matches.matchB = {
+        game1: matchBGame1,
+        game2: matchBGame2,
+        player1: seed4,
+        player2: seed5,
+        winner: null
+      }
+
+      // Match C:
+      var matchCGame1 = addNewGame(seed2, seed7, round1, [], [], [], false);
+      var matchCGame2 = addNewGame(seed7, seed2, round1, [], [], [], false);
+      eventData.matches.matchC = {
+        game1: matchCGame1,
+        game2: matchCGame2,
+        player1: seed2,
+        player2: seed7,
+        winner: null
+      }
+
+      // Match D:
+      var matchDGame1 = addNewGame(seed3, seed6, round1, [], [], [], false);
+      var matchDGame2 = addNewGame(seed6, seed3, round1, [], [], [], false);
+      eventData.matches.matchD = {
+        game1: matchDGame1,
+        game2: matchDGame2,
+        player1: seed3,
+        player2: seed6,
+        winner: null
+      }
+
+    }
+
+    // Match E pairings
+    if (shouldRebuildMatch(eventData.matches.matchE, eventData.matches.matchA, eventData.matches.matchB)) {
+      var winnerA = eventData.matches.matchA.winner;
+      var winnerB = eventData.matches.matchB.winner;
+      if (winnerA && winnerB) {
+
+        var round2 = UtilService.getRoundNum(2, eventData);
+
+        // Match E:
+        var matchEGame1 = addNewGame(winnerA, winnerB, round2, [], [], [], false);
+        var matchEGame2 = addNewGame(winnerB, winnerA, round2, [], [], [], false);
+        eventData.matches.matchE = {
+          game1: matchEGame1,
+          game2: matchEGame2,
+          player1: winnerA,
+          player2: winnerB,
+          winner: null
+        }
+      }
+    }
+
+
+    // Match F Pairings
+    if (shouldRebuildMatch(eventData.matches.matchF, eventData.matches.matchC, eventData.matches.matchD)) {
+      var winnerC = eventData.matches.matchC.winner;
+      var winnerD = eventData.matches.matchD.winner;
+      if (winnerC && winnerD) {
+
+        var round2 = UtilService.getRoundNum(2, eventData);
+
+        // Match F:
+        var matchFGame1 = addNewGame(winnerC, winnerD, round2, [], [], [], false);
+        var matchFGame2 = addNewGame(winnerD, winnerC, round2, [], [], [], false);
+        eventData.matches.matchF = {
+          game1: matchFGame1,
+          game2: matchFGame2,
+          player1: winnerC,
+          player2: winnerD,
+          winner: null
+        }
+      }
+    }
+
+
+    // Match G pairings
+    if (shouldRebuildMatch(eventData.matches.matchG, eventData.matches.matchE, eventData.matches.matchF)) {
+      var winnerE = eventData.matches.matchE.winner;
+      var winnerF = eventData.matches.matchF.winner;
+      if (winnerE && winnerF) {
+
+        var round3 = UtilService.getRoundNum(3, eventData);
+
+        // Match G:
+        var matchGGame1 = addNewGame(winnerE, winnerF, round3, [], [], [], false);
+        var matchGGame2 = addNewGame(winnerF, winnerE, round3, [], [], [], false);
+        eventData.matches.matchG = {
+          game1: matchGGame1,
+          game2: matchGGame2,
+          player1: winnerE,
+          player2: winnerF,
+          winner: null
+        }
+      }
+    }
+
+    console.log("updateMatchplayStandings");
+    console.log("matches: " + JSON.stringify(eventData.matches));
+  }
+
+  function removeGamesFromMatch(match) {
+    var game1 = match.game1;
+    if (game1) {
+      removeGame(game1);
+    }
+
+    var game2 = match.game2;
+    if (game2) {
+      removeGame(game2);
+    }
+  }
+
+  function removeGame(game) {
+    for (var i = 0; i < eventData.games.length; i++) {
+      var existingGame = eventData.games[i];
+      if (areGamesEquivilent(existingGame, game)) {
+        eventData.games.splice(i, 1);
+        return;
+      }
+    }
+  }
+
+  function shouldRebuildMatch(currentMatch, previousMatch1, previousMatch2) {
+    if (currentMatch) {
+
+      // Make sure the matchup has the right people!
+      if ((!UtilService.peopleEqual(previousMatch1.winner, currentMatch.player1)) &&
+          (!UtilService.peopleEqual(previousMatch1.winner, currentMatch.player2)))
+      {
+        removeGamesFromMatch(currentMatch);
+        return true;
+      }
+      if ((!UtilService.peopleEqual(previousMatch2.winner, currentMatch.player1)) &&
+          (!UtilService.peopleEqual(previousMatch2.winner, currentMatch.player2)))
+      {
+        removeGamesFromMatch(currentMatch);
+        return true;
+      }
+
+    } else {
+      // In this case, we haven't built the new match yet!
+      if (previousMatch1 && previousMatch1.winner && previousMatch2 && previousMatch2.winner) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function getPlayer(playerId) {
+    for (var i = 0; i < eventData.players.length; i++) {
+      var player = eventData.players[i];
+      if (player.id == playerId) {
+        return player;
+      }
+    }
+    console.log("Failed to get player with ID: " + playerId);
+    return null;
+  }
+
+  function getPlayerWithSeedNumber(num) {
+    for (var i = 0; i < eventData.seedData.length; i++) {
+      var seedInfo = eventData.seedData[i];
+      if (num == seedInfo.seedNum) {
+        var playerId = seedInfo.playerId;
+        return getPlayer(playerId);
+      }
+    }
+    console.log("Failed to get player at seed number: " + num);
+    return null;
+  }
+
+
+  /*
+  function newMatchupsMatchPlay() {
+    // The strategy for running to create pairs.
+    // For the first round, build an array of pairs. This array is a round.
+    // For the next round, build a 2nd array containing pairings of the winners
+
+    // Structure for match play is:
+    //
+
+    //Game 1:
+    //SeedBest vs SeedWorst
+    //Seed2Best vs Seed2Worst
+    //Seed3Best vs Seed3Worst
+    //Seed4Best vs Seed4Worst
+
+
+    var currentRound = getCurrentRound();
+    var currentRoundNum = currentRound.num;
+
+    var activePlayers = [];
+
+    if (currentRoundNum == 0) {
+      // Add all of the players!
+      activePlayers = JSON.parse(JSON.stringify(eventData.players));
+    } else {
+      // Not the first round, so get the winners from the previous round.
+      var previousRound = currentRoundNum - 1;
+      for (var i = 0; i < eventData.games.length; i++) {
+        var game = eventData.games[i];
+        if (game.round.num == previousRound) {
+          if (game.winner) {
+            activePlayers.push(JSON.parse(JSON.stringify(game.winner)));
+          }
+        }
+      }
+    }
+
+    // Odd number of players. Give the highest rated player a bye
+    if (activePlayers.length % 2 == 1) {
+      var highSeed = getHighestSeedPlayer(activePlayers);
+      addNewGame(highSeed, getByePlayer(), currentRound, [], activePlayers, activePlayers, false);
+    }
+
+    // Assign the rest of the players to games, picking off the highest and lowest seed each time
+    while (activePlayers.length > 0) {
+
+    }
+  }
+
+
+  function removePlayerFromList(player, playerList) {
+    var index = playerList.indexOf(player);
+    if (index !== -1) {
+      playerList.splice(index, 1);
+    }
+  }
+
+
+  function getSeedNumForPlayer(player) {
+    for (var i = 0; i < eventData.seedData.length; i++) {
+      var seedInfo = eventData.seedData[i];
+      if (player.id == seedInfo.playerId) {
+        return seedInfo.seedNum;
+      }
+    }
+    console.log("Failed to get seed number for player: " + JSON.stringify(player));
+    return -1;
+  }
+
+  function getHighestSeedPlayer(players) {
+    var highSeed = players[0];
+    for (var i = 0; i < players.length; i++) {
+      var player = players[i];
+      var seedNum = getSeedNumForPlayer(player);
+      if (seedNum > highSeed) {
+        highSeed = player;
+      }
+    }
+
+    return highSeed;
+  }
+
+  function getLowestSeedPlayer(players) {
+    var lowSeed = players[0];
+    for (var i = 0; i < players.length; i++) {
+      var player = players[i];
+      var seedNum = getSeedNumForPlayer(player);
+      if (seedNum < lowSeed) {
+        lowSeed = player;
+      }
+    }
+
+    return lowSeed;
+  }
+  */
+
+
   function newMatchups() {
 
     var currentRound = getCurrentRound();
@@ -418,7 +877,9 @@ this.TournamentWizard = function(eventData, gameCreated) {
       winner: winner,
       vp: 2,
       round: round,
-      diff: 0
+      diff: 0,
+      darkLostCards: 0,
+      lightLostCards: 0
     };
 
     // Also, now that we have a good matchup, clear out the past state
@@ -427,11 +888,13 @@ this.TournamentWizard = function(eventData, gameCreated) {
     downgradedPlayers.splice(0, downgradedPlayers.length);
 
     // Store the new game!
-    gameCreated(game);
+    var createdGame = gameCreated(game);
 
     if (updatePointsWhenDone) {
       StatsService.updateVictoryPoints(eventData);
     }
+
+    return createdGame;
   }
 
   function removeFromPile(player, pile) {

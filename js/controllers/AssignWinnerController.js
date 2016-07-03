@@ -1,29 +1,38 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$timeout', 'TournamentService', function($scope, $uibModalInstance, $timeout, TournamentService) {
+sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$timeout', 'ConstantsService', 'TournamentService', function($scope, $uibModalInstance, $timeout, ConstantsService, TournamentService) {
 
   // Get the game to open from the parent scope
-  $scope.gameToOpen = $scope.gameToOpen;
-
-  $scope.winner = $scope.gameToOpen.winner;
-  $scope.playerDark = $scope.gameToOpen.playerDark;
-  $scope.playerLight = $scope.gameToOpen.playerLight;
-  $scope.vp = $scope.gameToOpen.vp;
-  $scope.round = $scope.gameToOpen.round;
-  $scope.diff = $scope.gameToOpen.diff;
+  $scope.gameToOpen = JSON.parse(JSON.stringify($scope.gameToOpen));
+  $scope.showLostPiles = ($scope.currentEvent.mode == ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY);
 
   $scope.allPlayersAndBye = [];
 
   $scope.okClick = function() {
 
+    if (isNaN(parseInt($scope.gameToOpen.darkLostCards))) {
+      MessageBoxService.errorMessage("Please enter a valid value for 'Dark Side lost pile count'", $scope);
+      return;
+    }
+    if (isNaN(parseInt($scope.gameToOpen.lightLostCards))) {
+      MessageBoxService.errorMessage("Please enter a valid value for 'Light Side lost pile count'", $scope);
+      return;
+    }
+    if (isNaN(parseInt($scope.gameToOpen.diff))) {
+      MessageBoxService.errorMessage("Please enter a valid value for 'Differential'", $scope);
+      return;
+    }
+
     var edittedGame = {
       id: $scope.gameToOpen.id,
-      playerDark: $scope.playerDark,
-      playerLight: $scope.playerLight,
-      winner: $scope.winner,
+      playerDark: $scope.gameToOpen.playerDark,
+      playerLight: $scope.gameToOpen.playerLight,
+      winner: $scope.gameToOpen.winner,
       vp: 2,
-      diff: $scope.diff,
-      round: $scope.round
+      diff: parseInt($scope.gameToOpen.diff),
+      round: $scope.gameToOpen.round,
+      darkLostCards: parseInt($scope.gameToOpen.darkLostCards),
+      lightLostCards: parseInt($scope.gameToOpen.lightLostCards)
     }
     $uibModalInstance.close(edittedGame);
   }
@@ -45,11 +54,11 @@ sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$ti
 
   $scope.getPlayers = function() {
     var players = [];
-    if ($scope.playerDark) {
-      players.push($scope.playerDark);
+    if ($scope.gameToOpen.playerDark) {
+      players.push($scope.gameToOpen.playerDark);
     }
-    if ($scope.playerLight) {
-      players.push($scope.playerLight);
+    if ($scope.gameToOpen.playerLight) {
+      players.push($scope.gameToOpen.playerLight);
     }
     return players;
   };

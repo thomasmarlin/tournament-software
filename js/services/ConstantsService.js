@@ -4,7 +4,8 @@ sosApp.service('ConstantsService', [function() {
 
   this.TOURNAMENT_FORMAT = {
     SOS: "SOS",
-    DIFF: "DIFF"
+    DIFF: "DIFF",
+    MATCH_PLAY: "MATCH_PLAY"
   };
 
   this.PLAYER_STATUS = {

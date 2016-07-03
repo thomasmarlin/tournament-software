@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('CreateEventController', ['$scope', '$uibModalInstance', '$timeout', 'MessageBoxService', 'eventData', function($scope, $uibModalInstance, $timeout, MessageBoxService, eventData) {
+sosApp.controller('CreateEventController', ['$scope', '$timeout', '$uibModalInstance', '$uibModal', 'ConstantsService', 'MessageBoxService', 'eventData', function($scope, $timeout, $uibModalInstance, $uibModal, ConstantsService, MessageBoxService, eventData) {
 
   $scope.existingTournament = false;
   $scope.datePickerData = {
@@ -33,6 +33,25 @@ sosApp.controller('CreateEventController', ['$scope', '$uibModalInstance', '$tim
       return;
     }
 
+    if ($scope.creatingEventData.mode == ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY) {
+      var modalDialog = $uibModal.open({
+        template: addEightPlayerHTML,
+        controller: 'AddEightPlayerController',
+        scope: $scope
+      });
+
+      modalDialog.result.then(
+        //Success
+        function(players) {
+          finishEventCreation(players);
+        }
+      );
+
+    } else {
+      var emptyPlayers = [];
+      finishEventCreation(emptyPlayers);
+    }
+
     /*
     if ($scope.creatingEventData.password === "") {
       MessageBoxService.errorMessage("Please enter a password for this event", $scope);
@@ -45,8 +64,11 @@ sosApp.controller('CreateEventController', ['$scope', '$uibModalInstance', '$tim
     }
     */
 
-    $scope.creatingEventData.date = $scope.datePickerData.selectedDate.toISOString();
-    $uibModalInstance.close($scope.creatingEventData);
+    function finishEventCreation(players) {
+      $scope.creatingEventData.date = $scope.datePickerData.selectedDate.toISOString();
+      $scope.creatingEventData.players = players;
+      $uibModalInstance.close($scope.creatingEventData);
+    }
   };
 
   $scope.cancelClick = function() {

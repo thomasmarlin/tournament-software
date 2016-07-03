@@ -58,6 +58,18 @@ sosApp.service('UtilService', ['ConstantsService', function(ConstantsService) {
     return self.getCurrentRound(eventData).num;
   }
 
+  this.getRoundNum = function(num, eventData) {
+    for (var i = 0; i < eventData.rounds.length; i++) {
+      var round = eventData.rounds[i];
+      if (round.num == num) {
+        return round;
+      }
+    }
+
+    console.log("Failed to get round: " + num);
+    return null;
+  }
+
   this.generateGUID = function() {
     // http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
     /*jshint bitwise: false*/

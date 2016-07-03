@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('EditPlayerController', ['$scope', '$uibModal', '$uibModalInstance', '$timeout', 'LoggerService', 'MessageBoxService', 'playerToEdit', function($scope, $uibModal, $uibModalInstance, $timeout, LoggerService, MessageBoxService, playerToEdit) {
+sosApp.controller('EditPlayerController', ['$scope', '$uibModal', '$uibModalInstance', '$timeout', 'LoggerService', 'MessageBoxService', 'playerToEdit', 'allPlayers', function($scope, $uibModal, $uibModalInstance, $timeout, LoggerService, MessageBoxService, playerToEdit, allPlayers) {
 
   $scope.newPlayerMode = true;
   $scope.existingPlayerMode = false;
@@ -36,6 +36,8 @@ sosApp.controller('EditPlayerController', ['$scope', '$uibModal', '$uibModalInst
 
 
         LoggerService.log("Existing Player Loaded: " + JSON.stringify(existingPlayer));
+
+        existingPlayer.status = $scope.player.status;
         $scope.player = existingPlayer;
       },
       // Cancelled
@@ -50,9 +52,9 @@ sosApp.controller('EditPlayerController', ['$scope', '$uibModal', '$uibModalInst
 
     // Make sure we don't already have someone with this name;
     var newNameLower = playerName.toLowerCase().trim();
-    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
+    for (var i = 0; i < allPlayers.length; i++) {
 
-      var existingPlayer = $scope.currentEvent.players[i];
+      var existingPlayer = allPlayers[i];
       var existingNameLower = existingPlayer.name.toLowerCase().trim();
       if (existingNameLower == newNameLower) {
         // We have this person.  If this is the person we are editting, that's fine. otherwise, error out!
@@ -74,10 +76,10 @@ sosApp.controller('EditPlayerController', ['$scope', '$uibModal', '$uibModalInst
 
     // Make sure we don't already have someone with this name;
     var newPlayerId = $scope.player.id;
-    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
+    for (var i = 0; i < allPlayers.length; i++) {
 
-      var existingPlayer = $scope.currentEvent.players[i];
-      var existingId = $scope.currentEvent.players[i].id;
+      var existingPlayer = allPlayers[i];
+      var existingId = allPlayers[i].id;
       if (existingId == playerId) {
         // We have this person.  If this is the person we are editting, that's fine. otherwise, error out!
         if (playerToEdit && (playerToEdit.id === existingPlayer.id)) {
