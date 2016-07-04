@@ -281,8 +281,9 @@ this.TournamentWizard = function(eventData, gameCreated) {
     }
 
     if (player.id == game.playerLight.id) {
-      return game.lightCards;
+      return game.lightLostCards;
     }
+    console.log("Failed to get lost cards for game!");
   }
 
 

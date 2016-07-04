@@ -72,6 +72,34 @@ sosApp.directive('currentEvent', ['ConstantsService', 'DataStorage', 'RESTServic
         if (pendingGames.length == 0) {
           testNextRound();
         } else {
+          var rand = Math.round(Math.random());
+          var addResultButton = pendingGames.first().find('.addResultButton');
+          addResultButton[rand].click();
+
+          setTimeout(function() {
+            var assignWinnerButton = $('#assingWinnerOkButton');
+            if (assignWinnerButton.length == 0) {
+              alert("Failed to find assign winner button");
+            } else {
+              assignWinnerButton.click();
+              setTimeout(assignNextWinner, 3000);
+            }
+
+          }, 500);
+        }
+      }
+
+
+      function assignNextWinner_OLD() {
+        if (shouldStop) {
+          return;
+        }
+
+        var pendingGames = $('.gamePending');
+        if (pendingGames.length == 0) {
+          testNextRound();
+        } else {
+
           var addResultButton = pendingGames.first().find('.addResultButton');
           addResultButton.click();
 

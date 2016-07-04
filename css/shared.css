@@ -30,12 +30,28 @@
   text-align: center;
 }
 
+.matchPlayColumnGames {
+  width: 28%;
+  float: left;
+}
+
+.matchPlayColumnLines {
+  width: 7%;
+  float: left;
+}
+
 .matchBox {
   padding: 5px;
   height: 50px;
   width: 100%;
   border-radius: 5px 0px 0px 5px;
   border: thin solid gray;
+}
+.matchBox.incomplete {
+  background-color: #FFAAAA;
+}
+.matchBox.complete {
+  background-color: #AAFFAA;
 }
 
 .blankBox {
@@ -51,9 +67,26 @@
   border-left: thin solid gray;
 }
 
+.horizontalLine {
+  border: thin solid black; 
+  margin-top: 25px;
+}
+
 .matchPlayer {
-  font-weight: bold;
+  font-style: italic;
+  margin-left: 5px;
+  margin-right: 5px;
 }
 .matchPlayer.top {
   border-bottom: thin solid gray;
+}
+.matchPlayer.winner {
+  font-style: normal;
+  font-weight: bold;
+}
+
+.winnerLabel {
+  margin-left: 10px;
+  text-decoration: underline;
+  color: blue;
 }

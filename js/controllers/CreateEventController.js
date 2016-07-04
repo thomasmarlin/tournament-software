@@ -37,7 +37,8 @@ sosApp.controller('CreateEventController', ['$scope', '$timeout', '$uibModalInst
       var modalDialog = $uibModal.open({
         template: addEightPlayerHTML,
         controller: 'AddEightPlayerController',
-        scope: $scope
+        scope: $scope,
+        backdrop: 'static'
       });
 
       modalDialog.result.then(

@@ -1,44 +1,56 @@
-<div style='padding: 20px'>
+<div style='padding: 20px; padding-left: 40px; padding-right: 40px;'>
 
   <!-- Title -->
   <h2>Add Top-8 Player Seeds:</h2>
-  <button style='float:right' data-ng-click='addPlayer()'>Add Player...</button>
+  <button style='float:right' class='btn btn-default' data-ng-click='addPlayer()'>Add Player...</button>
   <div style='clear:both'></div>
 
   <!-- Headers -->
   <div class='row'>
-    <div class='col-md-2'>
+    <div class='col-xs-2'>
       Seed #
     </div>
-    <div class='col-md-6'>
+    <div class='col-xs-6'>
       Player
     </div>
-    <div class='col-md-4'>
+    <div class='col-xs-4'>
     </div>
   </div>
 
 
   <!-- Player List -->
-  <div data-ng-repeat='player in players track by $index'>
+  <div class='row playerBox' style='padding: 5px' data-ng-repeat='player in players track by $index'>
 
-    <div class='row playerBox'>
-      <div class='col-md-2'>
-        {{$index + 1}}
-      </div>
-      <div class='col-md-6'>
-        {{player.name}}
-      </div>
-      <div class='col-md-4'>
-        <button style='display-inline; margin-right: 5px' data-ng-click='movePlayerUp(player)'>&uarr;</button>
-        <button style='display-inline' data-ng-click='movePlayerDown(player)'>&darr;</button>
-      </div>
+    <div class='col-xs-2'>
+      {{$index + 1}}
     </div>
+    <div class='col-xs-6'>
+      {{player.name}}
+    </div>
+    <div class='col-xs-4' style='text-align: right'>
+      <button style='margin-right: 5px; padding: 5px'
+              class='glyphicon glyphicon-arrow-up'
+              data-ng-click='movePlayerUp(player)'>
+      </button>
+      <button style='padding: 5px; margin-right: 5px'
+              class='glyphicon glyphicon-arrow-down'
+              data-ng-click='movePlayerDown(player)'>
+      </button>
+      <button style='padding: 5px; margin-left: 5px;'
+              class='glyphicon glyphicon-remove'
+              data-ng-click='deletePlayer(player)'>
+      </button>
+    </div>
+  </div>
+
+  <div ng-if='players.length < 1' style="margin:50px">
+    <h3 style="font-style:italic; color:gray">Click 'Add Player' to add players...</h3>
   </div>
 
   <hr>
 
   <div style='text-align:center'>
-    <button data-ng-click='cancelClick()'>Cancel</button>
-    <button data-ng-click='done()'>Start</button>
+    <button class='btn btn-default' data-ng-click='cancelClick()'>Cancel</button>
+    <button class='btn btn-default' data-ng-click='done()'>Start</button>
   </div>
 </div>

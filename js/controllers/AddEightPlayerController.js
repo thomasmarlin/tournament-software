@@ -47,6 +47,13 @@ sosApp.controller('AddEightPlayerController', ['$scope', '$uibModal', '$uibModal
     );
   };
 
+  $scope.deletePlayer = function(player) {
+    var index = $scope.players.indexOf(player);
+    if (index > 0) {
+      $scope.players.splice(index, 1);
+    }
+  };
+
   $scope.movePlayerUp = function(player) {
     var index = $scope.players.indexOf(player);
     if (index > 0) {
@@ -64,6 +71,10 @@ sosApp.controller('AddEightPlayerController', ['$scope', '$uibModal', '$uibModal
   };
 
   $scope.done = function() {
+    if ($scope.players.length !== 8) {
+      MessageBoxService.errorMessage("You must add exactly 8 players. Please check your entry and try again.", $scope);
+      return;
+    }
     $uibModalInstance.close($scope.players);
   };
 

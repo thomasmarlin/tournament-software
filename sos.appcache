@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2016-07-02:v84
+# 2016-07-03:v29
 
 # Explicitly cached entries
 sos.html
@@ -41,6 +41,7 @@ js/controllers/LoadEventController.js
 js/controllers/LoginController.js
 js/controllers/homeScreen.js
 js/controllers/ManageOfflineDataController.js
+js/controllers/matchItem.js
 js/controllers/matchPlayDisplay.js
 js/controllers/MessageBoxController.js
 js/controllers/PasswordPromptController.js
@@ -74,6 +75,7 @@ gen/loadEventHTML.js
 gen/loginHTML.js
 gen/homeScreenHTML.js
 gen/manageOfflineDataHTML.js
+gen/matchItemHTML.js
 gen/matchPlayDisplayHTML.js
 gen/messageBoxHTML.js
 gen/passwordPromptHTML.js
