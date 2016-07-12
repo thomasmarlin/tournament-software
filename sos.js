@@ -904,7 +904,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
           (UtilService.peopleEqual(game.playerLight, playerToDelete)) ||
           (UtilService.peopleEqual(game.winner, playerToDelete)))
       {
-          MessageBoxService.infoMessage("This player has active games and cannot be deleted.", $scope, ["You may drop this player in the player 'Update' screen"]);
+          MessageBoxService.infoMessage("This player has active games and cannot be deleted.", $scope, ["You may drop this player by clicking 'Edit Player' and setting their status to 'Dropped'"]);
           return;
       }
     }
