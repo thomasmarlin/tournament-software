@@ -8,7 +8,9 @@ sosApp.controller('CreateGameController', ['$scope', '$uibModalInstance', '$time
     winner: null,
     vp: 2,
     round: $scope.getCurrentRound(),
-    diff: 0
+    diff: 0,
+    darkLostCards: 0,
+    lightLostCards: 0
   }
   $scope.showLostPiles = ($scope.currentEvent.mode == ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY);
 
@@ -17,13 +19,28 @@ sosApp.controller('CreateGameController', ['$scope', '$uibModalInstance', '$time
 
   $scope.okClick = function() {
 
+    if (isNaN(parseInt($scope.gameToOpen.darkLostCards))) {
+      MessageBoxService.errorMessage("Please enter a valid value for 'Dark Side lost pile count'", $scope);
+      return;
+    }
+    if (isNaN(parseInt($scope.gameToOpen.lightLostCards))) {
+      MessageBoxService.errorMessage("Please enter a valid value for 'Light Side lost pile count'", $scope);
+      return;
+    }
+    if (isNaN(parseInt($scope.gameToOpen.diff))) {
+      MessageBoxService.errorMessage("Please enter a valid value for 'Differential'", $scope);
+      return;
+    }
+
     var newGame = {
       playerDark: $scope.gameToOpen.playerDark,
       playerLight: $scope.gameToOpen.playerLight,
       winner: $scope.gameToOpen.winner,
       vp: 2,
       round: $scope.gameToOpen.round,
-      diff: parseInt($scope.gameToOpen.diff)
+      diff: parseInt($scope.gameToOpen.diff),
+      darkLostCards: parseInt($scope.gameToOpen.darkLostCards),
+      lightLostCards: parseInt($scope.gameToOpen.lightLostCards)
     };
 
     $uibModalInstance.close(newGame);

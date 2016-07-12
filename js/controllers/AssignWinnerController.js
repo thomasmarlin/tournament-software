@@ -29,8 +29,8 @@ sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$ti
       playerLight: $scope.gameToOpen.playerLight,
       winner: $scope.gameToOpen.winner,
       vp: 2,
-      diff: parseInt($scope.gameToOpen.diff),
       round: $scope.gameToOpen.round,
+      diff: parseInt($scope.gameToOpen.diff),
       darkLostCards: parseInt($scope.gameToOpen.darkLostCards),
       lightLostCards: parseInt($scope.gameToOpen.lightLostCards)
     }
