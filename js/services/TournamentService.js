@@ -199,6 +199,13 @@ this.TournamentWizard = function(eventData, gameCreated) {
   }
 
   function evenOutPiles(lightPile, darkPile) {
+
+    if (((lightPile.length + darkPile.length) % 2) !== 0) {
+      LoggerService.error("Too many light players (likely due to a drop). Moving a light player into the dark pile.");
+      MessageBoxService.errorMessage("Unexpected number of players in piles (should be even after assigning byes). Asignments may be incorrect.");
+      return;
+    }
+
     if (lightPile.length > darkPile.length) {
       var splicedPlayer = lightPile.splice(lightPile.length - 1, 1);
       darkPile.push(splicedPlayer[0]);
