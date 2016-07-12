@@ -83,6 +83,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
 
   function buildPilesSequential(players, darkPile, lightPile) {
+
     var randBetweenZeroAndOne = Math.random();
     LoggerService.action("Choosing starting allegiance: " + randBetweenZeroAndOne);
 
@@ -107,6 +108,25 @@ this.TournamentWizard = function(eventData, gameCreated) {
     LoggerService.log("Separated into piles. Dark: " + darkPile.length + " Light: " + lightPile.length);
   }
 
+  function wasLastGameBye(player) {
+    var lastRound = getCurrentRoundNumber() - 1;
+    for (var i = 0; i < eventData.games.length; i++) {
+      var game = eventData.games[i];
+      if (game.round.num == lastRound) {
+        if (UtilService.peopleEqual(game.playerDark, player) || UtilService.peopleEqual(game.playerLight, player)) {
+          if (isByePlayer(game.playerDark) || isByePlayer(game.playerLight)) {
+            return true;
+          }
+          return false;
+        }
+      }
+    }
+
+    // TODO: This shouldn't happen should it?
+    LoggerService.error("Couldn't determine last round (" + lastRound + ") for player: " + JSON.stringify(player) + " (for checking byes)")
+    return false;
+  }
+
   function wasLastGameDark(player) {
     var lastRound = getCurrentRoundNumber() - 1;
     for (var i = 0; i < eventData.games.length; i++) {
@@ -127,19 +147,76 @@ this.TournamentWizard = function(eventData, gameCreated) {
     return false;
   }
 
+
+  function getThisRoundByePlayer() {
+    var currentRoundNum = getCurrentRoundNumber();
+    for (var i = 0; i < eventData.games.length; i++) {
+      var game = eventData.games[i];
+      if (game.round.num == lastRound) {
+        if (isByePlayer(game.playerDark)) {
+          return game.playerLight;
+        }
+        if (isByePlayer(game.playerLight)) {
+          return game.playerDark;
+        }
+      }
+    }
+    return null;
+  }
+
   function buildPilesSwapAllegience(players, darkPile, lightPile) {
+
+    var lastGameByePlayer = null;
     for (var i = 0; i < players.length; i++) {
       var player = players[i];
-      if (wasLastGameDark(player)) {
+
+      if (wasLastGameBye(player)) {
+        // last game was a bye.  We want to put this player into
+        // the stack with the least players.  Save this guy to the end
+        lastGameByePlayer = player;
+
+      } else if (wasLastGameDark(player)) {
         lightPile.push(player);
       } else {
         darkPile.push(player);
       }
     }
+
+    // If we have a player who's last game was a bye, put them in the pile
+    // with the least players
+    // Alwasy re-sort the pile so that we don't get out of order
+    if (lastGameByePlayer) {
+      if (lightPile.length < darkPile.length) {
+        lightPile.push(lastGameByePlayer);
+        StatsService.sortPlayersByScore(lightPile, eventData.mode);
+      } else {
+        darkPile.push(lastGameByePlayer);
+        StatsService.sortPlayersByScore(darkPile, eventData.mode);
+      }
+    }
+
+    evenOutPiles(lightPile, darkPile);
+  }
+
+  function evenOutPiles(lightPile, darkPile) {
+    if (lightPile.length > darkPile.length) {
+      var splicedPlayer = lightPile.splice(lightPile.length - 1, 1);
+      darkPile.push(splicedPlayer[0]);
+      LoggerService.decision("Too many light players (likely due to a drop). Moving a light player into the dark pile.");
+      MessageBoxService.errorMessage("Too many light players present (likely due to a drop). The lowest-rated light player has been moved to the dark side");
+    } else if (darkPile.length > lightPile.length) {
+      var splicedPlayer = darkPlayer.splice(darkPlayer.length - 1, 1);
+      lightPile.push(splicedPlayer[0]);
+      LoggerService.decision("Too many dark players (likely due to a drop). Moving a dark player into the light pile.");
+      MessageBoxService.errorMessage("Too many dark players present (likely due to a drop). The lowest-rated dark player has been moved to the light side");
+    }
   }
 
 
   function buildPiles(players, darkPile, lightPile) {
+
+    // First, assign a bye if needed
+    assignBye(players);
 
     // On the odd rounds, just push them into piles one-one-one-one, etc
     if (isOddRound()) {
@@ -202,6 +279,43 @@ this.TournamentWizard = function(eventData, gameCreated) {
   }
 
 
+  function assignBye(players) {
+    // The Tournament Guide is being re-worked so that the lowest-ranked player
+    // always gets the bye UNLESS they've already been assigned a bye.  If all players
+    // have recieved a bye, then it goes back to the lowest-ranked player again
+
+    LoggerService.log("Assigning Byes...");
+
+    if ((players.length % 2) === 0) {
+      LoggerService.decision("Even number of active players. No byes required");
+      return;
+    }
+
+    var currentRound = getCurrentRound();
+
+    var minPlayerByeCount = 0;
+    var byeAssigned = false;
+    while (!byeAssigned) {
+
+      var downgradedPlayers = [];
+      var candidatePlayer = getWorstPlayerWithByeCount(players, minPlayerByeCount);
+      if (candidatePlayer) {
+        addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, players, players, false);
+        byeAssigned = true;
+        LoggerService.decision("Lowest-rank player (with fewest byes) is getting a bye: " + candidatePlayer.name);
+      }
+
+      if (!byeAssigned) {
+        // Apparently, everybody has a bye count of minPlayerByeCount.  See who has the next-fewest byes
+        LoggerService.decision("Everyone has a bye count of : " + minPlayerByeCount + ".  Checking for bye counts of: " + minPlayerByeCount + 1);
+        minPlayerByeCount++;
+      }
+    }
+
+    LoggerService.log("Bye Assignment complete: " + byeAssigned);
+  }
+
+  /*
   function assignByes(darkPile, lightPile) {
 
     LoggerService.log("Assigning Byes...");
@@ -274,6 +388,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
     LoggerService.log("Bye Assignment complete: " + byeAssigned);
   }
+  */
 
   function getLostCards(player, game) {
     if (player.id == game.playerDark.id) {
@@ -759,6 +874,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
     // Sort players into 2 piles (dark and light)
     var darkPile = [];
     var lightPile = [];
+
     buildPiles(allPlayerList, darkPile, lightPile);
 
 
@@ -766,7 +882,6 @@ this.TournamentWizard = function(eventData, gameCreated) {
     var warningMessages = [];
     var downgradedPlayers = [];
 
-    assignByes(darkPile, lightPile);
 
     // Now the tricky part...pulling cards off the 2 piles and making sure nobody has the same matchup again
     // Get the first card off of each pile
