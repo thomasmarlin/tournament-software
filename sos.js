@@ -274,6 +274,9 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
     var tournamentWizard = new TournamentService.TournamentWizard($scope.currentEvent, gameCreated);
     var warningMessages = tournamentWizard.newRound();
+    var lastDecisions = tournamentWizard.getLastRoundDecisions();
+    var currentRound = UtilService.getCurrentRound($scope.currentEvent);
+    currentRound.decisions = lastDecisions;
 
     if (warningMessages.length > 0) {
       MessageBoxService.infoMessage(
@@ -310,6 +313,36 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   }
 
+  $scope.explainPairings = function() {
+    var selectedRound = getSelectedRound();
+
+    var modalDialog = $uibModal.open({
+        template: explainPairingsHTML,
+        controller: 'ExplainPairingsController',
+        scope: $scope,
+        resolve: {
+          gameNumber: function() {
+            return selectedRound.num;
+          },
+          decisions: function() {
+            return selectedRound.decisions;
+          }
+        }
+      }
+    );
+
+  }
+
+  function getSelectedRound() {
+    var selectedRound = null;
+    for (var i = 0; i < $scope.currentEvent.rounds.length; i++) {
+      var round = $scope.currentEvent.rounds[i];
+      if (round.active) {
+        selectedRound = round;
+      }
+    }
+    return selectedRound;
+  }
 
   $scope.deleteRound = function() {
     var currentRound = $scope.getCurrentRound();
@@ -321,13 +354,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     var lastRoundIndex = numRounds -1;
     var lastRound = $scope.currentEvent.rounds[lastRoundIndex];
 
-    var selectedRound = null;
-    for (var i = 0; i < $scope.currentEvent.rounds.length; i++) {
-      var round = $scope.currentEvent.rounds[i];
-      if (round.active) {
-        selectedRound = round;
-      }
-    }
+    var selectedRound = getSelectedRound();
 
     if (!selectedRound) {
       MessageBoxService.errorMessage("There isn't a 'round' selected. Try clicking on one of the 'round' tabs and try again.");

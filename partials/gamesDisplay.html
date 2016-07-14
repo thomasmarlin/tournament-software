@@ -84,6 +84,7 @@
 
         <button data-ng-if="currentEvent.rounds.length > 0 && canAddRemoveGames()" class="btn btn-default" style="float:right; margin-right: 5px;" data-ng-click="deleteRound()">Delete Matchups</button>
         <button data-ng-if="currentEvent.rounds.length > 0 && canAddRemoveGames()" class="btn btn-default" style="float:right; margin-right: 15px" data-ng-click="createGame()">Add Single Game</button>
+        <button data-ng-if="currentEvent.rounds.length > 0 && canAddRemoveGames()" class="btn btn-default" style="float:right; margin-right: 15px" data-ng-click="explainPairings()">Pairing Log</button>
         <div style="clear:both"></div>
 
       </div>

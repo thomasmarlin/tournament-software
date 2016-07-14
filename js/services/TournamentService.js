@@ -29,6 +29,18 @@ this.TournamentWizard = function(eventData, gameCreated) {
     return getCurrentRoundNumber() % 2;
   }
 
+  var _decisionList = [];
+  function clearDecisions() {
+    _decisionList = [];
+  }
+  function logDecision(decisionString) {
+    LoggerService.decision(decisionString);
+    _decisionList.push(decisionString);
+  }
+  this.getLastRoundDecisions = function() {
+    return _decisionList;
+  }
+
 
   /**
    * Start a new Round of the tournament, creating all matchups
@@ -37,19 +49,21 @@ this.TournamentWizard = function(eventData, gameCreated) {
    */
   this.newRound = function() {
 
+    clearDecisions();
+
     // Make sure all of our totals are up-to-date before generating new pairings
     StatsService.updateVictoryPoints(eventData);
 
     // Bump the round
     var newRoundNum = getCurrentRoundNumber() + 1;
-    LoggerService.decision("-------- Starting New Round (" + newRoundNum + ")--------");
-    if (!isOddRound()) {
-      LoggerService.decision("Piles remain the same this round, but Dark/Light will swap");
-    }
-
     eventData.rounds.push({
       num: newRoundNum
     });
+
+    logDecision("-------- Starting New Game (" + newRoundNum + ")--------");
+    if (!isOddRound()) {
+      logDecision("Piles remain the same this game, but Dark/Light will swap");
+    }
 
     // Start matchups for the next round
     var warningMessages = newMatchups();
@@ -90,10 +104,10 @@ this.TournamentWizard = function(eventData, gameCreated) {
     var putDarkPile = true;
     if (randBetweenZeroAndOne > 0.5) {
       putDarkPile = false;
-      LoggerService.decision("First command card to light pile!");
+      logDecision("Light side was randomly chosen for the first command card! Random number was: " + randBetweenZeroAndOne);
     } else {
       putDarkPile = true;
-      LoggerService.decision("First command card to dark pile!");
+      logDecision("Dark side was randomly chosen for the first command card!  Random number was: " + randBetweenZeroAndOne);
     }
 
     for (var i = 0; i < players.length; i++) {
@@ -209,12 +223,12 @@ this.TournamentWizard = function(eventData, gameCreated) {
     if (lightPile.length > darkPile.length) {
       var splicedPlayer = lightPile.splice(lightPile.length - 1, 1);
       darkPile.push(splicedPlayer[0]);
-      LoggerService.decision("Too many light players (likely due to a drop). Moving a light player into the dark pile.");
+      logDecision("Too many light players (likely due to a drop). Moving a light player into the dark pile.");
       MessageBoxService.errorMessage("Too many light players present (likely due to a drop). The lowest-rated light player has been moved to the dark side");
     } else if (darkPile.length > lightPile.length) {
       var splicedPlayer = darkPlayer.splice(darkPlayer.length - 1, 1);
       lightPile.push(splicedPlayer[0]);
-      LoggerService.decision("Too many dark players (likely due to a drop). Moving a dark player into the light pile.");
+      logDecision("Too many dark players (likely due to a drop). Moving a dark player into the light pile.");
       MessageBoxService.errorMessage("Too many dark players present (likely due to a drop). The lowest-rated dark player has been moved to the light side");
     }
   }
@@ -233,15 +247,15 @@ this.TournamentWizard = function(eventData, gameCreated) {
       buildPilesSwapAllegience(players, darkPile, lightPile);
     }
 
-    LoggerService.decision("Separated Command cards into piles:");
-    LoggerService.decision("  -- Dark -- ");
+    logDecision("Separated Command cards into piles:");
+    logDecision("  -- Dark -- ");
     for (var i = 0; i < darkPile.length; i++) {
-      LoggerService.decision("  " + i + ". " + UtilService.playerSummaryString(darkPile[i]));
+      logDecision("  " + i + ". " + UtilService.playerSummaryString(darkPile[i]));
     }
-    LoggerService.decision("");
-    LoggerService.decision("  -- Light -- ");
+    logDecision("");
+    logDecision("  -- Light -- ");
     for (var i = 0; i < lightPile.length; i++) {
-      LoggerService.decision("  " + i + ". " + UtilService.playerSummaryString(lightPile[i]));
+      logDecision("  " + i + ". " + UtilService.playerSummaryString(lightPile[i]));
     }
 
   };
@@ -294,7 +308,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
     LoggerService.log("Assigning Byes...");
 
     if ((players.length % 2) === 0) {
-      LoggerService.decision("Even number of active players. No byes required");
+      logDecision("Even number of active players. No byes required");
       return;
     }
 
@@ -307,14 +321,14 @@ this.TournamentWizard = function(eventData, gameCreated) {
       var downgradedPlayers = [];
       var candidatePlayer = getWorstPlayerWithByeCount(players, minPlayerByeCount);
       if (candidatePlayer) {
+        logDecision("Lowest-rank player (with fewest byes) is getting a bye: " + candidatePlayer.name);
         addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, players, players, false);
         byeAssigned = true;
-        LoggerService.decision("Lowest-rank player (with fewest byes) is getting a bye: " + candidatePlayer.name);
       }
 
       if (!byeAssigned) {
         // Apparently, everybody has a bye count of minPlayerByeCount.  See who has the next-fewest byes
-        LoggerService.decision("Everyone has a bye count of : " + minPlayerByeCount + ".  Checking for bye counts of: " + minPlayerByeCount + 1);
+        logDecision("Everyone has a bye count of : " + minPlayerByeCount + ".  Checking for bye counts of: " + minPlayerByeCount + 1);
         minPlayerByeCount++;
       }
     }
@@ -341,17 +355,17 @@ this.TournamentWizard = function(eventData, gameCreated) {
         continue;
 
         // No byes necessary!
-        LoggerService.decision("No byes necessary!");
+        logDecision("No byes necessary!");
 
       } else if (darkPile.length > lightPile.length) {
 
-        LoggerService.decision("Dark pile has more players. Trying to assign bye to dark...")
+        logDecision("Dark pile has more players. Trying to assign bye to dark...")
         idealPile = darkPile;
         backupPile = lightPile;
 
       } else if (lightPile.length > darkPile.length) {
 
-        LoggerService.decision("Light pile has more players. Trying to assign bye to light...");
+        logDecision("Light pile has more players. Trying to assign bye to light...");
         idealPile = lightPile;
         backupPile = darkPile;
       }
@@ -362,11 +376,11 @@ this.TournamentWizard = function(eventData, gameCreated) {
         if (idealPile === darkPile) {
           addNewGame(candidatePlayer, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile, false);
           byeAssigned = true;
-          LoggerService.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);
+          logDecision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);
         } else {
           addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, darkPile, lightPile, false);
           byeAssigned = true;
-          LoggerService.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);
+          logDecision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);
         }
       }
 
@@ -377,18 +391,18 @@ this.TournamentWizard = function(eventData, gameCreated) {
           if (backupPile === darkPile) {
             addNewGame(candidatePlayer, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile, false);
             byeAssigned = true;
-            LoggerService.decision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);
+            logDecision("Lowest-rank dark player (with fewest byes) is getting a bye: " + candidatePlayer.name);
           } else {
             addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, darkPile, lightPile, false);
             byeAssigned = true;
-            LoggerService.decision("Lowest-rank dark player (fewest byes) is getting a bye: " + candidatePlayer.name);
+            logDecision("Lowest-rank dark player (fewest byes) is getting a bye: " + candidatePlayer.name);
           }
         }
       }
 
       if (!byeAssigned) {
         // Apparently, everybody has a bye count of minPlayerByeCount.  See who has the next-fewest byes
-        LoggerService.decision("Everyone has a bye count of : " + minPlayerByeCount + ".  Checking for bye counts of: " + minPlayerByeCount + 1);
+        logDecision("Everyone has a bye count of : " + minPlayerByeCount + ".  Checking for bye counts of: " + minPlayerByeCount + 1);
         minPlayerByeCount++;
       }
     }
@@ -861,7 +875,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
     var currentRound = getCurrentRound();
     var currentRoundNum = currentRound.num;
-    LoggerService.decision("Generating matchups for round: " + currentRoundNum);
+    logDecision("Generating matchups for round: " + currentRoundNum);
 
     var allPlayerList = [];
     for (var i = 0; i < eventData.players.length; i++) {
@@ -887,6 +901,10 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
     // Set a warning flag for the worst-case scenarios
     var warningMessages = [];
+
+    // Keep track of which player has been downgraded. If we ever try to
+    // downgrade this player again without creating a game in between,
+    // then we need to abort (likely in a loop)
     var downgradedPlayers = [];
 
 
@@ -900,16 +918,22 @@ this.TournamentWizard = function(eventData, gameCreated) {
       if (playerDark == null) {
 
         // Light side gets a bye!
+        logDecision("Light side has an extra player somehow.  This must be manually corrected by the TD");
+
         LoggerService.error("Light side getting an extra bye!  This should not happen I don't think!");
         addNewGame(getByePlayer(), playerLight, currentRound, downgradedPlayers, darkPile, lightPile, false);
-        warningMessages.push("Light side players recieved an extra bye. 2 Light players will have to play eachother.");
+        warningMessages.push("Light side players recieved an extra bye. There were not enough dark side players to play against.");
+        downgradedPlayers = [];
 
       } else if (playerLight == null) {
 
         // Dark gets a bye!
+        logDecision("Dark side has an extra player somehow.  This must be manually corrected by the TD");
+
         LoggerService.error("Dark side getting an extra bye!  This should not happen I don't think!");
         addNewGame(playerDark, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile, false);
-        warningMessages.push("Dark side players recieved an extra bye. 2 Dark players will have to play eachother.");
+        warningMessages.push("Dark side players recieved an extra bye. There were not enough light side players to play against.");
+        downgradedPlayers = [];
 
       } else {
 
@@ -918,20 +942,22 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
           // Sweet! Haven't played this matchup yet.  Commit it!
           addNewGame(playerDark, playerLight, currentRound, downgradedPlayers, darkPile, lightPile, false);
+          downgradedPlayers = [];
 
         } else {
 
           // They've already played this matchup...see if the reverse is OK
           if (!hasPlayedSameAllegiance(playerLight, true, playerDark)) {
 
-            LoggerService.decision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played. Swapping sides...");
+            logDecision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played. Swapping sides...");
             // No problem!  They haven't played this match yet
             // Just swap allegiances for this matchup
             addNewGame(playerLight, playerDark, currentRound, downgradedPlayers, darkPile, lightPile, false);
+            downgradedPlayers = [];
 
           } else {
 
-            LoggerService.decision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played (both sides). Attempting to move a player down...");
+            logDecision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played (both sides). Attempting to move lower-ranked player down...");
 
             // Bummer...they've already played both sides against eachother.
             // Pick the lower ranking of the two players and drop them down in the rankings 1 spot.
@@ -950,9 +976,11 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
               // Ruh Roh...The players have already played eachother AND downgrading players didn't help.
               // Go ahead and create this game as-is and fire up a warning after we've finished.
-              LoggerService.error("Ruh Roh...The players have already played eachother AND downgrading players didn't help... Compromising for now.");
-              warningMessages.push("Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning anyway.");
+              LoggerService.error("Ruh Roh...Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning anyway and TD can resolve...");
+              logDecision("Ruh Roh...Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning anyway and TD can resolve...");
+              warningMessages.push("Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning anyway. The TD must resolve this manually.");
               addNewGame(playerDark, playerLight, currentRound, downgradedPlayers, darkPile, lightPile, false);
+              downgradedPlayers = [];
 
             }
           }
@@ -964,7 +992,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
   }
 
   function downgradePlayerRanking(playerToMoveDown, pile) {
-    LoggerService.decision("Trying to move player down a ranking: " + playerToMoveDown.name);//JSON.stringify(playerToMoveDown));
+    logDecision("Trying to move player down a ranking: " + playerToMoveDown.name);//JSON.stringify(playerToMoveDown));
 
     for (var i = 0; i < pile.length; i++) {
       var pilePlayer = pile[i];
@@ -984,7 +1012,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
 
   function addNewGame(playerDark, playerLight, round, downgradedPlayers, darkPile, lightPile, updatePointsWhenDone) {
-    LoggerService.decision("Creating game for round " + getCurrentRoundNumber() + ". Dark: " + playerDark.name + " Light: " + playerLight.name);
+    logDecision("Creating next game for game #" + getCurrentRoundNumber() + ". Dark: " + playerDark.name + " Light: " + playerLight.name);
 
     var winner = null;
     if (isByePlayer(playerDark)) {
@@ -1037,7 +1065,9 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
     var personSortFunc = StatsService.getSortFunc(eventData.mode);
 
-    if (personSortFunc(playerA, playerB) < 0) {
+    // Note:  Sort function is reversed from normal. Instead of lowest-first
+    //        it sorts as highest-first
+    if (personSortFunc(playerA, playerB) > 0) {
       return playerA;
     }
     return playerB;
