@@ -261,11 +261,28 @@ this.TournamentWizard = function(eventData, gameCreated) {
   };
 
 
-  function getNextPlayer(pile) {
+  function getNextPlayer(pile, playersToSkip) {
     if (pile.length == 0) {
       return null;
     }
-    return pile[0];
+
+    // Go through all of the players, skipping them if they are in the list
+    for (var i = 0; i < pile.length; i++) {
+      var player = pile[i];
+      var skipPlayer = false;
+
+      for (var j = 0; j < playersToSkip.length; j++) {
+        var playerToSkip = playersToSkip[j];
+        if (UtilService.peopleEqual(player, playerToSkip)) {
+          skipPlayer = true;
+        }
+      }
+
+      if (!skipPlayer) {
+        return player;
+      }
+    }
+    return null;
   }
 
   function getPlayerByeCount(player) {
@@ -318,11 +335,10 @@ this.TournamentWizard = function(eventData, gameCreated) {
     var byeAssigned = false;
     while (!byeAssigned) {
 
-      var downgradedPlayers = [];
       var candidatePlayer = getWorstPlayerWithByeCount(players, minPlayerByeCount);
       if (candidatePlayer) {
         logDecision("Lowest-rank player (with fewest byes) is getting a bye: " + candidatePlayer.name);
-        addNewGame(getByePlayer(), candidatePlayer, currentRound, downgradedPlayers, players, players, false);
+        addNewGame(getByePlayer(), candidatePlayer, currentRound, players, players, false);
         byeAssigned = true;
       }
 
@@ -587,8 +603,8 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
 
       // Match A:
-      var matchAGame1 = addNewGame(seed1, seed8, round1, [], [], [], false);
-      var matchAGame2 = addNewGame(seed8, seed1, round1, [], [], [], false);
+      var matchAGame1 = addNewGame(seed1, seed8, round1, [], [], false);
+      var matchAGame2 = addNewGame(seed8, seed1, round1, [], [], false);
       eventData.matches.matchA = {
         game1: matchAGame1,
         game2: matchAGame2,
@@ -598,8 +614,8 @@ this.TournamentWizard = function(eventData, gameCreated) {
       }
 
       // Match B:
-      var matchBGame1 = addNewGame(seed4, seed5, round1, [], [], [], false);
-      var matchBGame2 = addNewGame(seed5, seed4, round1, [], [], [], false);
+      var matchBGame1 = addNewGame(seed4, seed5, round1, [], [], false);
+      var matchBGame2 = addNewGame(seed5, seed4, round1, [], [], false);
       eventData.matches.matchB = {
         game1: matchBGame1,
         game2: matchBGame2,
@@ -609,8 +625,8 @@ this.TournamentWizard = function(eventData, gameCreated) {
       }
 
       // Match C:
-      var matchCGame1 = addNewGame(seed2, seed7, round1, [], [], [], false);
-      var matchCGame2 = addNewGame(seed7, seed2, round1, [], [], [], false);
+      var matchCGame1 = addNewGame(seed2, seed7, round1, [], [], false);
+      var matchCGame2 = addNewGame(seed7, seed2, round1, [], [], false);
       eventData.matches.matchC = {
         game1: matchCGame1,
         game2: matchCGame2,
@@ -620,8 +636,8 @@ this.TournamentWizard = function(eventData, gameCreated) {
       }
 
       // Match D:
-      var matchDGame1 = addNewGame(seed3, seed6, round1, [], [], [], false);
-      var matchDGame2 = addNewGame(seed6, seed3, round1, [], [], [], false);
+      var matchDGame1 = addNewGame(seed3, seed6, round1, [], [], false);
+      var matchDGame2 = addNewGame(seed6, seed3, round1, [], [], false);
       eventData.matches.matchD = {
         game1: matchDGame1,
         game2: matchDGame2,
@@ -641,8 +657,8 @@ this.TournamentWizard = function(eventData, gameCreated) {
         var round2 = UtilService.getRoundNum(2, eventData);
 
         // Match E:
-        var matchEGame1 = addNewGame(winnerA, winnerB, round2, [], [], [], false);
-        var matchEGame2 = addNewGame(winnerB, winnerA, round2, [], [], [], false);
+        var matchEGame1 = addNewGame(winnerA, winnerB, round2, [], [], false);
+        var matchEGame2 = addNewGame(winnerB, winnerA, round2, [], [], false);
         eventData.matches.matchE = {
           game1: matchEGame1,
           game2: matchEGame2,
@@ -663,8 +679,8 @@ this.TournamentWizard = function(eventData, gameCreated) {
         var round2 = UtilService.getRoundNum(2, eventData);
 
         // Match F:
-        var matchFGame1 = addNewGame(winnerC, winnerD, round2, [], [], [], false);
-        var matchFGame2 = addNewGame(winnerD, winnerC, round2, [], [], [], false);
+        var matchFGame1 = addNewGame(winnerC, winnerD, round2, [], [], false);
+        var matchFGame2 = addNewGame(winnerD, winnerC, round2, [], [], false);
         eventData.matches.matchF = {
           game1: matchFGame1,
           game2: matchFGame2,
@@ -685,8 +701,8 @@ this.TournamentWizard = function(eventData, gameCreated) {
         var round3 = UtilService.getRoundNum(3, eventData);
 
         // Match G:
-        var matchGGame1 = addNewGame(winnerE, winnerF, round3, [], [], [], false);
-        var matchGGame2 = addNewGame(winnerF, winnerE, round3, [], [], [], false);
+        var matchGGame1 = addNewGame(winnerE, winnerF, round3, [], [], false);
+        var matchGGame2 = addNewGame(winnerF, winnerE, round3, [], [], false);
         eventData.matches.matchG = {
           game1: matchGGame1,
           game2: matchGGame2,
@@ -902,28 +918,24 @@ this.TournamentWizard = function(eventData, gameCreated) {
     // Set a warning flag for the worst-case scenarios
     var warningMessages = [];
 
-    // Keep track of which player has been downgraded. If we ever try to
-    // downgrade this player again without creating a game in between,
-    // then we need to abort (likely in a loop)
-    var downgradedPlayers = [];
-
 
     // Now the tricky part...pulling cards off the 2 piles and making sure nobody has the same matchup again
     // Get the first card off of each pile
     while (darkPile.length > 0 || lightPile.length > 0) {
 
       // Get the next available players from the pile
-      var playerDark = getNextPlayer(darkPile);
-      var playerLight = getNextPlayer(lightPile);
+      var playerDark = getNextPlayer(darkPile, []);
+      var playerLight = getNextPlayer(lightPile, []);
+
       if (playerDark == null) {
 
         // Light side gets a bye!
         logDecision("Light side has an extra player somehow.  This must be manually corrected by the TD");
 
         LoggerService.error("Light side getting an extra bye!  This should not happen I don't think!");
-        addNewGame(getByePlayer(), playerLight, currentRound, downgradedPlayers, darkPile, lightPile, false);
+        addNewGame(getByePlayer(), playerLight, currentRound, darkPile, lightPile, false);
         warningMessages.push("Light side players recieved an extra bye. There were not enough dark side players to play against.");
-        downgradedPlayers = [];
+        continue;
 
       } else if (playerLight == null) {
 
@@ -931,88 +943,138 @@ this.TournamentWizard = function(eventData, gameCreated) {
         logDecision("Dark side has an extra player somehow.  This must be manually corrected by the TD");
 
         LoggerService.error("Dark side getting an extra bye!  This should not happen I don't think!");
-        addNewGame(playerDark, getByePlayer(), currentRound, downgradedPlayers, darkPile, lightPile, false);
+        addNewGame(playerDark, getByePlayer(), currentRound, darkPile, lightPile, false);
         warningMessages.push("Dark side players recieved an extra bye. There were not enough light side players to play against.");
-        downgradedPlayers = [];
+        continue;
+
+      }
+
+
+      //
+      // We have 2 opponents.  Let's make sure they are ok
+      //
+
+      if (createMatchupForPlayers(playerDark, playerLight, currentRound, darkPile, lightPile)) {
+
+        // Great! Game has been created for these players!
+        LoggerService.log("Game created successfully!");
 
       } else {
 
-        // We have 2 opponents.  Let's make sure they are ok
-        if (!hasPlayedSameAllegiance(playerDark, true, playerLight)) {
+        // Coudn't pair those 2 players yet. Try pairing down dark/light/dark/light/etc until we get a valid match (or run out of matchups)
+        logDecision("Matchup: " + playerDark.name + " & " + playerLight.name + " already played (both sides). Attempting to pair-down a player...");
 
-          // Sweet! Haven't played this matchup yet.  Commit it!
-          addNewGame(playerDark, playerLight, currentRound, downgradedPlayers, darkPile, lightPile, false);
-          downgradedPlayers = [];
-
+        if (createMatchupWithPairdowns(playerDark, playerLight, currentRound, darkPile, lightPile)) {
+          LoggerService.log("Successfully created matchup via pairdowns!");
         } else {
 
-          // They've already played this matchup...see if the reverse is OK
-          if (!hasPlayedSameAllegiance(playerLight, true, playerDark)) {
+          // Ruh Roh...The players have already played eachother AND pairing-down players didn't help.
+          // Go ahead and create this game as-is and fire up a warning after we've finished.
+          LoggerService.error("Ruh Roh...Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning players to eachother anyway.");
+          logDecision("Ruh Roh...Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning players to eachother anyway.");
+          warningMessages.push("Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning players to eachother anyway.");
 
-            logDecision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played. Swapping sides...");
-            // No problem!  They haven't played this match yet
-            // Just swap allegiances for this matchup
-            addNewGame(playerLight, playerDark, currentRound, downgradedPlayers, darkPile, lightPile, false);
-            downgradedPlayers = [];
-
-          } else {
-
-            logDecision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played (both sides). Attempting to move lower-ranked player down...");
-
-            // Bummer...they've already played both sides against eachother.
-            // Pick the lower ranking of the two players and drop them down in the rankings 1 spot.
-            var lowerRankedPlayer = getLowerRankedPlayer(playerDark, playerLight);
-            if (downgradedPlayers.indexOf(lowerRankedPlayer) == -1) {
-
-              // Haven't tried to downgrade this guy yet!...downgrade him now and try again
-              if (UtilService.peopleEqual(lowerRankedPlayer, playerDark)) {
-                downgradePlayerRanking(playerDark, darkPile);
-              } else if (UtilService.peopleEqual(lowerRankedPlayer,playerLight)) {
-                downgradePlayerRanking(playerLight, lightPile);
-              }
-              downgradedPlayers.push(lowerRankedPlayer);
-
-            } else {
-
-              // Ruh Roh...The players have already played eachother AND downgrading players didn't help.
-              // Go ahead and create this game as-is and fire up a warning after we've finished.
-              LoggerService.error("Ruh Roh...Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning anyway and TD can resolve...");
-              logDecision("Ruh Roh...Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning anyway and TD can resolve...");
-              warningMessages.push("Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning anyway. The TD must resolve this manually.");
-              addNewGame(playerDark, playerLight, currentRound, downgradedPlayers, darkPile, lightPile, false);
-              downgradedPlayers = [];
-
-            }
-          }
+          addNewGame(playerDark, playerLight, currentRound, darkPile, lightPile, false);
         }
+
       }
+
     }
 
     return warningMessages;
   }
 
-  function downgradePlayerRanking(playerToMoveDown, pile) {
-    logDecision("Trying to move player down a ranking: " + playerToMoveDown.name);//JSON.stringify(playerToMoveDown));
 
-    for (var i = 0; i < pile.length; i++) {
-      var pilePlayer = pile[i];
-      if (UtilService.peopleEqual(pilePlayer, playerToMoveDown)) {
-        if (pile.length > (i+1)) {
-          pile[i] = pile[i+1];
-          pile[i+1] = playerToMoveDown;
-          LoggerService.log("Succesfully downgraded player...");
-          return true;
+  /**
+   * Create matchups by pairing down players
+   * @param   originalDark          Dark Player that we want in the game
+   * @param   originalLight         Light Player that we want in the game
+   * @param   currentRound          Current round we are assigning a game to
+   * @param   darkPile              Players in the 'dark' pile of players
+   * @param   lightPile             Players in the 'light' pile of players
+   *
+   * @return  false if no matchup possible. true if matchup was created
+   */
+  function createMatchupWithPairdowns(originalDark, originalLight, currentRound, darkPile, lightPile) {
+
+    var noMoreLightPlayers = false;
+    var noMoreDarkPlayers = false;
+
+    var lightPlayersToSkip = [ originalLight ];
+    var darkPlayersToSkip = [ originalDark ];
+
+    // Keep looping until we run out of possible people to pair down
+    while (!(noMoreDarkPlayers && noMoreLightPlayers)) {
+
+      var darkPlayer = originalDark;
+      var lightPlayer = originalLight;
+
+
+      // Figure out which side of the force to pair-down on
+      if (!noMoreDarkPlayers && (lightPlayersToSkip.length >= darkPlayersToSkip.length)) {
+
+        // Try skipping a player in the dark pile and match it up with the original light player
+        darkPlayer = getNextPlayer(darkPile, darkPlayersToSkip);
+        if (darkPlayer) {
+          // Next time around, skip this particular player
+          darkPlayersToSkip.push(darkPlayer);
         } else {
-          LoggerService.error("*sigh....nobody to swap places with...");
-          return false;
+          // Out of dark side players!
+          noMoreDarkPlayers = true;
+          continue;
         }
+
+      } else {
+
+        // Try skipping a player in the light pile and match it up with the original dark player
+        lightPlayer = getNextPlayer(lightPile, lightPlayersToSkip);
+        if (lightPlayer) {
+          // Next time around, skip this particular player
+          lightPlayersToSkip.push(lightPlayer);
+        } else {
+          // Out of light side players!
+          noMoreLightPlayers = true;
+          continue;
+        }
+
+      }
+
+      // Try to create the pairiing!
+      if (createMatchupForPlayers(darkPlayer, lightPlayer, currentRound, darkPile, lightPile)) {
+        return true;
+      } else {
+        logDecision("Matchup: " + darkPlayer.name + " & " + lightPlayer.name + " already played (both sides). Attempting to pair-down a player...");
       }
     }
+
+    LoggerService.error("Pair-down is not possible. Have tried all combinations below the current players.");
+    return false;
+
   }
 
 
-  function addNewGame(playerDark, playerLight, round, downgradedPlayers, darkPile, lightPile, updatePointsWhenDone) {
-    logDecision("Creating next game for game #" + getCurrentRoundNumber() + ". Dark: " + playerDark.name + " Light: " + playerLight.name);
+  function createMatchupForPlayers(playerDark, playerLight, currentRound, darkPile, lightPile) {
+    if (!hasPlayedSameAllegiance(playerDark, true, playerLight)) {
+
+      // Sweet! Haven't played this matchup yet.  Commit it!
+      addNewGame(playerDark, playerLight, currentRound, darkPile, lightPile, false);
+      return true;
+
+    } else if (!hasPlayedSameAllegiance(playerLight, true, playerDark)) {
+
+      logDecision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played. Swapping sides...");
+      // No problem!  They haven't played this match yet
+      // Just swap allegiances for this matchup
+      addNewGame(playerLight, playerDark, currentRound, darkPile, lightPile, false);
+      return true;
+    }
+
+    return false;
+  }
+
+
+  function addNewGame(playerDark, playerLight, round, darkPile, lightPile, updatePointsWhenDone) {
+    logDecision("Creating game:  Dark: " + playerDark.name + ",    Light: " + playerLight.name);
 
     var winner = null;
     if (isByePlayer(playerDark)) {
@@ -1036,7 +1098,6 @@ this.TournamentWizard = function(eventData, gameCreated) {
     // Also, now that we have a good matchup, clear out the past state
     removePlayerFromPiles(playerDark, darkPile, lightPile);
     removePlayerFromPiles(playerLight, darkPile, lightPile);
-    downgradedPlayers.splice(0, downgradedPlayers.length);
 
     // Store the new game!
     var createdGame = gameCreated(game);
