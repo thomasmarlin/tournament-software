@@ -226,7 +226,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
       logDecision("Too many light players (likely due to a drop). Moving a light player into the dark pile.");
       MessageBoxService.errorMessage("Too many light players present (likely due to a drop). The lowest-rated light player has been moved to the dark side");
     } else if (darkPile.length > lightPile.length) {
-      var splicedPlayer = darkPlayer.splice(darkPlayer.length - 1, 1);
+      var splicedPlayer = darkPile.splice(darkPile.length - 1, 1);
       lightPile.push(splicedPlayer[0]);
       logDecision("Too many dark players (likely due to a drop). Moving a dark player into the light pile.");
       MessageBoxService.errorMessage("Too many dark players present (likely due to a drop). The lowest-rated dark player has been moved to the light side");
@@ -891,7 +891,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
     var currentRound = getCurrentRound();
     var currentRoundNum = currentRound.num;
-    logDecision("Generating matchups for round: " + currentRoundNum);
+    logDecision("Generating matchups for game: " + currentRoundNum);
 
     var allPlayerList = [];
     for (var i = 0; i < eventData.players.length; i++) {
@@ -962,10 +962,12 @@ this.TournamentWizard = function(eventData, gameCreated) {
       } else {
 
         // Coudn't pair those 2 players yet. Try pairing down dark/light/dark/light/etc until we get a valid match (or run out of matchups)
-        logDecision("Matchup: " + playerDark.name + " & " + playerLight.name + " already played (both sides). Attempting to pair-down a player...");
+        logDecision("Matchup: " + playerDark.name + " & " + playerLight.name + " already played. Attempting to pair-down a player...");
 
         if (createMatchupWithPairdowns(playerDark, playerLight, currentRound, darkPile, lightPile)) {
+
           LoggerService.log("Successfully created matchup via pairdowns!");
+
         } else {
 
           // Ruh Roh...The players have already played eachother AND pairing-down players didn't help.
@@ -984,6 +986,85 @@ this.TournamentWizard = function(eventData, gameCreated) {
     return warningMessages;
   }
 
+  /**
+   * Create matchups by pairing down players
+   * @param   originalDark          Dark Player that we want in the game
+   * @param   originalLight         Light Player that we want in the game
+   * @param   currentRound          Current round we are assigning a game to
+   * @param   darkPile              Players in the 'dark' pile of players
+   * @param   lightPile             Players in the 'light' pile of players
+   *
+   * @return  false if no matchup possible. true if matchup was created
+   */
+  function createMatchupWithPairdowns(originalDark, originalLight, currentRound, darkPile, lightPile) {
+    var keepingLight = true;
+
+    var lowerRankedPlayer = getLowerRankedPlayer(originalDark, originalLight);
+    if (UtilService.peopleEqual(lowerRankedPlayer, originalDark)) {
+
+      logDecision("Player: " + originalLight.name + " is rated higher. Pairing against next opponent in dark pile...");
+      var keepingLight = true;
+      var playersToSkip = [originalDark];
+      var possibleOpponents = darkPile;
+      return createMatchupWithPairdownsHelper(originalLight, keepingLight, playersToSkip, currentRound, possibleOpponents, darkPile, lightPile);
+
+    } else {
+
+      logDecision("Player: " + originalDark.name + " is rated higher. Pairing against next opponent in light pile...");
+      var keepingLight = false;
+      var playersToSkip = [originalLight];
+      var possibleOpponents = lightPile;
+      return createMatchupWithPairdownsHelper(originalDark, keepingLight, playersToSkip, currentRound, possibleOpponents, darkPile, lightPile);
+
+    }
+  }
+
+
+  /**
+   * Attempt to create matchups pairing up 'player' + each player in 'possibleOpponents'
+   *
+   * @param   player              Player that we want in the game
+   * @param   playerIsLight       Whether or not the player is light or not
+   * @param   playersToSkip       List of players in the possibleOpponents that we want to skip
+   * @param   currentRound        Current round
+   * @param   possibleOpponents   Possible opponents for 'player' to play
+   * @param   darkPile            Players in the 'dark' pile of players
+   * @param   lightPile           Players in the 'light' pile of players
+   *
+   * @return  false if no matchup possible. true if matchup was created
+   */
+  function createMatchupWithPairdownsHelper(player, playerIsLight, playersToSkip, currentRound, possibleOpponents, darkPile, lightPile) {
+
+    var moreOpponents = true;
+    while (moreOpponents) {
+      var opponent = getNextPlayer(possibleOpponents, playersToSkip);
+      if (opponent) {
+
+        var lightPlayer = player;
+        var darkPlayer = opponent;
+        if (!playerIsLight) {
+          lightPlayer = opponent;
+          darkPlayer = player;
+        }
+
+        // Try to create the pairiing!
+        if (createMatchupForPlayers(darkPlayer, lightPlayer, currentRound, darkPile, lightPile)) {
+          return true;
+        } else {
+          logDecision("Matchup: " + darkPlayer.name + " & " + lightPlayer.name + " already played. Attempting to use next opposing player...");
+          playersToSkip.push(opponent);
+        }
+
+      } else {
+        moreOpponents = false;
+      }
+    }
+
+    LoggerService.error("Pair-down is not possible. Have tried all combinations below the current players.");
+    return false;
+  }
+
+
 
   /**
    * Create matchups by pairing down players
@@ -995,6 +1076,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
    *
    * @return  false if no matchup possible. true if matchup was created
    */
+   /*
   function createMatchupWithPairdowns(originalDark, originalLight, currentRound, darkPile, lightPile) {
 
     var noMoreLightPlayers = false;
@@ -1049,8 +1131,8 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
     LoggerService.error("Pair-down is not possible. Have tried all combinations below the current players.");
     return false;
-
   }
+  */
 
 
   function createMatchupForPlayers(playerDark, playerLight, currentRound, darkPile, lightPile) {
@@ -1060,9 +1142,10 @@ this.TournamentWizard = function(eventData, gameCreated) {
       addNewGame(playerDark, playerLight, currentRound, darkPile, lightPile, false);
       return true;
 
-    } else if (!hasPlayedSameAllegiance(playerLight, true, playerDark)) {
+    } else if (isOddRound() && !hasPlayedSameAllegiance(playerLight, true, playerDark)) {
 
-      logDecision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played. Swapping sides...");
+      logDecision("Matchup between " + playerDark.name + " & " + playerLight.name + " already played. Players are swapping sides this round...");
+
       // No problem!  They haven't played this match yet
       // Just swap allegiances for this matchup
       addNewGame(playerLight, playerDark, currentRound, darkPile, lightPile, false);
