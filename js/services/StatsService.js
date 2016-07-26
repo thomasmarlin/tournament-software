@@ -236,6 +236,54 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
 
 
 
+  function shuffleEqualVpPlayers(players) {
+
+    var fullShuffledList = [];
+
+    var currentVp = -1;
+    var playersAtCurrentVp = [];
+    for (var i = 0; i < players.length; i++) {
+      var player = players[i];
+      if ((currentVp == -1) || (player.vp == currentVp)) {
+        // First player OR same vp as last player
+        currentVp = player.vp;
+        playersAtCurrentVp.push(player);
+      } else {
+        // New set of players
+
+        // First, clear out all of the previous ones
+        var shuffled = UtilService.shuffle(playersAtCurrentVp);
+        for (var j = 0; j < shuffled.length; j++) {
+          var shuffledPlayer = shuffled[j];
+          fullShuffledList.push(shuffledPlayer);
+        }
+
+        // Next, start a new list which will end when the currentVp changes
+        // or we reach the end of our list
+        currentVp = player.vp;
+        playersAtCurrentVp = [player];
+      }
+    }
+
+    var shuffled = UtilService.shuffle(playersAtCurrentVp);
+    for (var j = 0; j < shuffled.length; j++) {
+      var shuffledPlayer = shuffled[j];
+      fullShuffledList.push(shuffledPlayer);
+    }
+
+    // Remove all players from the original list:
+    players.splice(0, players.length);
+
+    // Re-add the shuffled list
+    for (var i = 0; i < fullShuffledList.length; i++) {
+      var shuffledPlayer = fullShuffledList[i];
+      players.push(shuffledPlayer);
+    }
+
+  }
+  this.shuffleEqualVpPlayers = shuffleEqualVpPlayers;
+
+
   this.stripUnneededData = function(eventData) {
 
     if (eventData.players) {

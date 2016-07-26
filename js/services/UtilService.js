@@ -7,6 +7,10 @@ sosApp.service('UtilService', ['ConstantsService', function(ConstantsService) {
   // Fisher-Yates (aka Knuth) Shuffle
   // http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
   this.shuffle = function(array) {
+    if (array.length == 0) {
+      return array;
+    }
+    
     var currentIndex = array.length, temporaryValue, randomIndex ;
 
     // While there remain elements to shuffle...
