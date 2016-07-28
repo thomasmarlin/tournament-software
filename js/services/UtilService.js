@@ -1,16 +1,16 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.service('UtilService', ['ConstantsService', function(ConstantsService) {
+sosApp.service('UtilService', [function() {
 
   var self = this;
 
   // Fisher-Yates (aka Knuth) Shuffle
   // http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
   this.shuffle = function(array) {
-    if (array.length == 0) {
+    if (array.length === 0) {
       return array;
     }
-    
+
     var currentIndex = array.length, temporaryValue, randomIndex ;
 
     // While there remain elements to shuffle...
@@ -34,7 +34,7 @@ sosApp.service('UtilService', ['ConstantsService', function(ConstantsService) {
   }
 
 
-  this.peopleEqual = function(p1, p2) {
+  function peopleEqual(p1, p2) {
     if ((p1 == null) && (p2 == null)) {
       return true;
     } else if (p1 == null) {
@@ -46,11 +46,32 @@ sosApp.service('UtilService', ['ConstantsService', function(ConstantsService) {
     } else {
       return false;
     }
+  }
+  this.peopleEqual = peopleEqual;
+
+
+  this.isPairDown = function(playerDark, playerLight) {
+    if (playerDark.vp != playerLight.vp) {
+      return true;
+    }
+    return false;
   };
 
 
+  this.gamesEqual = function(game1, game2) {
+    if ((game1.roundNumber == game2.roundNumber) &&
+        peopleEqual(game1.playerDark, game2.playerDark) &&
+        peopleEqual(game1.playerLight, game2.playerLight))
+    {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+
   this.getCurrentRound = function(eventData) {
-    if (eventData.rounds.length == 0) {
+    if (eventData.rounds.length === 0) {
       return {
         num: 0
       };
