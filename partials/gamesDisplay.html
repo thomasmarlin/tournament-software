@@ -35,6 +35,10 @@
             </div>
           </div>
 
+          <div data-ng-if='getTotalGamesInRound() < 1' style='text-align: center; font-style: italic; color: gray;'>
+            <h3>No Games Created. Click 'Add Single Game' to add a new game.</h3>
+          </div>
+
           <div ng-repeat="game in currentEvent.games" style="margin-left:20px; margin-right:20px" ng-if='game.round.num == round.num'>
 
             <div>

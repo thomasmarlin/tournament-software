@@ -56,7 +56,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     );
   };
 
-  $scope.toggleOfflineMode = function(skipPrompt) {
+  $scope.toggleOfflineMode = function() {
 
     if (DataStorage.getNetworkMode() === DataStorage.NETWORK_MODES.NETWORK_OFFLINE) {
       return;
@@ -189,6 +189,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         );
       },
       function(err) {
+        console.log("Error loading event: ", err);
         MessageBoxService.errorMessage("Failed to load event. The event could not be found");
       }
     )
@@ -272,6 +273,35 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   function newRoundConfirmed() {
 
+    var confirmDialog = MessageBoxService.confirmDialog("Would you like to automatically generate pairings for this game?", $scope, "Auto-generate Pairings?");
+    confirmDialog.result.then(
+      function() {
+        console.log("Confirmed starting auto-pairings.");
+        autoGenerateNextRound();
+      },
+      function() {
+        console.log("Manual-mode selected. Just creating new game without pairings");
+        manuallyGenerateNextRound();
+      }
+    );
+
+  }
+
+  function manuallyGenerateNextRound() {
+    // Bump the round, but don't auto-generate pairings
+    var newRoundNum = getCurrentRoundNumber() + 1;
+    $scope.currentEvent.rounds.push({
+      num: newRoundNum
+    });
+
+    var currentRound = UtilService.getCurrentRound($scope.currentEvent);
+    currentRound.decisions = [];
+
+    selectCurrentRound();
+  }
+
+
+  function autoGenerateNextRound() {
     var tournamentWizard = new TournamentService.TournamentWizard($scope.currentEvent, gameCreated);
     var warningMessages = tournamentWizard.newRound();
     var lastDecisions = tournamentWizard.getLastRoundDecisions();
@@ -286,7 +316,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     }
 
     selectCurrentRound();
-  };
+  }
 
 
   $scope.getCurrentRound = function() {
@@ -299,6 +329,18 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   }
   $scope.getCurrentRoundNumber = getCurrentRoundNumber;
 
+
+  $scope.getTotalGamesInRound = function() {
+    var totalGamesInRound = 0;
+    var roundNum = getCurrentRoundNumber();
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
+      if (game.round.num == roundNum) {
+        totalGamesInRound++;
+      }
+    }
+    return totalGamesInRound;
+  };
 
   $scope.toggleTournamentFinished = function() {
     updateAllStats();
