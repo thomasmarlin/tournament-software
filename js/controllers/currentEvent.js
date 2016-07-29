@@ -59,7 +59,7 @@ sosApp.directive('currentEvent', ['ConstantsService', 'DataStorage', 'RESTServic
           generateStartButton.click();
           setTimeout(function() {
             assignNextWinner();
-          }, 20*1000);
+          }, 5 * 1000);
         }
       }
 
@@ -82,7 +82,7 @@ sosApp.directive('currentEvent', ['ConstantsService', 'DataStorage', 'RESTServic
               alert("Failed to find assign winner button");
             } else {
               assignWinnerButton.click();
-              setTimeout(assignNextWinner, 3000);
+              setTimeout(assignNextWinner, 1 * 1000);
             }
 
           }, 500);
