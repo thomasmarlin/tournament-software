@@ -1218,15 +1218,12 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
             // Woot!  Built some better pairings!
             logDecision("Pairings have been modified to avoid unneeded pair-downs. Continuing");
-            MessageBoxService.infoMessage("Successfully fixed up a pairing!!!");
             return true;
 
           } else {
 
-            MessageBoxService.infoMessage("Failed to avoid a pair-down.  Dangit...");
-
             // Dang...no better pairings available
-            LoggerService.log("Sadly, no better pairings are available. Continuing with paired-down version");
+            logDecision("Attempt at pair-down avoidance unsuccessful. Continuing...");
 
           }
 
