@@ -1,6 +1,6 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$timeout', 'ConstantsService', 'TournamentService', function($scope, $uibModalInstance, $timeout, ConstantsService, TournamentService) {
+sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$timeout', 'ConstantsService', 'MessageBoxService', 'TournamentService', 'UtilService', function($scope, $uibModalInstance, $timeout, ConstantsService, MessageBoxService, TournamentService, UtilService) {
 
   // Get the game to open from the parent scope
   $scope.gameToOpen = JSON.parse(JSON.stringify($scope.gameToOpen));
@@ -9,6 +9,17 @@ sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$ti
   $scope.allPlayersAndBye = [];
 
   $scope.okClick = function() {
+
+    // Fix messed up stuff
+    if (typeof $scope.gameToOpen.darkLostCards == 'undefined') {
+      $scope.gameToOpen.darkLostCards = 0;
+    }
+    if (typeof $scope.gameToOpen.lightLostCards == 'undefined') {
+      $scope.gameToOpen.lightLostCards = 0;
+    }
+    if (typeof $scope.gameToOpen.diff == 'undefined') {
+      $scope.gameToOpen.diff = 0;
+    }
 
     if (isNaN(parseInt($scope.gameToOpen.darkLostCards))) {
       MessageBoxService.errorMessage("Please enter a valid value for 'Dark Side lost pile count'", $scope);
@@ -37,17 +48,63 @@ sosApp.controller('AssignWinnerController', ['$scope', '$uibModalInstance', '$ti
     $uibModalInstance.close(edittedGame);
   }
 
+  function getPlayersThisRound() {
+    var currentRoundNum = $scope.getCurrentRoundNumber();
+    var players = [];
+    for (var i = 0; i < $scope.currentEvent.games.length; i++) {
+      var game = $scope.currentEvent.games[i];
+      if (game.round.num == currentRoundNum) {
+        players.push(game.playerDark);
+        players.push(game.playerLight);
+      }
+    }
+    return players;
+  }
+
+
   function getAllPlayersAndBye(){
+    var i = 0;
+    var player = null;
+
     var allPlayers = [];
-    for (var i = 0; i < $scope.currentEvent.players.length; i++) {
-      var player = $scope.currentEvent.players[i];
+    for (i = 0; i < $scope.currentEvent.players.length; i++) {
+      player = $scope.currentEvent.players[i];
       allPlayers.push(player);
     }
 
     var byePlayer = TournamentService.getByePlayer();
     allPlayers.push(byePlayer);
 
-    return allPlayers;
+    var unplayedPlayers = [];
+
+    // Keep existing players available
+    if ($scope.gameToOpen.playerDark) {
+      unplayedPlayers.push($scope.gameToOpen.playerDark);
+    }
+    if ($scope.gameToOpen.playerLight) {
+      unplayedPlayers.push($scope.gameToOpen.playerLight);
+    }
+    
+
+    var playersThisRound = getPlayersThisRound();
+    for (i = 0; i < allPlayers.length; i++) {
+      player = allPlayers[i];
+      var playedThisRound = false;
+
+      for (var j = 0; j < playersThisRound.length; j++) {
+        var playedPlayer = playersThisRound[j];
+        if (UtilService.peopleEqual(playedPlayer, player)) {
+          playedThisRound = true;
+        }
+      }
+      if (!playedThisRound) {
+        unplayedPlayers.push(player);
+      }
+    }
+
+
+
+    return unplayedPlayers;
   }
   $scope.allPlayersAndBye = getAllPlayersAndBye();
 

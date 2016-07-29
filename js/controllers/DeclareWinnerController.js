@@ -1,12 +1,23 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('DeclareWinnerController', ['$scope', '$uibModalInstance', '$timeout', 'ConstantsService', 'MessageBoxService', 'TournamentService', function($scope, $uibModalInstance, $timeout, ConstantsService, MessageBoxService, TournamentService) {
+sosApp.controller('DeclareWinnerController', ['$scope', '$uibModalInstance', '$timeout', 'ConstantsService', 'MessageBoxService', function($scope, $uibModalInstance, $timeout, ConstantsService, MessageBoxService) {
 
   // Get the game to open from the parent scope
   $scope.gameToOpen = JSON.parse(JSON.stringify($scope.gameToOpen));
   $scope.showLostPiles = ($scope.currentEvent.mode == ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY);
 
   $scope.okClick = function() {
+
+    // Fix messed up stuff
+    if (typeof $scope.gameToOpen.darkLostCards == 'undefined') {
+      $scope.gameToOpen.darkLostCards = 0;
+    }
+    if (typeof $scope.gameToOpen.lightLostCards == 'undefined') {
+      $scope.gameToOpen.lightLostCards = 0;
+    }
+    if (typeof $scope.gameToOpen.diff == 'undefined') {
+      $scope.gameToOpen.diff = 0;
+    }
 
     if (isNaN(parseInt($scope.gameToOpen.darkLostCards))) {
       MessageBoxService.errorMessage("Please enter a valid value for 'Dark Side lost pile count'", $scope);
