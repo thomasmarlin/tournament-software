@@ -2,10 +2,9 @@
 var sosApp = angular.module('sosApp');
 sosApp.service('TournamentService', ['MessageBoxService', 'LoggerService', 'UtilService', 'ConstantsService', 'StatsService', function(MessageBoxService, LoggerService, UtilService, ConstantsService, StatsService) {
 
-/*
 var MAX_SHUFFLE_COUNT = 50;
 var PAIRING_PROBLEM_DETECTED = 'PAIRING_PROBLEM_DETECTED';
-*/
+
 
 function getByePlayer() {
   return {
@@ -55,26 +54,56 @@ this.TournamentWizard = function(eventData, gameCreated) {
   this.newRound = function() {
 
     var newRoundNum = getCurrentRoundNumber() + 1;
+    resetRetryCountForRound(newRoundNum);
 
-    clearDecisions();
+    var warningMessages = [];
+    var caughtException = true;
 
-    // Make sure all of our totals are up-to-date before generating new pairings
-    StatsService.updateVictoryPoints(eventData);
+    // Keep trying to regenerate the round until we have tried too many times OR we have a success
+    while (caughtException && canRetryPairingsForRound(newRoundNum)) {
 
-    // Add the new round
-    eventData.rounds.push({
-      num: newRoundNum
-    });
+      clearDecisions();
 
-    // Start it up!
-    logDecision("-------- Starting New Game (" + newRoundNum + ")--------");
-    if (!isOddRound()) {
-      logDecision("Piles remain the same this game, but Dark/Light will swap");
+      // Make sure all of our totals are up-to-date before generating new pairings
+      StatsService.updateVictoryPoints(eventData);
+
+      // Add the new round
+      eventData.rounds.push({
+        num: newRoundNum
+      });
+
+      // Start it up!
+      logDecision("-------- Starting New Game (" + newRoundNum + ")--------");
+      if (!isOddRound()) {
+        logDecision("Piles remain the same this game, but Dark/Light will swap");
+      }
+
+      caughtException = false;
+
+      try {
+
+        // Start matchups for the next round
+        warningMessages = newMatchups();
+        console.log("Pairings for this round have finished!");
+
+      } catch (e) {
+
+        // If this is an unneeded pairdown situation OR it's a dead-end situation, go ahead and retry
+        if (e == PAIRING_PROBLEM_DETECTED) {
+
+          caughtException = true;
+          console.log("**** PAIRING_PROBLEM_DETECTED: Will retry after reshuffling all piles of equal VP");
+          incrementRetryCountForRound(newRoundNum);
+
+          // Remove all of the generated data for this round...
+          removeEverythingForRound(newRoundNum);
+
+        } else {
+          console.error("Error detected during pairings....crap.  Error was; ", e);
+        }
+
+      }
     }
-
-    // Start matchups for the next round
-    var warningMessages = newMatchups();
-    console.log("Pairings for this round have finished!");
 
     // Make sure all of our totals are up-to-date now that we have new assignments
     StatsService.updateVictoryPoints(eventData);
@@ -82,7 +111,6 @@ this.TournamentWizard = function(eventData, gameCreated) {
     return warningMessages
   }
 
-/*
   function incrementRetryCountForRound(roundNum) {
     eventData.retryCountForRound[roundNum]++;
   }
@@ -110,13 +138,11 @@ this.TournamentWizard = function(eventData, gameCreated) {
     }
     return false;
   }
-  */
   function isSOSTournament() {
     return (eventData.mode === ConstantsService.TOURNAMENT_FORMAT.SOS);
   }
 
 
-/*
   function removeEverythingForRound(roundNum) {
     var i = 0;
     var removedGames = true;
@@ -144,16 +170,23 @@ this.TournamentWizard = function(eventData, gameCreated) {
     }
 
   }
-*/
 
 
 
-  function hasPlayedSameAllegiance(playerDark, playerLight) {
+  function hasPlayedSameAllegiance(player1, p1Dark, player2) {
     for (var i = 0; i < eventData.games.length; i++) {
       var game = eventData.games[i];
 
-      if (UtilService.peopleEqual(game.playerDark, playerDark) && UtilService.peopleEqual(game.playerLight, playerLight)) {
-        return true;
+      if (p1Dark) {
+        if (UtilService.peopleEqual(game.playerDark, player1) && UtilService.peopleEqual(game.playerLight, player2)) {
+          return true;
+        }
+      }
+
+      if (!p1Dark) {
+        if (UtilService.peopleEqual(game.playerLight, player1) && UtilService.peopleEqual(game.playerDark, player2)) {
+          return true;
+        }
       }
     }
     return false;
@@ -1047,11 +1080,24 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
           logDecision("No pair-downs were available for this match. Attempting to swap assignments with people from previous games.");
 
-          // Try re-pairing this player with someone from the last 3 games. The 3 is somewhat arbitrary, but oh well...
+          // First, try re-pairing this player with someone from the last 2 games.
           var couldRePairGames = false;
-          couldRePairGames = repairPreviousGames(gameTryingToFix, 3, currentRound, darkPile, lightPile);
+          couldRePairGames = repairPreviousGames(gameTryingToFix, 2, currentRound, darkPile, lightPile);
           if (couldRePairGames) {
             logDecision('Successfully re-paired a player with a player from a previous game. (level-2)');
+          }
+
+          // Crap...pairings failed.  Try to retry pairings if possible...
+          if (!couldRePairGames && canRetryPairingsForRound(currentRound.num)) {
+            throw PAIRING_PROBLEM_DETECTED;
+          }
+
+          // Not good...couldn't re-pair with last 2 games, and re-pairing failed. Try last 3 games...
+          if (!couldRePairGames) {
+            couldRePairGames = repairPreviousGames(gameTryingToFix, 3, currentRound, darkPile, lightPile);
+            if (couldRePairGames) {
+              logDecision('Successfully re-paired a player with a player from a previous game. (level-3)');
+            }
           }
 
           // If we still couldn't re-pair the games, the give up and just let it go through... TD will need to figure this out.
@@ -1118,7 +1164,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
   /**
    * Gets previous X games.  These should be in order of most recent to oldest games
    */
-  function getPreviousNonByeGames(maxGames, currentRound) {
+  function getPreviousGames(maxGames, currentRound) {
     var gamesForRound = [];
     var i = 0;
     var game = null;
@@ -1134,11 +1180,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
     var matchingGames = [];
     for (i = gamesForRound.length-1; i >= 0; i--) {
       game = gamesForRound[i];
-
-      // Only include games which are not BYES. We don't want to do anything with these!
-      if (!gameHasByePlayer(game)) {
-        matchingGames.push(game);
-      }
+      matchingGames.push(game);
 
       // See if we have enough games...
       if (matchingGames.length >= maxGames) {
@@ -1153,7 +1195,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
   /**
    * Gets games with equal victory points. These should be in order of most recent to oldest games
    */
-  function getNonByeGamesWithVictoryPoints(victoryPoints, currentRound) {
+  function getGamesWithVictoryPoints(victoryPoints, currentRound) {
     var gamesForRound = [];
     var i = 0;
     var game = null;
@@ -1170,31 +1212,21 @@ this.TournamentWizard = function(eventData, gameCreated) {
     for (i = gamesForRound.length-1; i >= 0; i--) {
       game = gamesForRound[i];
       if ((game.playerLight.vp == victoryPoints) || (game.playerDark.vp == victoryPoints)) {
-        if (!gameHasByePlayer(game)) {
-          matchingGames.push(game);
-        }
+        matchingGames.push(game);
       }
     }
 
     return matchingGames;
   }
 
-  function gameHasByePlayer(game) {
-    if (isByePlayer(game.playerLight) || isByePlayer(game.playerDark)) {
-      return true;
-    }
-
-    return false;
-  }
-
 
   function repairGamesWithVp(badGame, victoryPoints, currentRound, darkPile, lightPile) {
-    var games = getNonByeGamesWithVictoryPoints(victoryPoints, currentRound);
+    var games = getGamesWithVictoryPoints(victoryPoints, currentRound);
     return repairGames(badGame, games, currentRound, darkPile, lightPile);
   }
 
   function repairPreviousGames(badGame, maxPreviousGame, currentRound, darkPile, lightPile) {
-    var games = getPreviousNonByeGames(maxPreviousGame, currentRound);
+    var games = getPreviousGames(maxPreviousGame, currentRound);
     return repairGames(badGame, games, currentRound, darkPile, lightPile);
   }
 
@@ -1226,13 +1258,13 @@ this.TournamentWizard = function(eventData, gameCreated) {
       }
 
       // See if we can rebuild game2 with badGame's Light and swapGame's Dark  (or swap sides if an odd-round)
-      if (!hasPlayedSameAllegiance(swapGame.playerDark, badGame.playerLight)) {
+      if (!hasPlayedSameAllegiance(badGame.playerLight, swapGame.playerDark)) {
         modifiedGame2Dark = swapGame.playerDark;
         modifiedGame2Light = badGame.playerLight;
-      } else if (!hasPlayedSameAllegiance(badGame.playerLight, swapGame.playerDark) && isOddRound()) {
+      } else if (!hasPlayedSameAllegiance(swapGame.playerDark, badGame.playerLight) && isOddRound()) {
         // Odd games, we can swap light/dark
-        modifiedGame2Dark = badGame.playerLight;
-        modifiedGame2Light = swapGame.playerDark;
+        modifiedGame2Dark = swapGame.playerDark;
+        modifiedGame2Light = badGame.playerLight;
       }
 
 
@@ -1413,12 +1445,12 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
   function createMatchupForPlayers(playerDark, playerLight, currentRound, darkPile, lightPile) {
     var createdGame = null;
-    if (!hasPlayedSameAllegiance(playerDark, playerLight)) {
+    if (!hasPlayedSameAllegiance(playerDark, true, playerLight)) {
 
       // Sweet! Haven't played this matchup yet.  Commit it!
       createdGame = addNewGame(playerDark, playerLight, currentRound, darkPile, lightPile, false);
 
-    } else if (isOddRound() && !hasPlayedSameAllegiance(playerLight, playerDark)) {
+    } else if (isOddRound() && !hasPlayedSameAllegiance(playerLight, true, playerDark)) {
 
       // No problem!  They haven't played this match yet
       // Just swap allegiances for this matchup

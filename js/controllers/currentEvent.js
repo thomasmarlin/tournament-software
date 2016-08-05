@@ -46,6 +46,13 @@ sosApp.directive('currentEvent', ['ConstantsService', 'DataStorage', 'RESTServic
         shouldStop = true;
       }
 
+      scope.toggleTournamentMode = function() {
+        if (scope.currentEvent.mode == ConstantsService.TOURNAMENT_FORMAT.SOS) {
+          scope.currentEvent.mode = ConstantsService.TOURNAMENT_FORMAT.DIFF;
+        } else {
+          scope.currentEvent.mode = ConstantsService.TOURNAMENT_FORMAT.SOS;
+        }
+      };
       scope.assignRandomWinners = function() {
         shouldStop = false;
         setTimeout(assignNextWinner);
@@ -58,8 +65,20 @@ sosApp.directive('currentEvent', ['ConstantsService', 'DataStorage', 'RESTServic
         } else {
           generateStartButton.click();
           setTimeout(function() {
+            clickYesAutoGenerate();
+          }, 1000);
+        }
+      }
+
+      function clickYesAutoGenerate() {
+        var confirmAutoGenerateButton = $('.confirmYes');
+        if (confirmAutoGenerateButton.length == 0) {
+          alert("Can't find auto-generate-confirm button!");
+        } else {
+          confirmAutoGenerateButton.click();
+          setTimeout(function() {
             assignNextWinner();
-          }, 5 * 1000);
+          }, 3 * 1000);
         }
       }
 

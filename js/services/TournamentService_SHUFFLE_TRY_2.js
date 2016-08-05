@@ -2,10 +2,9 @@
 var sosApp = angular.module('sosApp');
 sosApp.service('TournamentService', ['MessageBoxService', 'LoggerService', 'UtilService', 'ConstantsService', 'StatsService', function(MessageBoxService, LoggerService, UtilService, ConstantsService, StatsService) {
 
-/*
 var MAX_SHUFFLE_COUNT = 50;
 var PAIRING_PROBLEM_DETECTED = 'PAIRING_PROBLEM_DETECTED';
-*/
+
 
 function getByePlayer() {
   return {
@@ -55,26 +54,56 @@ this.TournamentWizard = function(eventData, gameCreated) {
   this.newRound = function() {
 
     var newRoundNum = getCurrentRoundNumber() + 1;
+    resetRetryCountForRound(newRoundNum);
 
-    clearDecisions();
+    var warningMessages = [];
+    var caughtException = true;
 
-    // Make sure all of our totals are up-to-date before generating new pairings
-    StatsService.updateVictoryPoints(eventData);
+    // Keep trying to regenerate the round until we have tried too many times OR we have a success
+    while (caughtException && canRetryPairingsForRound(newRoundNum)) {
 
-    // Add the new round
-    eventData.rounds.push({
-      num: newRoundNum
-    });
+      clearDecisions();
 
-    // Start it up!
-    logDecision("-------- Starting New Game (" + newRoundNum + ")--------");
-    if (!isOddRound()) {
-      logDecision("Piles remain the same this game, but Dark/Light will swap");
+      // Make sure all of our totals are up-to-date before generating new pairings
+      StatsService.updateVictoryPoints(eventData);
+
+      // Add the new round
+      eventData.rounds.push({
+        num: newRoundNum
+      });
+
+      // Start it up!
+      logDecision("-------- Starting New Game (" + newRoundNum + ")--------");
+      if (!isOddRound()) {
+        logDecision("Piles remain the same this game, but Dark/Light will swap");
+      }
+
+      caughtException = false;
+
+      try {
+
+        // Start matchups for the next round
+        warningMessages = newMatchups();
+        console.log("Pairings for this round have finished!");
+
+      } catch (e) {
+
+        // If this is an unneeded pairdown situation OR it's a dead-end situation, go ahead and retry
+        if (e == PAIRING_PROBLEM_DETECTED) {
+
+          caughtException = true;
+          console.log("**** PAIRING_PROBLEM_DETECTED: Will retry after reshuffling all piles of equal VP");
+          incrementRetryCountForRound(newRoundNum);
+
+          // Remove all of the generated data for this round...
+          removeEverythingForRound(newRoundNum);
+
+        } else {
+          console.error("Error detected during pairings....crap.  Error was; ", e);
+        }
+
+      }
     }
-
-    // Start matchups for the next round
-    var warningMessages = newMatchups();
-    console.log("Pairings for this round have finished!");
 
     // Make sure all of our totals are up-to-date now that we have new assignments
     StatsService.updateVictoryPoints(eventData);
@@ -82,7 +111,6 @@ this.TournamentWizard = function(eventData, gameCreated) {
     return warningMessages
   }
 
-/*
   function incrementRetryCountForRound(roundNum) {
     eventData.retryCountForRound[roundNum]++;
   }
@@ -110,13 +138,11 @@ this.TournamentWizard = function(eventData, gameCreated) {
     }
     return false;
   }
-  */
   function isSOSTournament() {
     return (eventData.mode === ConstantsService.TOURNAMENT_FORMAT.SOS);
   }
 
 
-/*
   function removeEverythingForRound(roundNum) {
     var i = 0;
     var removedGames = true;
@@ -144,7 +170,6 @@ this.TournamentWizard = function(eventData, gameCreated) {
     }
 
   }
-*/
 
 
 
@@ -1047,11 +1072,24 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
           logDecision("No pair-downs were available for this match. Attempting to swap assignments with people from previous games.");
 
-          // Try re-pairing this player with someone from the last 3 games. The 3 is somewhat arbitrary, but oh well...
+          // First, try re-pairing this player with someone from the last 2 games.
           var couldRePairGames = false;
-          couldRePairGames = repairPreviousGames(gameTryingToFix, 3, currentRound, darkPile, lightPile);
+          couldRePairGames = repairPreviousGames(gameTryingToFix, 2, currentRound, darkPile, lightPile);
           if (couldRePairGames) {
             logDecision('Successfully re-paired a player with a player from a previous game. (level-2)');
+          }
+
+          // Crap...pairings failed.  Try to retry pairings if possible...
+          if (!couldRePairGames && canRetryPairingsForRound(currentRound.num)) {
+            throw PAIRING_PROBLEM_DETECTED;
+          }
+
+          // Not good...couldn't re-pair with last 2 games, and re-pairing failed. Try last 3 games...
+          if (!couldRePairGames) {
+            couldRePairGames = repairPreviousGames(gameTryingToFix, 3, currentRound, darkPile, lightPile);
+            if (couldRePairGames) {
+              logDecision('Successfully re-paired a player with a player from a previous game. (level-3)');
+            }
           }
 
           // If we still couldn't re-pair the games, the give up and just let it go through... TD will need to figure this out.
