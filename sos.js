@@ -18,8 +18,6 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   console.log("Location data: " + JSON.stringify(queryParams));
 
 
-
-
   function setOfflineMode() {
     DataStorage.setNetworkMode(DataStorage.NETWORK_MODES.NETWORK_OFFLINE);
     $scope.networkStatus.networkMode = DataStorage.getNetworkMode();
@@ -195,8 +193,16 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     )
   }
 
+
+  function getBaseUrl() {
+    return $location.protocol() + '://' + $location.host() + ':' + $location.port() + $location.path()
+  }
+
   function loadSpecificJson(evt) {
+
     $scope.currentEvent = JSON.parse(JSON.stringify(evt));
+
+    $window.location.hash = evt.id;
 
     updateAllStats();
 
@@ -207,6 +213,8 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     var confirmDialog = MessageBoxService.confirmDialog("Warning: All unsaved data will be lost. Are you sure you want to continue?", $scope, "Are You Sure?");
     confirmDialog.result.then(
       function() {
+
+        $window.location.hash = "";
         $window.location.reload();
       }
     );
@@ -1017,6 +1025,13 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     function() {
       $scope.checkingNetworkStatus = false;
       console.log("We are online!");
+
+      // Load the current tournament (if available)
+      var eventId = $location.hash();
+      if (eventId && eventId.trim() !== "") {
+        loadEventById(eventId);
+      }
+
     },
     function(){
       $scope.checkingNetworkStatus = false;
