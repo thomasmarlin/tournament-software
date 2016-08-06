@@ -1059,7 +1059,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
             // Go ahead and create this game as-is and fire up a warning after we've finished.
             LoggerService.error("Ruh Roh...Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning players to eachother anyway.");
-            logDecision("Ruh Roh...Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning players to eachother anyway.");
+            logDecision("Problem:  Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Simple corrections were also not possible. Assigning players to eachother anyway.");
             warningMessages.push("Players: " +  playerDark.name + " and " + playerLight.name + " have already played and no pair-downs were possible. Assigning players to eachother anyway.");
 
             addNewGame(playerDark, playerLight, currentRound, darkPile, lightPile, false);
