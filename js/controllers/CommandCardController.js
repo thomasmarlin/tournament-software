@@ -1,8 +1,8 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('CommandCardController', ['$scope', '$uibModalInstance', '$timeout', 'ConstantsService', 'currentEvent', 'player', function($scope, $uibModalInstance, $timeout, ConstantsService, currentEvent, player) {
+sosApp.controller('CommandCardController', ['$scope', '$uibModalInstance', '$timeout', 'ConstantsService', 'StatsService', 'currentEvent', 'player', function($scope, $uibModalInstance, $timeout, ConstantsService, StatsService, currentEvent, player) {
 
-
+  var i = 0;
   var unsortedGames = [];
   var sortedGames = [];
   var playerId = player.id;
@@ -11,7 +11,7 @@ sosApp.controller('CommandCardController', ['$scope', '$uibModalInstance', '$tim
 
   $scope.commandCardGames = [];
 
-  for (var i = 0; i < currentEvent.games.length; i++) {
+  for (i = 0; i < currentEvent.games.length; i++) {
     var game = currentEvent.games[i];
     if ((game.playerDark.id == playerId) || (game.playerLight.id == playerId)) {
       unsortedGames.push(game);
@@ -22,7 +22,7 @@ sosApp.controller('CommandCardController', ['$scope', '$uibModalInstance', '$tim
 
   while (unsortedGames.length > 0) {
     var lowestRoundGame = unsortedGames[0];
-    for (var i = 0; i < unsortedGames.length; i++) {
+    for (i = 0; i < unsortedGames.length; i++) {
       var unsortedGame = unsortedGames[i];
       if (unsortedGame.round < lowestRoundGame.round) {
         lowestRoundGame = unsortedGame;
@@ -41,12 +41,18 @@ sosApp.controller('CommandCardController', ['$scope', '$uibModalInstance', '$tim
 
   console.log("SortedGames: " + sortedGames.length);
   // Build up the displayable games
-  for (var i = 0; i < sortedGames.length; i++) {
+  for (i = 0; i < sortedGames.length; i++) {
     var existingGame = sortedGames[i];
 
     var gameNum = existingGame.round.num;
     var lightDark = "Light"
     var opponentName = existingGame.playerDark.name;
+    var opponentVp = StatsService.getCachedVpForPlayer(existingGame.playerDark, currentEvent);
+    if (existingGame.playerDark.id == playerId) {
+      lightDark = "Dark";
+      opponentName = existingGame.playerLight.name;
+      opponentVp = StatsService.getCachedVpForPlayer(existingGame.playerLight, currentEvent);
+    }
 
     var vp = 0;
     var diff = 0;
@@ -69,15 +75,13 @@ sosApp.controller('CommandCardController', ['$scope', '$uibModalInstance', '$tim
     cumulativeVP += vp;
     cumulativeDiff += diff;
 
-    if (existingGame.playerDark.id == playerId) {
-      lightDark = "Dark";
-      opponentName = existingGame.playerLight.name;
-    }
+
 
     var displayGame = {
       num: gameNum,
       side: lightDark,
       opponentName: opponentName,
+      opponentVp: opponentVp,
       vp: vp,
       diff: diff,
       cumulativeVP: cumulativeVP,
