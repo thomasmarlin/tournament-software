@@ -4,69 +4,110 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
 
   var self = this;
 
+  /* NEW SOS Calculations - Updated Aug 9, 2016:
 
-  /* SOS Calculations from the SWCCG Tournament Guide:
+  (1) Compute for each player their total Victory Points. If they dropped, give them 1 Victory Point for each game they didn't play.
+  (2) Apply a floor of 1 Victory Point for every round (i.e., 1 Victory Point for every two games) to each player, including the bye.
+  (3) Each player's Strength Of Schedule score is the sum of all their opponents adjusted Victory Points, including the bye.
+  */
 
-  9. Strength of Schedule: Strength of Schedule is the recommended scoring method for
-     breaking ties at the end of a Swiss tournament that has more than 8 participants.
-     The calculation method is as follows:
-      •For all of your opponents: Calculate their total victory points, and then
-       calculate the total number of games they played. Divide the total VP by the
-       total number of games played; this is your Strength of Schedule score.
+  this.updateSosForPlayers = function(eventData) {
 
-      •If a player has fewer than .5 victory points per game played, adjust that
-       players victory point total so it is equal to .5 VP/GP
+    var i = 0;
+    var j = 0;
+    var k = 0;
+    var player = null;
 
-      •In the case of two or more players having equal Strength of Schedules,
-       drop each player’s lowest opponent until the tie is resolved.
+    // First, go through game-by-game and figure out the "adjustedVictoryPoints" for each player
+    // **IMPORTANT** ...in the code, a 'round' is really a game...
+    for (i = 0; i < eventData.players.length; i++) {
+      player = eventData.players[i];
+      player.adjustedVictoryPoints = 0;
+    }
 
-   */
+    //
+    // (1) Compute for each player their total Victory Points. If they dropped, give them 1 Victory Point for each game they didn't play.
+    //
 
-  this.updateSosForPlayer = function(currentPlayer, eventData) {
-    LoggerService.log("Updating SOS for player: " + currentPlayer.name + " Number of opponents: " + currentPlayer.opponentsPlayed.length);
+    for (i = 0; i < eventData.rounds.length; i++) {
+      var round = eventData.rounds[i];
 
-    var opponentsVictoryPoints = 0;
-    var opponentsGamesPlayed = 0;
-    for (var i = 0; i < currentPlayer.opponentsPlayed.length; i++) {
-      var opponent = currentPlayer.opponentsPlayed[i];
+      for (j = 0; j < eventData.players.length; j++) {
+        player = eventData.players[j];
+        var playedAGame = false;
 
-      LoggerService.calculation("  - analyzing opponent: " + opponent.name);
+        for (k = 0; k < eventData.games.length; k++) {
+          var game = eventData.games[k];
+          if (game.round.num == round.num) {
+            if (UtilService.peopleEqual(player, game.playerDark) || UtilService.peopleEqual(player, game.playerLight)) {
 
-      for (var j = 0; j < eventData.players.length; j++) {
-        var player = eventData.players[j];
-        if (UtilService.peopleEqual(player, opponent)) {
+              // Played a game!
+              playedAGame = true;
 
-          var adjustedVictoryPoints = player.vp;
-
-          // Tournament Guide:
-          // "If a player has fewer than .5 victory points per game played, adjust that players victory point total so it is equal to .5 VP/GP"
-          var playerVictoryPointToGamePlayedRatio = (player.vp / (player.wins + player.losses));
-          if (playerVictoryPointToGamePlayedRatio < 0.5) {
-
-              // Need to make this:  (VP / played) = 0.5
-              // VP = 0.5 * played
-              adjustedVictoryPoints = 0.5 * (player.wins + player.losses);
-              LoggerService.calculation("    ...player has (VP / GP) ratio < 0.5. Updating vp to: " + adjustedVictoryPoints);
+              if (game.winner) {
+                if (game.winner.id == player.id) {
+                  player.adjustedVictoryPoints += 2;
+                }
+              }
+            }
           }
+        }
 
-
-          LoggerService.calculation("    ...Adding victory points : " + adjustedVictoryPoints);
-          LoggerService.calculation("    ...Adding games played : " + (player.wins + player.losses));
-          opponentsVictoryPoints += adjustedVictoryPoints;
-          opponentsGamesPlayed += (player.wins + player.losses);
+        if (!playedAGame) {
+          // This player must have dropped!  We give them 1 VP/game that they didn't play
+          LoggerService.calculation("Player: " + player.name + " must have dropped. Applying single adjusted victory point.");
+          player.adjustedVictoryPoints += 1;
         }
       }
     }
 
-    //LoggerService.log("  - Opponents VP: " + opponentsVictoryPoints);
-    //LoggerService.log("  - Opponents GamesPlayed: " + opponentsGamesPlayed);
 
-    var sos = opponentsVictoryPoints / opponentsGamesPlayed;
-    if (opponentsGamesPlayed == 0) {
-      sos = "";
+    //
+    // (2) Apply a floor of 1 Victory Point for every round (i.e., 1 Victory Point for every two games) to each player, including the bye.
+    //
+
+    var roundCount = Math.floor(eventData.rounds.length / 2);  // Again..our 'rounds' in the software are actually games, so divide by 2
+    for (i = 0; i < eventData.players.length; i++) {
+      player = eventData.players[i];
+
+      if (player.adjustedVictoryPoints < roundCount) {
+        LoggerService.calculation("Player: " + player.name + " didn't do well. Setting 'adjustedVictoryPoints' to " + roundCount);
+        player.adjustedVictoryPoints = roundCount;
+      }
     }
-    LoggerService.calculation("  - Totals: Opponents' VP: " + opponentsVictoryPoints + " Opponents' GP: " + opponentsGamesPlayed + ".  Calculated SOS: " + sos);
-    currentPlayer.sos = sos;
+
+
+    LoggerService.calculation("--- Printing Adjusted Victory Points ---");
+    for (i = 0; i < eventData.players.length; i++) {
+      player = eventData.players[i];
+      LoggerService.calculation("Adjusted Victory Points for: " + player.name + ": " + player.adjustedVictoryPoints);
+    }
+
+
+    //
+    // (3) Each player's Strength Of Schedule score is the sum of all their opponents adjusted Victory Points, including the bye.
+    //
+
+    for (i = 0; i < eventData.players.length; i++) {
+      player = eventData.players[i];
+      player.sos = 0;
+
+      LoggerService.calculation("Calculating SOS for player: " + player.name);
+      for (j = 0; j < player.opponentsPlayed.length; j++) {
+        var opponent = player.opponentsPlayed[j];
+
+
+        if (isByePlayer(opponent)) {
+          // The Bye player uses VP equal to the number of rounds (due to the 'floor of 1 per rount' rule)
+          player.sos += roundCount;
+        } else {
+          var adjustedVictoryPointsForOpponent = getCachedAdjustedVpForPlayer(opponent, eventData);
+          LoggerService.calculation("  - Opponent '" + opponent.name + "' adjustedVictoryPoints: " + adjustedVictoryPointsForOpponent);
+
+          player.sos += adjustedVictoryPointsForOpponent;
+        }
+      }
+    }
 
   };
 
@@ -124,11 +165,8 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
       LoggerService.calculation("Victory Points for Player: " + player.name + " : " + player.vp);
     }
 
-    // Update SOS for each player
-    for (var i = 0; i < eventData.players.length; i++) {
-      var player = eventData.players[i];
-      self.updateSosForPlayer(player, eventData);
-    }
+    // Update SOS for each player (this requires the VP be in place from the above!)
+    self.updateSosForPlayers(eventData);
 
     perfLog("Before player sorting.");
 
@@ -161,10 +199,43 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
     return playerThin;
   }
 
+  function getCachedAdjustedVpForPlayer(player, eventData) {
+    if (isByePlayer(player)) {
+      return Math.floor(eventData.rounds.length / 2);
+    }
+
+    for (var i = 0; i < eventData.players.length; i++) {
+      var existingPlayer = eventData.players[i];
+      if (UtilService.peopleEqual(existingPlayer, player)) {
+        return existingPlayer.adjustedVictoryPoints;
+      }
+    }
+    LoggerService.error("Error finding player: " + player.name);
+    return 99999;
+  }
+  this.getCachedAdjustedVpForPlayer = getCachedAdjustedVpForPlayer;
+
+  function getCachedVpForPlayer(player, eventData) {
+    if (isByePlayer(player)) {
+      return 0;
+    }
+
+    for (var i = 0; i < eventData.players.length; i++) {
+      var existingPlayer = eventData.players[i];
+      if (UtilService.peopleEqual(existingPlayer, player)) {
+        return existingPlayer.vp;
+      }
+    }
+    LoggerService.error("Error finding player: " + player.name);
+    return 99999;
+  }
+  this.getCachedVpForPlayer = getCachedVpForPlayer;
+
   /**
    * Adds a given opponent to the list of opponents they have played
    */
   function addToOpponentList(currentPlayer, opponent) {
+    /*
     var opponentAdded = false;
     for (var i = 0; i < currentPlayer.opponentsPlayed.length; i++) {
       var op = currentPlayer.opponentsPlayed[i];
@@ -178,6 +249,9 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
       var opponentThin = buildThinPlayer(opponent);
       currentPlayer.opponentsPlayed.push(opponentThin);
     }
+    */
+    var opponentThin = buildThinPlayer(opponent);
+    currentPlayer.opponentsPlayed.push(opponentThin);
   }
 
   function getSortFunc(tournamentMode) {
@@ -221,7 +295,7 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
         return 0;
       }
     }
-  };
+  }
 
   function sortPlayersByScore(players, tournamentMode) {
     var personSortFunc = getSortFunc(tournamentMode);
@@ -235,14 +309,22 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
   this.sortPlayersByScore = sortPlayersByScore;
 
 
+  function isByePlayer(player) {
+    return player && (player.name === "BYE");
+  }
+
 
   function shuffleEqualVpPlayers(players) {
 
     var fullShuffledList = [];
+    var shuffled = [];
+    var shuffledPlayer = null;
+    var i = 0;
+    var j = 0;
 
     var currentVp = -1;
     var playersAtCurrentVp = [];
-    for (var i = 0; i < players.length; i++) {
+    for (i = 0; i < players.length; i++) {
       var player = players[i];
       if ((currentVp == -1) || (player.vp == currentVp)) {
         // First player OR same vp as last player
@@ -252,9 +334,9 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
         // New set of players
 
         // First, clear out all of the previous ones
-        var shuffled = UtilService.shuffle(playersAtCurrentVp);
-        for (var j = 0; j < shuffled.length; j++) {
-          var shuffledPlayer = shuffled[j];
+        shuffled = UtilService.shuffle(playersAtCurrentVp);
+        for (j = 0; j < shuffled.length; j++) {
+          shuffledPlayer = shuffled[j];
           fullShuffledList.push(shuffledPlayer);
         }
 
@@ -265,9 +347,10 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
       }
     }
 
-    var shuffled = UtilService.shuffle(playersAtCurrentVp);
-    for (var j = 0; j < shuffled.length; j++) {
-      var shuffledPlayer = shuffled[j];
+    shuffled = UtilService.shuffle(playersAtCurrentVp);
+
+    for (j = 0; j < shuffled.length; j++) {
+      shuffledPlayer = shuffled[j];
       fullShuffledList.push(shuffledPlayer);
     }
 
@@ -275,8 +358,8 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
     players.splice(0, players.length);
 
     // Re-add the shuffled list
-    for (var i = 0; i < fullShuffledList.length; i++) {
-      var shuffledPlayer = fullShuffledList[i];
+    for (i = 0; i < fullShuffledList.length; i++) {
+      shuffledPlayer = fullShuffledList[i];
       players.push(shuffledPlayer);
     }
 
@@ -285,10 +368,11 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
 
 
   this.stripUnneededData = function(eventData) {
+    var i = 0;
 
     if (eventData.players) {
-      for (var i = 0; i < eventData.players.length; i++) {
-        var player = eventData.players[i];
+      for (i = 0; i < eventData.players.length; i++) {
+        var player = eventData.players[i]; //jshint ignore:line
         /*
         delete player.diff;
         delete player.sos;
@@ -300,7 +384,7 @@ sosApp.service('StatsService', ['LoggerService', 'UtilService', 'ConstantsServic
     }
 
     if (eventData.games) {
-      for (var i = 0; i < eventData.games.length; i++) {
+      for (i = 0; i < eventData.games.length; i++) {
         var game = eventData.games[i];
         if (game.playerDark) {
           game.playerDark = {
