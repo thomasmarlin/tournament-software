@@ -1,0 +1,26 @@
+<div id='printPairingsNode' style='padding: 15px;'>
+
+  <!-- Pairings sorted by dark side player first -->
+  <h2 style='text-align:center'>Pairings for Game #{{gameNumber}} (Dark First)</h2>
+  <hr>
+
+  <div style='margin-top: 5px;' data-ng-repeat='darkPairing in darkPairings'>
+    Dark: {{darkPairing.playerDark.name}}  vs  Light: {{darkPairing.playerLight.name}}.  Table: {{darkPairing.tableNumber}}
+    <span data-ng-if='darkPairing.winner' style='margin-left: 20px; font-weight: bold;'>Winner: {{darkPairing.winner.name}}</span>
+  </div>
+
+  <!-- Adding a page break -->
+  <p style="page-break-after:always;"></p>
+
+
+  <!-- Pairings sorted by light side player first -->
+  <h2 style='text-align:center'>Pairings for Game #{{gameNumber}} (Light First)</h2>
+  <hr>
+
+  <div style='margin-top: 5px;' data-ng-repeat='lightPairing in lightPairings'>
+    Light:  {{lightPairing.playerLight.name}}  vs  Dark: {{lightPairing.playerDark.name}}.  Table: {{lightPairing.tableNumber}}
+    <span data-ng-if='lightPairing.winner' style='margin-left: 20px; font-weight: bold;'>Winner: {{lightPairing.winner.name}}</span>
+  </div>
+
+
+</div>

@@ -1071,8 +1071,34 @@ this.TournamentWizard = function(eventData, gameCreated) {
 
     }
 
+    // Move the Bye game to the end
+    moveByeGameToEnd(currentRound.num);
+
     return warningMessages;
   }
+
+
+  /**
+   * Move the bye game for the given round to the end
+   * This helps with assigning table matchups to games
+   *
+   * @param   roundNum
+   * @return  null
+   */
+  function moveByeGameToEnd(roundNum) {
+    for (var i = 0; i < eventData.games.length; i++) {
+      var game = eventData.games[i];
+      if (game.round.num === roundNum) {
+        if (gameHasByePlayer(game)) {
+          eventData.games.splice(i, 1);
+          eventData.games.push(game);
+          break;
+        }
+      }
+    }
+  }
+
+
 
   /**
    * Create matchups by pairing down players

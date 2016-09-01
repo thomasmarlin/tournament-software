@@ -4,6 +4,14 @@
 
   <hr>
 
+  <div style='font-weight: bold; font-size: 1.2em'> Pairing Summary</div>
+  <div data-ng-repeat='decision in gameOnlyDecisions track by $index'>
+    {{decision}}
+  </div>
+
+
+  <div style='width: 10px; height: 50px'></div>
+  <div style='font-weight: bold; font-size: 1.2em'>Pairing Log:</div>
   <div data-ng-repeat='decision in decisions track by $index'>
     {{decision}}
   </div>

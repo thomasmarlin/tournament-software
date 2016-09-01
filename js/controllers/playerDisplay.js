@@ -1,10 +1,31 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.directive('playerDisplay', ['MessageBoxService', function(MessageBoxService) {
+sosApp.directive('playerDisplay', ['MessageBoxService', '$uibModal', function(MessageBoxService, $uibModal) {
   return {
     restrict: 'A',
     template: playerDisplayHTML,
     link: function(scope, elem, attrs) {
+
+      scope.printPlayerSummary = function() {
+
+        var modalDialog = $uibModal.open({
+            template: printStandingsHTML,
+            controller: "PrintStandingsController",
+            scope: scope,
+            resolve: {
+              players: function() {
+                return scope.currentEvent.players;
+              },
+              gameNumber: function() {
+                return scope.getCurrentRoundNumber();
+              }
+            }
+          });
+
+        return modalDialog;
+      }
+
+
       scope.showSosFormulas = function() {
 
         var calculationInfo = "The Player's Committee is adjusting the method for calculating the Strength of Schedule tiebreaker. Following issues with the prior system at Worlds 2015 the Player's Committee undertook an extensive review of the system and explored many possible methods of calculation. After much deliberation, the Player's Committee has decided that the following system best meets its goals of fairness and ease of administration:\n";

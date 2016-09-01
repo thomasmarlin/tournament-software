@@ -1,25 +1,39 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.directive('gamesDisplay', [function() {
+sosApp.directive('gamesDisplay', ['$uibModal', function($uibModal) {
   return {
     restrict: 'A',
     template: gamesDisplayHTML,
     link: function(scope, element, attrs) {
 
+      function getActiveRoundNum() {
+        for (var i = 0; i < scope.currentEvent.rounds.length; i++) {
+          var round = scope.currentEvent.rounds[i];
+          if (round.active) {
+            return round.num;
+          }
+        }
+
+        return -1;
+      }
+
       scope.printCurrentRound = function() {
-        var printContents = element.html();
-        var popupWin = window.open('', '_blank', 'width=800');
 
-        var cssIncludes =
-          '<link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/bootstrap.min.css">' +
-          '<link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/sos.css">' +
-          '<link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/findPlayer.css">' +
-          '<link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/progress.css">' +
-          '<link rel="stylesheet" type="text/css" href="/wp-content/plugins/swccg-tourny/css/shared.css">'
+        var modalDialog = $uibModal.open({
+            template: printPairingsHTML,
+            controller: "PrintPairingsController",
+            scope: scope,
+            resolve: {
+              eventData: function() {
+                return scope.currentEvent;
+              },
+              gameNumber: function() {
+                return getActiveRoundNum();
+              }
+            }
+          });
 
-        popupWin.document.open();
-        popupWin.document.write('<html><head>' + cssIncludes + '</head><body onload="window.print()">' + printContents + '</body></html>');
-        popupWin.document.close();
+        return modalDialog;
       }
 
     }
