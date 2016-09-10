@@ -32,7 +32,7 @@
           <div class="col-xs-4">
             <div class="playerBoxHeader">{{player.name}}</div>
             <div data-ng-if='player.forum_handle' class="swccg_forum_handle">{{player.forum_handle}}</div>
-            <div>SoS: {{player.sos}}</div>
+            <div>SoS: {{player.sos}} <span data-ng-if='player.sosTiebreaker != player.sos' style='color:orange'>(Tiebreak SOS: {{player.sosTiebreaker}})<span></div>
             <div>Diff:
               <span data-ng-if="player.diff >= 0" style="color:green"> ({{player.diff}}) </span>
               <span data-ng-if="player.diff < 0" style="color:red"> ({{player.diff}}) </span>

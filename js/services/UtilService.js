@@ -105,4 +105,36 @@ sosApp.service('UtilService', [function() {
   };
 
 
+  this.isPlayerInGame = function(player, game) {
+    if (peopleEqual(game.playerDark, player)) {
+      return true;
+    }
+    if (peopleEqual(game.playerLight, player)) {
+      return true;
+    }
+  }
+
+  /**
+   * Gets the given player's opponent in a given Game object
+   */
+  this.getOpponent = function(player, game) {
+    if (peopleEqual(game.playerDark, player)) {
+      return game.playerLight;
+    }
+    if (peopleEqual(game.playerLight, player)) {
+      return game.playerDark;
+    }
+  }
+
+  this.gamesEqual = function(game1, game2) {
+    if ((game1.id == game2.id) &&
+        peopleEqual(game1.playerDark, game2.playerDark) &&
+        peopleEqual(game1.playerLight, game2.playerLight))
+    {
+      return true;
+    }
+    return false;
+  }
+
+
 }]);

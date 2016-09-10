@@ -48,10 +48,13 @@ sosApp.controller('CommandCardController', ['$scope', '$uibModalInstance', '$tim
     var lightDark = "Light"
     var opponentName = existingGame.playerDark.name;
     var opponentVp = StatsService.getCachedVpForPlayer(existingGame.playerDark, currentEvent);
+    var opponentAdjustedVp = StatsService.getCachedAdjustedVpForPlayer(existingGame.playerDark, currentEvent);
     if (existingGame.playerDark.id == playerId) {
       lightDark = "Dark";
       opponentName = existingGame.playerLight.name;
       opponentVp = StatsService.getCachedVpForPlayer(existingGame.playerLight, currentEvent);
+      opponentAdjustedVp = StatsService.getCachedAdjustedVpForPlayer(existingGame.playerLight, currentEvent);
+
     }
 
     var vp = 0;
@@ -82,6 +85,7 @@ sosApp.controller('CommandCardController', ['$scope', '$uibModalInstance', '$tim
       side: lightDark,
       opponentName: opponentName,
       opponentVp: opponentVp,
+      opponentAdjustedVp: opponentAdjustedVp,
       vp: vp,
       diff: diff,
       cumulativeVP: cumulativeVP,
