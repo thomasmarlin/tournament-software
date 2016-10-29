@@ -1,10 +1,16 @@
 'use strict';
+/* globals $ */
 var sosApp = angular.module('sosApp');
 sosApp.controller('DeclareWinnerController', ['$scope', '$uibModalInstance', '$timeout', 'ConstantsService', 'MessageBoxService', function($scope, $uibModalInstance, $timeout, ConstantsService, MessageBoxService) {
 
   // Get the game to open from the parent scope
   $scope.gameToOpen = JSON.parse(JSON.stringify($scope.gameToOpen));
   $scope.showLostPiles = ($scope.currentEvent.mode == ConstantsService.TOURNAMENT_FORMAT.MATCH_PLAY);
+
+  $timeout(function() {
+    // Highlight the entire Diff field so the user can type in the data very easily
+    $('#differentialEntryField').select();
+  }, 100);
 
   $scope.okClick = function() {
 
