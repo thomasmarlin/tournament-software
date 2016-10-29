@@ -17,8 +17,11 @@
       <div class='col-xs-2'>
         VP
       </div>
-      <div class='col-xs-4'>
+      <div class='col-xs-4'  data-ng-if='isSos'>
         SOS
+      </div>
+      <div class='col-xs-4'  data-ng-if='!isSos'>
+        DIFF
       </div>
     </div>
 
@@ -35,8 +38,11 @@
         <div class='col-xs-2'>
           {{player.vp}}
         </div>
-        <div class='col-xs-4'>
+        <div class='col-xs-4' data-ng-if='isSos'>
           {{player.sos}} <span style='margin-left: 25px' data-ng-if='player.sosTiebreaker != player.sos' style='color:orange'>(Tiebreak SOS: {{player.sosTiebreaker}})</span>
+        </div>
+        <div class='col-xs-4' data-ng-if='!isSos'>
+          {{player.diff}}</span>
         </div>
       </div>
     </div>

@@ -18,6 +18,9 @@ sosApp.directive('playerDisplay', ['MessageBoxService', '$uibModal', function(Me
               },
               gameNumber: function() {
                 return scope.getCurrentRoundNumber();
+              },
+              isSos: function() {
+                return scope.currentEvent.mode == "SOS";
               }
             }
           });
