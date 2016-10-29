@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2016-09-10:v40
+# 2016-10-29:v22
 
 
 # Explicitly cached entries
@@ -59,6 +59,7 @@ js/services/LocalData.js
 js/services/LoggerService.js
 js/services/MessageBoxService.js
 js/services/RESTService.js
+js/services/SosTiebreakService.js
 js/services/StatsService.js
 js/services/TournamentService.js
 js/services/UtilService.js

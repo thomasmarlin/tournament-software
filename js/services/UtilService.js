@@ -105,7 +105,16 @@ sosApp.service('UtilService', [function() {
   };
 
 
-  this.isPlayerInGame = function(player, game) {
+  function isGameBetweenPlayers(game, player1, player2) {
+    if (isPlayerInGame(player1, game) && isPlayerInGame(player2, game)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  this.isGameBetweenPlayers = isGameBetweenPlayers;
+
+  function isPlayerInGame(player, game) {
     if (peopleEqual(game.playerDark, player)) {
       return true;
     }
@@ -113,6 +122,7 @@ sosApp.service('UtilService', [function() {
       return true;
     }
   }
+  this.isPlayerInGame = isPlayerInGame;
 
   /**
    * Gets the given player's opponent in a given Game object
@@ -135,6 +145,22 @@ sosApp.service('UtilService', [function() {
     }
     return false;
   }
+
+  this.isByePlayer = function(player) {
+    return player && (player.name === "BYE");
+  };
+
+
+  this.getGamesForPlayer = function(eventData, player) {
+    var games = [];
+    for (var i = 0; i < eventData.games.length; i++) {
+      var game = eventData.games[i];
+      if (isPlayerInGame(player, game)) {
+        games.push(game);
+      }
+    }
+    return games;
+  };
 
 
 }]);
