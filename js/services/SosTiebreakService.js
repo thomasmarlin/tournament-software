@@ -240,7 +240,7 @@ sosApp.service('SosTiebreakService', ['$injector', 'ConstantsService', 'LoggerSe
       printFailedTiebreakInfo(players, worstGamesToDropCount);
       for (i = 0; i < players.length; i++) {
         player = players[i];
-        player.sosTiebreaker = "TIED! Coin-Flip Required!";
+        player.sosTiebreaker += ": TIED! Coin-Flip Required!";
       }
     } else {
       console.log("TIEBREAK RESOLVED!!");
@@ -286,6 +286,11 @@ sosApp.service('SosTiebreakService', ['$injector', 'ConstantsService', 'LoggerSe
 
         }
       }
+    }
+
+    if (!winner) {
+      LoggerService.log("Players have not played against eachother yet. No head-to-head winner");
+      return null;
     }
 
     LoggerService.decision("Head-to-Head winner between " + player1.name + " and " + player2.name + ": " + winner.name);
