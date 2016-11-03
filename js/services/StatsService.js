@@ -110,12 +110,7 @@ sosApp.service('StatsService', ['ConstantsService', 'LoggerService', 'SosTiebrea
       player.sosTiebreaker = player.sos;
     }
 
-
-    console.log("TIEBREAK: PlayerListBEFORE: " + eventData.players.length);
-
     SosTiebreakService.applysosTiebreakers(eventData, roundCount);
-
-    console.log("TIEBREAK: PlayerListAfter: " + eventData.players.length);
   };
 
 
@@ -260,15 +255,30 @@ sosApp.service('StatsService', ['ConstantsService', 'LoggerService', 'SosTiebrea
 
 
   function personSortSosFunc(playerA, playerB) {
+
+    // Primary Sort:  VP
     if (playerA.vp > playerB.vp) {
       return -1;
     } else if (playerA.vp < playerB.vp) {
       return 1;
     } else {
+
+      // Secondary Sort:  SOS
       if (playerA.sos > playerB.sos) {
         return -1;
       } else if (playerA.sos < playerB.sos) {
         return 1;
+      } else if (playerA.sos == playerB.sos) {
+
+        // Tertiary Sort: sosTiebreaker
+        if (playerA.sosTiebreakerValue > playerB.sosTiebreakerValue) {
+          return -1;
+        } else if (playerA.sosTiebreakerValue < playerB.sosTiebreakerValue) {
+          return 1;
+        } else {
+          return 0;
+        }
+
       } else {
         return 0;
       }

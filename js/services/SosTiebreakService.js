@@ -184,15 +184,19 @@ sosApp.service('SosTiebreakService', ['$injector', 'ConstantsService', 'LoggerSe
         */
 
         LoggerService.decision("Tiebreak result: Head-to-head matchup winner between " + players[0].name + "  and " + players[1].name + ": " + headToHeadWinner.name);
-        // Bump up the player
-        playersToBumpUp.push(headToHeadWinner);
 
-        // Put the opponent after the winner
-        if (players[0].id == headToHeadWinner.id) {
-          playersToBumpUp.push(players[1]);
-        } else {
-          playersToBumpUp.push(players[0]);
+        var winner = players[0];
+        var loser = players[1];
+        if (UtilService.peopleEqual(players[1], headToHeadWinner)) {
+          winner = players[1];
+          loser = players[0];
         }
+
+        winner.sosTiebreaker += " (win vs " + loser.name + ")";
+
+        // Bump up them up in their correct order
+        playersToBumpUp.push(winner);
+        playersToBumpUp.push(loser);
 
         // Just bumped up 2 players (in order). Remove them from the list now
         removePlayersFromList(players, playersToBumpUp);
@@ -226,8 +230,18 @@ sosApp.service('SosTiebreakService', ['$injector', 'ConstantsService', 'LoggerSe
       orderedRanking.push(player);
     }
 
+    // Set the sosTiebreakerValue for sorting purposes
+    for (i = 0; i < orderedRanking.length; i++) {
+      player = orderedRanking[i];
+      player.sosTiebreakerValue = (orderedRanking.length - i);
+    }
+
     if (players.length > 0) {
       printFailedTiebreakInfo(players, worstGamesToDropCount);
+      for (i = 0; i < players.length; i++) {
+        player = players[i];
+        player.sosTiebreaker = "TIED! Coin-Flip Required!";
+      }
     } else {
       console.log("TIEBREAK RESOLVED!!");
     }
