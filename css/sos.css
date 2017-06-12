@@ -9,8 +9,18 @@
 
 .choiceContainer {
   padding: 20px;
+  padding-top: 0px;
   /*border: thin solid #dadada;*/
   border-radius: 5px;
+}
+
+.home-usage-note {
+  text-align: center;
+  width: 450px;
+  max-width: 90%;
+  margin: auto;
+  margin-top: 3em;
+  font-style: italic;
 }
 
 .tournamentTitle {

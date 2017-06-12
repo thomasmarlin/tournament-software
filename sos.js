@@ -174,7 +174,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
                   console.log("Load data Cancelled. Offline data is better.");
                   MessageBoxService.infoMessage("To use your OFFLINE data, return to the main page and select 'Manage Offline Data'", $scope);
                 }
-              )
+              );
             } else {
               // Local data is older
               loadSpecificJson(data);
@@ -190,7 +190,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         console.log("Error loading event: ", err);
         MessageBoxService.errorMessage("Failed to load event. The event could not be found");
       }
-    )
+    );
   }
 
 
@@ -232,7 +232,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     }
 
     return record;
-  }
+  };
 
   /**
    * Start a new round and automatically create matchups
@@ -329,7 +329,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
   $scope.getCurrentRound = function() {
     return UtilService.getCurrentRound($scope.currentEvent);
-  }
+  };
 
 
   function getCurrentRoundNumber() {
@@ -361,7 +361,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       MessageBoxService.infoMessage("This tournament has been re-opened and is ready for edits.", $scope);
     }
 
-  }
+  };
 
   $scope.explainPairings = function() {
     var selectedRound = getSelectedRound();
@@ -469,7 +469,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     } else {
       MessageBoxService.errorMessage("Could not find the active round!");
     }
-  }
+  };
 
 
   $scope.editPlayer = function(player) {
@@ -493,7 +493,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
           replacePlayer(player.id, newPlayer);
         }
       );
-  }
+  };
 
 
   $scope.viewCommandCard = function(player) {
@@ -506,11 +506,11 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
             return $scope.currentEvent;
           },
           player: function() {
-            return player
+            return player;
           }
         }
       });
-  }
+  };
 
   function replacePlayer(playerId, newPlayer) {
 
@@ -580,7 +580,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
             LoggerService.log("Add Player : Cancelled");
         }
       );
-  }
+  };
 
 
   $scope.manageOfflineData = function() {
@@ -604,9 +604,30 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         LoggerService.log("Closed Offlien Data");
       }
     );
-  }
+  };
 
   $scope.createEvent = function() {
+
+    // If already logged in, proceed normally
+    if (!DataStorage.isOnline() || RESTService.isLoggedIn() ) {
+      createEventHelper();
+      return;
+    }
+
+    // If not logged in, force them to log in or select offline mode
+    loginThen(
+      function() {
+        createEventHelper();
+      },
+      function() {
+        MessageBoxService.infoMessage("If you would like to continue without logging in, please select 'offline mode' in the top-right corner.");
+      }
+    );
+
+  };
+
+
+  function createEventHelper() {
     var modalDialog = $uibModal.open({
         template: createEventHTML,
         controller: 'CreateEventController',
@@ -678,7 +699,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
           LoggerService.log("Loading Event : Cancelled");
       }
     );
-  }
+  };
 
 
   $scope.loadEventFromFile = function() {
@@ -713,9 +734,9 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         loadSpecificJson(newArr);
         $scope.$apply();
       }
-    }
+    };
     input.click();
-  }
+  };
 
   // createEditGameHTML is generated off of createEditGameHTML at compile-time
   // This is required so that we can run this app in 100% offline-mode
@@ -742,7 +763,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
           LoggerService.log("Game creation : Cancelled");
       }
     );
-  }
+  };
 
 
   $scope.declareWinner = function(gameToUpdate, winner) {
@@ -806,7 +827,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
           LoggerService.log("Game Update : Cancelled");
       }
     );
-  }
+  };
 
 
   $scope.exportData = function() {
@@ -828,7 +849,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
     //element.css("display", 'none');
 
     var body = angular.element(document).find('body').eq(0);
-    body.append(element)
+    body.append(element);
 
     $timeout(function(){
       element.get(0).click();
@@ -839,7 +860,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
 
     }, 5000);
 
-  }
+  };
 
 
   /*
@@ -909,7 +930,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       saveDataUsingPassword();
     }
 
-  }
+  };
 
 
   function saveDataUsingPassword() {
@@ -939,10 +960,10 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
       },
       //Cancelled
       function() {
-        LoggerService.log("Whew...that was close.")
+        LoggerService.log("Whew...that was close.");
       }
     );
-  }
+  };
 
 
   function gameCreated(newGame){
@@ -1050,6 +1071,6 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
         }
       );
     }
-  )
+  );
 
 }]);
