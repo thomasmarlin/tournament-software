@@ -31,7 +31,7 @@ sosApp.service('UtilService', [function() {
 
   this.playerSummaryString = function(player) {
     return player.name + "  (VP: " + player.vp + " SoS: " + player.sos + " Diff: " + player.diff + ")";
-  }
+  };
 
 
   function peopleEqual(p1, p2) {
@@ -77,11 +77,11 @@ sosApp.service('UtilService', [function() {
       };
     }
     return eventData.rounds[eventData.rounds.length-1];
-  }
+  };
 
   this.getCurrentRoundNumber = function(eventData) {
     return self.getCurrentRound(eventData).num;
-  }
+  };
 
   this.getRoundNum = function(num, eventData) {
     for (var i = 0; i < eventData.rounds.length; i++) {

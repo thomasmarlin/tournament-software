@@ -1,6 +1,6 @@
 "use strict";
 var sosApp = angular.module('sosApp');
-sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $q, CryptoService) {
+sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
 
   var API_DOMAIN = 'http://192.168.33.10';
   //var API_DOMAIN = 'http://www.swtournamentbeta.com';
@@ -28,7 +28,7 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
 
     //console.log("Response: " + httpResponse);
 
-    if (jsonStart != -1 && jsonEnd != -1) {
+    if (jsonStart !== -1 && jsonEnd !== -1) {
       console.log("Found start and end of JSON response");
       var jsonContent = httpResponse.substring(jsonStart, jsonEnd);
       //console.log("JSON CONTENT: " + jsonContent);
@@ -120,8 +120,8 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
     $http.defaults.headers.post['password'] = password;
     */
 
-    $http.defaults.headers.common['username'] = username;
-    $http.defaults.headers.common['password'] = password;
+    $http.defaults.headers.post['username'] = username; //jshint ignore:line
+    $http.defaults.headers.post['password'] = password; //jshint ignore:line
   }
 
   this.isLoggedIn = function() {
