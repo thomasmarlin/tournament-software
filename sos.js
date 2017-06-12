@@ -682,6 +682,24 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
   }
 
   $scope.loadEvent = function() {
+    // If already logged in, proceed normally
+    if (!DataStorage.isOnline() || RESTService.isLoggedIn() ) {
+      loadEventHelper();
+      return;
+    }
+
+    // If not logged in, force them to log in or select offline mode
+    loginThen(
+      function() {
+        loadEventHelper();
+      },
+      function() {
+        MessageBoxService.infoMessage("If you would like to continue without logging in, please select 'offline mode' in the top-right corner.");
+      }
+    );
+  }
+
+  function loadEventHelper() {
     var modalDialog = $uibModal.open({
         template: loadEventHTML,
         controller: 'LoadEventController',
@@ -699,7 +717,7 @@ sosApp.controller('sos', ['$scope', '$animate', '$animateCss', '$uibModal', '$do
           LoggerService.log("Loading Event : Cancelled");
       }
     );
-  };
+  }
 
 
   $scope.loadEventFromFile = function() {
