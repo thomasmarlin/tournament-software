@@ -1,10 +1,12 @@
 <?php
 
+ob_start();
+
 $oldErrLevel = error_reporting();
 print("Error level: $oldErrLevel");
 
 // For production, disable errors
-//error_reporting(0);
+error_reporting(0);
 
 
 require 'MyAPI.class.php';
@@ -20,6 +22,7 @@ try {
     //$API = new MyAPI($_REQUEST, $fakeOrigin);
     $API = new MyAPI($_REQUEST, $HTTP_RAW_POST_DATA);
     echo '====JSONRESULTS====' . $API->processAPI();
+    obj_end();
 } catch (Exception $e) {
     echo json_encode(Array('error' => $e->getMessage()));
 }

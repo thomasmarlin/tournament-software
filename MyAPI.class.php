@@ -410,6 +410,110 @@ class MyAPI extends API
       $this->sendJsonResponse(true, $tournamentListData, null);
     }
 
+    protected function handleExportTournamentsCSV() {
+
+      ob_clean();
+
+      // eventId, eventName, scoreType, numberOfGames, eventDate, adjectELORating
+      // XXXX, 2017 Worlds, "SOS", 8, 10/1/2017, no
+
+      header('Content-type: text/plain');
+      header('Content-Disposition: attachment; filename="eventsExport.csv"');
+
+      print("eventId, eventName, scoreType, numberOfGames, eventDate, adjustELORating\n");
+      $tournamentIds = $this->getTournamentIds();
+      $tournamentList = array();
+
+      foreach($tournamentIds as $tournamentId) {
+        $tournamentJson = $this->getTournament($tournamentId);
+        if ($tournamentJson) {
+
+          $maxRound = 0;
+          if ($tournamentJson->games) {
+            foreach($tournamentJson->games as $game) {
+              if ($game->round->num > $maxRound) {
+                $maxRound = $game->round->num;
+              }
+            }
+          }
+
+          $id = $tournamentJson->id;
+          $name = $tournamentJson->name;
+          $mode = "SOS";
+          if ($tournamentJson->mode) {
+            $mode = $tournamentJson->mode;
+          }
+          $date = "";
+          if (isset($tournamentJson->date)) {
+            $date = $tournamentJson->date;
+          }
+          $gamesPlayed = $maxRound;
+
+          print($id . ", " . $name . ", " . $mode . ", " . $maxRound . ", " . $date . "," . "no\n");
+
+        }
+
+      }
+
+      http_response_code(200);
+      exit();
+
+    }
+
+
+    protected function handleExportGamesCSV() {
+      ob_clean();
+
+      // eventId, gameId, darkPlayerId, darkPlayerName, lightPlayerId, lightPlayerName, winnerPlayerId, victoryPoints, diff
+
+      header('Content-type: text/plain');
+      header('Content-Disposition: attachment; filename="gamesExport.csv"');
+
+      print("eventId, gameId, gameNum, darkPlayerId, darkPlayerName, lightPlayerId, lightPlayerName, winnerPlayerId, victoryPoints, diff\n");
+
+      $tournamentIds = $this->getTournamentIds();
+      $tournamentList = array();
+
+      foreach($tournamentIds as $tournamentId) {
+        $tournamentJson = $this->getTournament($tournamentId);
+
+        if ($tournamentJson) {
+
+          $eventId = $tournamentJson->id;
+
+          if ($tournamentJson->games) {
+            foreach($tournamentJson->games as $game) {
+
+              if (isset($game->playerDark) && isset($game->playerDark->id) && isset($game->playerLight) && isset($game->playerLight->id)) {
+
+                $gameId = $game->id;
+                $darkPlayerId = $game->playerDark->id;
+                $darkPlayerName = $game->playerDark->name;
+                $lightPlayerId = $game->playerLight->id;
+                $lightPlayerName = $game->playerLight->name;
+                $diff = "";
+                if (isset($game->diff)) {
+                  $diff = $game->diff;
+                }
+
+                if (isset($game->winner)) {
+                  $winnerId = $game->winner->id;
+
+                  // eventId, gameId, gameNum, darkPlayerId, darkPlayerName, lightPlayerId, lightPlayerName, winnerPlayerId, victoryPoints, diff
+                  print($eventId . ", " . $gameId . ", " . $game->round->num . ", " . $darkPlayerId . ", " . $darkPlayerName . ", " . $lightPlayerId . ", " . $lightPlayerName . ", " . $winnerId . ", 2, " . $diff . "\n");
+                }
+              }
+            }
+          }
+        }
+
+      }
+      exit();
+
+    }
+
+
+
     protected function ping() {
       $pingResponse = new stdClass();
       $pingResponse->message = "PONG";
@@ -508,6 +612,32 @@ class MyAPI extends API
 
       } else {
         $this->sendJsonResponse(false, null, "tournamentList only supports HTTP GET");
+      }
+
+    }
+
+    protected function exportTournamentsCSV() {
+
+      $method = $this->method;
+      if ($method == "GET") {
+
+        $this->handleExportTournamentsCSV();
+
+      } else {
+        $this->sendJsonResponse(false, null, "export tournaments to CSV only supports HTTP GET");
+      }
+
+    }
+
+    protected function exportGamesCSV() {
+
+      $method = $this->method;
+      if ($method == "GET") {
+
+        $this->handleExportGamesCSV();
+
+      } else {
+        $this->sendJsonResponse(false, null, "export games to CSV only supports HTTP GET");
       }
 
     }

@@ -2,8 +2,10 @@
 var sosApp = angular.module('sosApp');
 sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $q, CryptoService) {
 
-  //var API_DOMAIN = 'http://192.168.33.10';
-  var API_DOMAIN = 'http://www.swtournamentbeta.com';
+  var API_DOMAIN = 'http://192.168.33.10';
+  //var API_DOMAIN = 'http://www.swtournamentbeta.com';
+  //var API_DOMAIN = 'http://www.starwarsccg.org.com';
+
   var DEFAULT_ENDPOINT = API_DOMAIN + '/wp-content/plugins/swccg-tourny/api.php';
 
   var JSON_RESPONSE_START = "====================JSON_RESPONSE_START====================";
@@ -16,7 +18,7 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
 
 
   function getJsonDataFromResponse(response) {
-    if (response == null) {
+    if (response === null) {
       console.log("JSON response was null. Settings empty object");
       response = "{}";
     }
@@ -127,11 +129,11 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
       return true;
     }
     return false;
-  }
+  };
 
   this.getCurrentUser = function() {
     return currentUser.username;
-  }
+  };
 
   function login(username, password) {
     var url = DEFAULT_ENDPOINT + '?endpoint=login';
@@ -163,7 +165,7 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
         deferred.reject(jsonContent);
       });
     return deferred.promise;
-  };
+  }
 
 
   //
@@ -222,7 +224,7 @@ sosApp.service('RESTService', ['$http', '$q', 'CryptoService', function($http, $
   };
 
   this.deleteUser = function(userData, password) {
-    var url = DEFAULT_ENDPOINT + '?endpoint=users&userId=' + userData.id
+    var url = DEFAULT_ENDPOINT + '?endpoint=users&userId=' + userData.id;
     return this.delete(url);
   };
 
