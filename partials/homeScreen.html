@@ -12,10 +12,21 @@
   <!-- No Event yet -->
   <div data-ng-if="currentEvent == null" style="padding:20px">
     <div style="width:100%; text-align:center">
-      <h1 class="tournamentTitle">SWCCG Tournament Assistant</h1>
+      <div>
+        <span><img class="titleImageBig" src="img/star.png"></span>
+        <span><img class="titleImageBig" src="img/wars.png"></span>
+        <div style="clear:both"></div>
+        <span><img class="titleImage" src="img/customizable.png"></span>
+        <span><img class="titleImage" src="img/card.png"></span>
+        <span><img class="titleImage" src="img/game.png"></span>
+      </div>
+      <!--<h1 class="tournamentTitle">Star Wars Customizable Card Game</h1>-->
+      <h1 class="tournamentTitle" style="color: #777">Tournament Assistant</h1>
     </div>
 
+    <!--
     <hr>
+  -->
 
     <!-- Checking Network Connectivity Spinner -->
     <div data-ng-if="checkingNetworkStatus">

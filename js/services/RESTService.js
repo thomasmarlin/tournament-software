@@ -3,10 +3,11 @@ var sosApp = angular.module('sosApp');
 sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
 
   //var API_DOMAIN = 'http://192.168.33.10';
-  //var API_DOMAIN = 'http://www.swtournamentbeta.com';
-  var API_DOMAIN = 'http://www.starwarsccg.org.com';
+  //var API_DOMAIN = 'http://www.swtournamentbeta.com'; // TEST
+  var API_DOMAIN = 'http://www.starwarsccg.org';  // PRODUCTION
 
-  var DEFAULT_ENDPOINT = API_DOMAIN + '/wp/wp-content/plugins/swccg-tourny/api.php';
+  //var DEFAULT_ENDPOINT = API_DOMAIN + '/wp-content/plugins/swccg-tourny/api.php';  // TEST
+  var DEFAULT_ENDPOINT = API_DOMAIN + '/wp/wp-content/plugins/swccg-tourny/api.php'; // PRODUCTION
 
   var JSON_RESPONSE_START = "====================JSON_RESPONSE_START====================";
   var JSON_RESPONSE_END = "====================JSON_RESPONSE_END====================";
@@ -243,4 +244,4 @@ sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
 
 
 
-//http://192.168.33.10/wp/wp-content/plugins/swccg-tourny/api.php?endpoint=tournaments&tournamentId=XXXXXX&year=YYYYYY&pickers=Yes
+//http://192.168.33.10api.php?endpoint=tournaments&tournamentId=XXXXXX&year=YYYYYY&pickers=Yes
