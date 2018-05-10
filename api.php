@@ -22,7 +22,7 @@ try {
     //$API = new MyAPI($_REQUEST, $fakeOrigin);
     $API = new MyAPI($_REQUEST, $HTTP_RAW_POST_DATA);
     echo '====JSONRESULTS====' . $API->processAPI();
-    obj_end();
+    ob_end_flush();
 } catch (Exception $e) {
     echo json_encode(Array('error' => $e->getMessage()));
 }
