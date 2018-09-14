@@ -14,10 +14,10 @@ sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
   var LOCAL_ENDPOINT = 'http://192.168.33.10/wp-content/plugins/swccg-tourny/api.php';
 
   // Testing (beta)
-  var BETA_ENDPOINT = 'http://www.swtournamentbeta.com/wp-content/plugins/swccg-tourny/api.php';
+  var BETA_ENDPOINT = 'http://www.starwarsccg.org/wp/wp-content/plugins/tomtournytest/swccg-tourny/api.php';
 
 
-  var DEFAULT_ENDPOINT = LOCAL_ENDPOINT;
+  var DEFAULT_ENDPOINT = PRODUCTION_ENDPOINT;
 
 
   var JSON_RESPONSE_START = "====================JSON_RESPONSE_START====================";
