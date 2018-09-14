@@ -1,8 +1,9 @@
 'use strict';
 var sosApp = angular.module('sosApp');
-sosApp.controller('PrintPairingsController', ['$scope', '$timeout', '$uibModal', '$uibModalInstance', '$window', 'eventData', 'gameNumber', function($scope, $timeout, $uibModal, $uibModalInstance, $window, eventData, gameNumber) {
+sosApp.controller('PrintPairingsController', ['$scope', '$timeout', '$uibModal', '$uibModalInstance', '$window', 'eventData', 'gameNumber', 'summaryOnly', function($scope, $timeout, $uibModal, $uibModalInstance, $window, eventData, gameNumber, summaryOnly) {
 
   $scope.gameNumber = gameNumber;
+  $scope.summaryOnly = summaryOnly;
 
   function sortByLightPlayersFunc(gameA, gameB) {
     if (gameA.playerLight.name > gameB.playerLight.name) {
@@ -24,6 +25,18 @@ sosApp.controller('PrintPairingsController', ['$scope', '$timeout', '$uibModal',
     }
   }
 
+  function sortByName(entryA, entryB) {
+    if (entryA.name > entryB.name) {
+      return 1;
+    } else if (entryA.name < entryB.name) {
+      return -1;
+    } else {
+      return 0;
+    }
+  }
+
+
+  var verboseGames = [];
 
   var darkPairings = [];
   var lightPairings = [];
@@ -48,16 +61,36 @@ sosApp.controller('PrintPairingsController', ['$scope', '$timeout', '$uibModal',
       gameCopy.tableNumber = i+1;
       darkPairings.push(gameCopy);
       lightPairings.push(gameCopy);
+
+      verboseGames.push({
+        name: gameCopy.playerDark.name,
+        playerSide: "Dark",
+        opponentName: gameCopy.playerLight.name,
+        opponentSide: "Light",
+        tableNumber: gameCopy.tableNumber,
+        winner: gameCopy.winner
+      });
+
+      verboseGames.push({
+        name: gameCopy.playerLight.name,
+        playerSide: "Light",
+        opponentName: gameCopy.playerDark.name,
+        opponentSide: "Dark",
+        tableNumber: gameCopy.tableNumber,
+        winner: gameCopy.winner
+      });
     }
   }
 
 
   darkPairings.sort(sortByDarkPlayersFunc);
   lightPairings.sort(sortByLightPlayersFunc);
+  verboseGames.sort(sortByName);
+
 
   $scope.darkPairings = darkPairings;
   $scope.lightPairings = lightPairings;
-
+  $scope.verboseGames = verboseGames;
 
   $scope.close = function() {
     $uibModalInstance.dismiss(null);
@@ -76,7 +109,8 @@ sosApp.controller('PrintPairingsController', ['$scope', '$timeout', '$uibModal',
       '<link rel="stylesheet" type="text/css" href="css/shared.css">'
 
     popupWin.document.open();
-    popupWin.document.write('<html><head>' + cssIncludes + '</head><body onload="window.print()">' + printContents + '</body></html>');
+    //popupWin.document.write('<html><head>' + cssIncludes + '</head><body onload="window.print()">' + printContents + '</body></html>');
+    popupWin.document.write('<html><head>' + cssIncludes + '</head><body>' + printContents + '</body></html>');
     popupWin.document.close();
 
     $uibModalInstance.dismiss();

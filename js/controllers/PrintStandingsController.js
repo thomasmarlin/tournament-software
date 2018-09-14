@@ -23,7 +23,8 @@ sosApp.controller('PrintStandingsController', ['$scope', '$timeout', '$uibModal'
       '<link rel="stylesheet" type="text/css" href="css/shared.css">'
 
     popupWin.document.open();
-    popupWin.document.write('<html><head>' + cssIncludes + '</head><body onload="window.print()">' + printContents + '</body></html>');
+    //popupWin.document.write('<html><head>' + cssIncludes + '</head><body onload="window.print()">' + printContents + '</body></html>');
+    popupWin.document.write('<html><head>' + cssIncludes + '</head><body>' + printContents + '</body></html>');
     popupWin.document.close();
 
     $uibModalInstance.dismiss();

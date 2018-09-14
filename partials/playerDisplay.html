@@ -55,6 +55,14 @@
     </div>
   </div>
 
-  <button class="btn btn-default" data-ng-click="printPlayerSummary()" style='margin-left: 4px; margin-top: 7px; float:left;'>Print<span class="glyphicon glyphicon-print" style='margin-left:10px'></span></button>
+  <!-- Detailed Standings -->
+  <button class="btn btn-default" data-ng-click="printPlayerSummary(true)" style='margin-left: 4px; margin-top: 7px; float:left;'>
+    Detailed Standings
+  </button>
+
+  <!-- Detailed Standings -->
+  <button class="btn btn-default" data-ng-click="printPlayerSummary(false)" style='margin-left: 4px; margin-top: 7px; float:left;'>
+    Quick Summary
+  </button>
   <div style='clear:both'></div>
 </div>

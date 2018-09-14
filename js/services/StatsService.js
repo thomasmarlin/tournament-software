@@ -17,6 +17,7 @@ sosApp.service('StatsService', ['ConstantsService', 'LoggerService', 'SosTiebrea
     var j = 0;
     var k = 0;
     var player = null;
+    var opponent = null;
 
     // First, go through game-by-game and figure out the "adjustedVictoryPoints" for each player
     // **IMPORTANT** ...in the code, a 'round' is really a game...
@@ -94,7 +95,7 @@ sosApp.service('StatsService', ['ConstantsService', 'LoggerService', 'SosTiebrea
 
       LoggerService.calculation("Calculating SOS for player: " + player.name);
       for (j = 0; j < player.opponentsPlayed.length; j++) {
-        var opponent = player.opponentsPlayed[j];
+        opponent = player.opponentsPlayed[j];
 
 
         if (UtilService.isByePlayer(opponent)) {
@@ -108,6 +109,17 @@ sosApp.service('StatsService', ['ConstantsService', 'LoggerService', 'SosTiebrea
         }
       }
       player.sosTiebreaker = player.sos;
+    }
+
+    // Add in an "opponentSos" to each player. This is used later on for deep tie-breakers
+    for (i = 0; i < eventData.players.length; i++) {
+      player = eventData.players[i];
+      player.opponentSos = 0;
+
+      for (j = 0; j < player.opponentsPlayed.length; j++) {
+        opponent = player.opponentsPlayed[j];
+        player.opponentSos = player.opponentSos + getCachedSosForPlayer(opponent, eventData);
+      }
     }
 
     SosTiebreakService.applysosTiebreakers(eventData, roundCount);
@@ -126,10 +138,27 @@ sosApp.service('StatsService', ['ConstantsService', 'LoggerService', 'SosTiebrea
    */
   this.updateVictoryPoints = function(eventData) {
 
+    var i = 0;
+    var player = null;
+
+    // Clear out all values for all players
+    for (i = 0; i < eventData.players.length; i++) {
+      player = eventData.players[i];
+      player.adjustedVictoryPoints = 0;
+      player.vp = 0;
+      player.sos = 0;
+      player.sosTiebreaker = 0;
+      player.sosTiebreakerValue = 0;
+      player.opponentSos = 0;
+      player.trueTie = false;
+    }
+
+
+
     perfLog("updateVictoryPoints()...");
 
-    for (var i = 0; i < eventData.players.length; i++){
-      var player = eventData.players[i];
+    for (i = 0; i < eventData.players.length; i++){
+      player = eventData.players[i];
       player.wins = 0;
       player.losses = 0;
       player.vp = 0;
@@ -204,6 +233,32 @@ sosApp.service('StatsService', ['ConstantsService', 'LoggerService', 'SosTiebrea
     return 99999;
   }
   this.getCachedAdjustedVpForPlayer = getCachedAdjustedVpForPlayer;
+
+  function getCachedSosForPlayer(player, eventData) {
+    if (UtilService.isByePlayer(player)) {
+      // Bye player doesn't really have an SOS. Give them an SOS according to
+      // the tournament guide:
+      //
+      // < 6 Game event (or less):  4VP / game
+      // 6+ Game event: 6VP / game
+      var valuePerGame = 4;
+      if (eventData.rounds.length) {
+        valuePerGame = 6;
+      }
+      return eventData.rounds.length * valuePerGame;
+    }
+
+    for (var i = 0; i < eventData.players.length; i++) {
+      var existingPlayer = eventData.players[i];
+      if (UtilService.peopleEqual(existingPlayer, player)) {
+        return existingPlayer.sos;
+      }
+    }
+    LoggerService.error("Error finding player: " + player.name);
+    return 99999;
+  }
+  this.getCachedSosForPlayer = getCachedSosForPlayer;
+
 
   function getCachedVpForPlayer(player, eventData) {
     if (UtilService.isByePlayer(player)) {

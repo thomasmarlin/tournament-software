@@ -109,6 +109,11 @@ sosApp.service('SosTiebreakService', ['$injector', 'ConstantsService', 'LoggerSe
     var i = 0;
     var j = 0;
     var player = null;
+    var otherPlayer = null;
+    var brokeATie = true;
+    var playerLookingAt = null;
+    var playerIsHighest = true;
+    var playerIsLowest = true;
 
     console.log("TIEBREAK:  The following players are currently tied: ");
     for (i = 0; i < players.length; i++) {
@@ -131,44 +136,103 @@ sosApp.service('SosTiebreakService', ['$injector', 'ConstantsService', 'LoggerSe
         console.log("New sosTiebreaker for player: " + player.name + ": " + player.sosTiebreaker);
       }
 
-      // See if a player has broken free of the tie!
+      // See if a player has broken free of the tie (higher or lower than everyone else)
+      while (brokeATie) {
+        brokeATie = false;
+        for (i = 0; i < players.length; i++) {
+          playerLookingAt = players[i];
+          playerIsHighest = true;
+          playerIsLowest = true;
 
-      // First, see if a player has a higher adjusted total than everyone else
-      for (i = 0; i < players.length; i++) {
-        var playerLookingAt = players[i];
-        var playerIsHighest = true;
-        var playerIsLowest = true;
+          for (j = 0; j < players.length; j++) {
+            otherPlayer = players[j];
+            if (UtilService.peopleEqual(playerLookingAt, otherPlayer)) {
+              // Don't compare with self ;-)
+              continue;
+            }
+              if (otherPlayer.sosTiebreaker >= playerLookingAt.sosTiebreaker) {
+              playerIsHighest = false;
+            }
+            if (otherPlayer.sosTiebreaker <= playerLookingAt.sosTiebreaker) {
+              playerIsLowest = false;
+            }
+          }
 
-        for (j = 0; j < players.length; j++) {
-          var otherPlayer = players[j];
-          if (UtilService.peopleEqual(playerLookingAt, otherPlayer)) {
-            // Don't compare with self ;-)
-            continue;
+          if (playerIsHighest) {
+            playersToBumpUp.push(playerLookingAt);
+            brokeATie = true;
+            console.log("TIEBREAK: BUMPED UP player: " + playerLookingAt.name);
           }
-            if (otherPlayer.sosTiebreaker >= playerLookingAt.sosTiebreaker) {
-            playerIsHighest = false;
-          }
-          if (otherPlayer.sosTiebreaker <= playerLookingAt.sosTiebreaker) {
-            playerIsLowest = false;
+          if (playerIsLowest) {
+            // Add the player to the beginning of the playersToDropDown list
+            playersToDropDown.unshift(playerLookingAt);
+            brokeATie = true;
+            console.log("TIEBREAK: BUMPED DOWN player: " + playerLookingAt.name);
           }
         }
-
-        if (playerIsHighest) {
-          playersToBumpUp.push(playerLookingAt);
-          console.log("TIEBREAK: BUMPED UP player: " + playerLookingAt.name);
-        }
-        if (playerIsLowest) {
-          // Add the player to the beginning of the playersToDropDown list
-          playersToDropDown.unshift(playerLookingAt);
-          console.log("TIEBREAK: BUMPED DOWN player: " + playerLookingAt.name);
-        }
+        // Remove all players which we have bumped up or down
+        removePlayersFromList(players, playersToBumpUp);
+        removePlayersFromList(players, playersToDropDown);
       }
 
-      // Remove all players which we have bumped up or down
-      removePlayersFromList(players, playersToBumpUp);
-      removePlayersFromList(players, playersToDropDown);
 
     }
+
+
+    /** If still tied, compute the Opponents' Strength of Schedule by summing the SoS score of each
+        opponent. Each game not played (for byes and drops) should count as a 4VP opponent in a sixgame
+        event, or a 6VP opponent in an eight-game event. So, in a six-game event the bye will
+        has a SoS score of 24 (6 games x 4VP per game),
+     */
+
+     // Sort them by their opponent's SOS
+     players.sort(sortOpponentSos);
+
+     // See if a player has broken free of the tie (higher or lower than everyone else)
+     brokeATie = true;
+     while (brokeATie) {
+       brokeATie = false;
+
+       // Go through eacy player and compare their opponentSos with their own opponentSos
+       for (i = 0; i < players.length; i++) {
+         playerLookingAt = players[i];
+         playerIsHighest = true;
+         playerIsLowest = true;
+
+         for (j = 0; j < players.length; j++) {
+           otherPlayer = players[j];
+           if (UtilService.peopleEqual(playerLookingAt, otherPlayer)) {
+             // Don't compare with self ;-)
+             continue;
+           }
+           if (otherPlayer.opponentSos >= playerLookingAt.opponentSos) {
+             playerIsHighest = false;
+           }
+           if (otherPlayer.opponentSos <= playerLookingAt.opponentSos) {
+             playerIsLowest = false;
+           }
+         }
+
+         if (playerIsHighest) {
+           playersToBumpUp.push(playerLookingAt);
+           playerLookingAt.sosTiebreaker += " (> Opp SOS)"
+           brokeATie = true;
+           console.log("TIEBREAK: BUMPED UP due to opponent SOS player: " + playerLookingAt.name);
+         }
+         if (playerIsLowest) {
+           // Add the player to the beginning of the playersToDropDown list
+           playerLookingAt.sosTiebreaker += " (< Opp SOS)"
+           playersToDropDown.unshift(playerLookingAt);
+           brokeATie = true;
+           console.log("TIEBREAK: BUMPED DOWN due to opponent SOS player: " + playerLookingAt.name);
+         }
+       }
+       // Remove all players which we have bumped up or down
+       removePlayersFromList(players, playersToBumpUp);
+       removePlayersFromList(players, playersToDropDown);
+     }
+
+
 
 
     // After removing the worst games for people, if players are still tied, check their head-to-head scores!
@@ -202,11 +266,7 @@ sosApp.service('SosTiebreakService', ['$injector', 'ConstantsService', 'LoggerSe
         removePlayersFromList(players, playersToBumpUp);
       }
 
-    } else if (players.length > 0) {
-      printFailedTiebreakInfo(players, worstGamesToDropCount);
     }
-
-
 
 
     // At the end, re-assemble our list of players
@@ -234,16 +294,29 @@ sosApp.service('SosTiebreakService', ['$injector', 'ConstantsService', 'LoggerSe
     for (i = 0; i < orderedRanking.length; i++) {
       player = orderedRanking[i];
       player.sosTiebreakerValue = (orderedRanking.length - i);
+      player.trueTie = false;
     }
 
-    if (players.length > 0) {
-      printFailedTiebreakInfo(players, worstGamesToDropCount);
-      for (i = 0; i < players.length; i++) {
-        player = players[i];
-        player.sosTiebreaker += ": TIED! Coin-Flip Required!";
+    // If anybody is still tie up, print out info indicating that a tiebreak is still required!
+    var previousPlayer = null;
+    for (i = 0; i < orderedRanking.length; i++) {
+      player = orderedRanking[i];
+      if (previousPlayer) {
+        if ((previousPlayer.vp == player.vp) &&
+            (previousPlayer.sos == player.sos) &&
+            (previousPlayer.sosTiebreaker == player.sosTiebreaker) &&
+            (previousPlayer.opponentSos == player.opponentSos) )
+        {
+          // We have a true tie here!
+          console.log("True tie for players: " + player.name + " and " + previousPlayer.name);
+          //player.sosTiebreaker += ": TIED! Coin-Flip Required!";
+          //previousPlayer.sosTiebreaker += ": TIED! Coin-Flip Required!";
+
+          player.trueTie = true;
+          previousPlayer.trueTie = true;
+        }
       }
-    } else {
-      console.log("TIEBREAK RESOLVED!!");
+      previousPlayer = player;
     }
 
     // Re-order the tied players in the event data
@@ -251,13 +324,9 @@ sosApp.service('SosTiebreakService', ['$injector', 'ConstantsService', 'LoggerSe
   }
 
 
-  // This is for debugging purposes only
-  function printFailedTiebreakInfo(players, worstGamesToDropCount) {
-    var sosTiebreakerValues = "";
-    for (var z = 0; z < players.length; z++) {
-      sosTiebreakerValues += " " + players[z].sosTiebreaker;
-    }
-    console.log("TIEBREAK: Failed to break ties after dropping worst opponent game count: " + worstGamesToDropCount + " games.  (players had: " + sosTiebreakerValues + "). Coin-flip required");
+  function sortOpponentSos(player1, player2) {
+    // Sort descending (highest first)
+    return player2.opponentSos - player1.opponentSos;
   }
 
 

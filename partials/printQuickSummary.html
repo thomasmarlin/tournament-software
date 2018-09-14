@@ -17,21 +17,6 @@
       <div class='col-xs-1'>
         VP
       </div>
-      <div class='col-xs-2'  data-ng-if='isSos'>
-        SOS
-      </div>
-      <div class='col-xs-3'  data-ng-if='isSos'>
-        TB SOS
-      </div>
-      <div class='col-xs-1'  data-ng-if='isSos'>
-        Opp SOS
-      </div>
-      <div class='col-xs-1'>
-        AVP
-      </div>
-      <div class='col-xs-4'  data-ng-if='!isSos'>
-        DIFF
-      </div>
     </div>
 
     <hr>
@@ -46,21 +31,6 @@
         </div>
         <div class='col-xs-1'>
           {{player.vp}}
-        </div>
-        <div class='col-xs-2' data-ng-if='isSos'>
-          {{player.sos}}
-        </div>
-        <div class='col-xs-3' data-ng-if='isSos'>
-          {{player.sosTiebreaker}}
-        </div>
-        <div class='col-xs-1' data-ng-if='isSos'>
-          {{player.opponentSos}}</span>
-        </div>
-        <div class='col-xs-1'>
-          {{player.adjustedVictoryPoints}}
-        </div>
-        <div class='col-xs-4' data-ng-if='!isSos'>
-          {{player.diff}}</span>
         </div>
       </div>
     </div>

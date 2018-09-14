@@ -17,7 +17,7 @@ sosApp.directive('gamesDisplay', ['$uibModal', function($uibModal) {
         return -1;
       }
 
-      scope.printCurrentRound = function() {
+      scope.printCurrentRound = function(summaryOnly) {
 
         var modalDialog = $uibModal.open({
             template: printPairingsHTML,
@@ -29,6 +29,9 @@ sosApp.directive('gamesDisplay', ['$uibModal', function($uibModal) {
               },
               gameNumber: function() {
                 return getActiveRoundNum();
+              },
+              summaryOnly: function() {
+                return summaryOnly;
               }
             }
           });

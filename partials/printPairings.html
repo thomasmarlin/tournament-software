@@ -1,26 +1,27 @@
 <div id='printPairingsNode' style='padding: 15px;'>
 
   <!-- Pairings sorted by dark side player first -->
-  <h2 style='text-align:center'>Pairings for Game #{{gameNumber}} (Dark First)</h2>
+  <h2 style='text-align:center'>Pairings for Game #{{gameNumber}}</h2>
   <hr>
 
-  <div style='margin-top: 5px;' data-ng-repeat='darkPairing in darkPairings'>
-    Dark: {{darkPairing.playerDark.name}}  vs  Light: {{darkPairing.playerLight.name}}.  Table: {{darkPairing.tableNumber}}
-    <span data-ng-if='darkPairing.winner' style='margin-left: 20px; font-weight: bold;'>Winner: {{darkPairing.winner.name}}</span>
+
+  <!-- Verbose Pairings (every person listed first) -->
+  <div data-ng-if="!summaryOnly" style="padding-left: 1em">
+    <div style='margin-top: 5px;' data-ng-repeat='entry in verboseGames | orderBy: "entry.name"'>
+      {{entry.name}} ({{entry.playerSide}})  vs  {{entry.opponentName}} ({{entry.opponentSide}})   Table: {{entry.tableNumber}}
+      <span data-ng-if='entry.winner' style='margin-left: 20px; font-weight: bold;'>.... <span style="color:transparent">[b]</span>Winner: {{entry.winner.name}}<span style="color:transparent">[/b]</span></span>
+    </div>
   </div>
 
-  <!-- Adding a page break -->
-  <p style="page-break-after:always;"></p>
-
-
-  <!-- Pairings sorted by light side player first -->
-  <h2 style='text-align:center'>Pairings for Game #{{gameNumber}} (Light First)</h2>
-  <hr>
-
-  <div style='margin-top: 5px;' data-ng-repeat='lightPairing in lightPairings'>
-    Light:  {{lightPairing.playerLight.name}}  vs  Dark: {{lightPairing.playerDark.name}}.  Table: {{lightPairing.tableNumber}}
-    <span data-ng-if='lightPairing.winner' style='margin-left: 20px; font-weight: bold;'>Winner: {{lightPairing.winner.name}}</span>
+  <!-- Summary Pairings (every game listed once, Dark first) -->
+  <div data-ng-if="summaryOnly" style="padding-left: 1em">
+    <div style='margin-top: 5px;' data-ng-repeat='darkPairing in darkPairings | orderBy: "tableNumber"'>
+      Table #{{darkPairing.tableNumber}}:  {{darkPairing.playerDark.name}} (Dark) vs {{darkPairing.playerLight.name}} (Light)
+      <span data-ng-if='darkPairing.winner' style='margin-left: 20px; font-weight: bold;'>.... <span style="color:transparent">[b]</span>Winner: {{darkPairing.winner.name}}<span style="color:transparent">[/b]</span></span>
+    </div>
   </div>
+
+
 
 
 </div>

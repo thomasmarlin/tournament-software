@@ -2,7 +2,7 @@
   <h3>{{title}}</h3>
   <hr>
   <div>{{message}}</div>
-  <li data-ng-repeat='message in extraMessages'>
+  <li data-ng-repeat='message in extraMessages track by $index'>
     {{message}}
   </li>
   <div>

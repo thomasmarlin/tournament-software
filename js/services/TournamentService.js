@@ -258,9 +258,12 @@ this.TournamentWizard = function(eventData, gameCreated) {
       }
     }
 
-    evenOutPiles(lightPile, darkPile);
+    // Do not even out piles.  If they don't match, then too-bad, so-sad. We will have extra byes!
+    //evenOutPiles(lightPile, darkPile);
   }
 
+
+  /** THIS NOT NOT WANTED!  Tournament Committee has decided they would rather have extra BYES
   function evenOutPiles(lightPile, darkPile) {
 
     if (((lightPile.length + darkPile.length) % 2) !== 0) {
@@ -282,6 +285,7 @@ this.TournamentWizard = function(eventData, gameCreated) {
       MessageBoxService.errorMessage("Too many dark players present (likely due to a drop). The lowest-rated dark player has been moved to the light side");
     }
   }
+  */
 
 
   function buildPiles(players, darkPile, lightPile) {

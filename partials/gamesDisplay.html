@@ -92,7 +92,8 @@
 
         <div style="height: 10px; width: 10px"></div>
 
-        <button class="btn btn-default" data-ng-click="printCurrentRound()" style='margin-left: 4px; float:left;'>Print<span class="glyphicon glyphicon-print" style='margin-left:10px'></span></button>
+        <button class="btn btn-default" data-ng-click="printCurrentRound(false)" style='margin-left: 4px; float:left;'>Print<span class="glyphicon glyphicon-print" style='margin-left:10px'></span></button>
+        <button class="btn btn-default" data-ng-click="printCurrentRound(true)" style='margin-left: 4px; float:left;'>View Summary</button>
         <button data-ng-if="currentEvent.rounds.length > 0 && canAddRemoveGames()" class="btn btn-default" style="float:right; margin-right: 5px;" data-ng-click="deleteRound()">Delete Matchups</button>
         <button data-ng-if="currentEvent.rounds.length > 0 && canAddRemoveGames()" class="btn btn-default" style="float:right; margin-right: 15px" data-ng-click="createGame()">Add Single Game</button>
         <button data-ng-if="currentEvent.rounds.length > 0 && canAddRemoveGames()" class="btn btn-default" style="float:right; margin-right: 15px" data-ng-click="explainPairings()">Pairing Log</button>

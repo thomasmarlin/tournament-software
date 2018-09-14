@@ -3,7 +3,7 @@
     <h2>Load Existing Event</h2>
     <select class="input-sm" data-ng-model="tmp.eventId" style="min-width:200px" autofocus>
       <option value="SELECT_EVENT_PLACEHOLDER">-- Select Event --</option>
-      <option ng-repeat="evt in tmp.eventNames track by $index" value='{{evt.id}}'>{{evt.name}}</option>
+      <option ng-repeat="evt in tmp.eventNames | orderBy: 'name' track by $index" value='{{evt.id}}'>{{evt.name}}</option>
     </select>
     <hr>
     <div>

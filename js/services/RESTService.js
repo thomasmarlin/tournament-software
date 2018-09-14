@@ -2,12 +2,23 @@
 var sosApp = angular.module('sosApp');
 sosApp.service('RESTService', ['$http', '$q', function($http, $q) {
 
-  //var API_DOMAIN = 'http://192.168.33.10';
-  //var API_DOMAIN = 'http://www.swtournamentbeta.com'; // TEST
-  var API_DOMAIN = 'http://www.starwarsccg.org';  // PRODUCTION
+  //
+  // Different configurations
+  //
 
-  //var DEFAULT_ENDPOINT = API_DOMAIN + '/wp-content/plugins/swccg-tourny/api.php';  // TEST
-  var DEFAULT_ENDPOINT = API_DOMAIN + '/wp/wp-content/plugins/swccg-tourny/api.php'; // PRODUCTION
+
+  // PC Site (Production)
+  var PRODUCTION_ENDPOINT = 'http://www.starwarsccg.org/wp/wp-content/plugins/swccg-tourny/api.php';
+
+  // Testing (local dev)
+  var LOCAL_ENDPOINT = 'http://192.168.33.10/wp-content/plugins/swccg-tourny/api.php';
+
+  // Testing (beta)
+  var BETA_ENDPOINT = 'http://www.swtournamentbeta.com/wp-content/plugins/swccg-tourny/api.php';
+
+
+  var DEFAULT_ENDPOINT = LOCAL_ENDPOINT;
+
 
   var JSON_RESPONSE_START = "====================JSON_RESPONSE_START====================";
   var JSON_RESPONSE_END = "====================JSON_RESPONSE_END====================";

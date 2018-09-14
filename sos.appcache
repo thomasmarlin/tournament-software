@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2017-07-06:v01
+# 2018-09-13:v41
 
 # Explicitly cached entries
 sos.html
@@ -86,6 +86,7 @@ gen/messageBoxHTML.js
 gen/passwordPromptHTML.js
 gen/printPairingsHTML.js
 gen/printStandingsHTML.js
+gen/printQuickSummaryHTML.js
 gen/playerDisplayHTML.js
 gen/userManagementHTML.js
 

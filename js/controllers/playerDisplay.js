@@ -6,10 +6,15 @@ sosApp.directive('playerDisplay', ['MessageBoxService', '$uibModal', function(Me
     template: playerDisplayHTML,
     link: function(scope, elem, attrs) {
 
-      scope.printPlayerSummary = function() {
+      scope.printPlayerSummary = function(showDetails) {
+
+        var template = printStandingsHTML;
+        if (!showDetails) {
+          template = printQuickSummaryHTML;
+        }
 
         var modalDialog = $uibModal.open({
-            template: printStandingsHTML,
+            template: template,
             controller: "PrintStandingsController",
             scope: scope,
             resolve: {
