@@ -46,7 +46,9 @@ abstract class API
 
         $this->endpoint = $request['endpoint'];
         $this->args = $request;
-        $this->post_data = $http_raw_post_data;
+        
+        //$this->post_data = $http_raw_post_data;
+        $this->post_data = file_get_contents('php://input');
 
 
         /*
