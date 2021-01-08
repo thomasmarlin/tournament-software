@@ -7,7 +7,7 @@ Running large SWCCG tournaments can be very complex and time consuming. This too
 - Saving tournament results (either locally in your browser OR on the SWCCG Website)
 
 For more information about Star Wars CCG, check out the SWCCG Players Committee website here: https://www.starwarsccg.org/
-* Website: https://www.starwarsccg.org/v
+* Website: https://tournament.starwarsccg.org/
 
 ## Tutorial and FAQ:
 Video: https://www.starwarsccg.org/tournament-software-tutorial/
@@ -81,16 +81,50 @@ more garbage data
 
 ```
 
-
 It's not a true REST API, which is unfortunate, but it works. This would be a great opportunity for someone to come in and clean up.
 
 
+## How Do I Run This Locally?
+To run locally, the basic steps are:
+1) Create a Wordpress VM  (Recommend using Vagrant + VirtualBox)
+2) Place the entire code folder into the wordpress/plugins/swccg-tourney folder so that it runs as a Wordpress Plugin
+
+### Detailed Steps:
+1. Install VirtualBox: https://www.virtualbox.org/
+2. Install Vagrant: https://www.vagrantup.com/downloads.html
+3. Install Wordpress via Vagrant: via instructions here (https://deliciousbrains.com/vagrant-docker-wordpress-development/)
+   * vagrant plugin install vagrant-hostsupdater
+   * git clone -b master git://github.com/Varying-Vagrant-Vagrants/VVV.git ~/vagrant-local
+   * cd ~/vagrant-local && vagrant up
+   
+   You can log into Wordpress using UN: wp  PW: wp
+   
+4. Now that the Vagrant Wordpress install exists, go to that folder where you placed the vagrant file.  You will see a folder "www" which hosts the wordpress install. Inside that there are 2 copies of wordpress:  "wordpress-one" and "wordpress-two". Navigate to wordpress-one\public_html\wp-content\plugins. 
+
+5. Copy the entire tournament software source folder into the "plugins" folder above.  For exmaple, if you have the code checked out into folder "swccg-tourny", copy that folder so that it is available in wordpress\wp-content\plugins\swccg-tourny
+
+6. You can now access the website by navigating here:
+http://one.wordpress.test/wp-content/plugins/swccg-tourny/sos.html
+
+7. You'll initially see that the site is only available in "offline" mode.  This is because the code is trying to point to the production site (you don't want to do that). Instead, update the \js\services\RESTService.js file to point to the local endpoint:
+
+```
+ // PC Site (Production)
+  var PRODUCTION_ENDPOINT = 'http://www.starwarsccg.org/wp/wp-content/plugins/swccg-tourny/api.php';
+
+  // Testing (local dev)
+  var LOCAL_ENDPOINT = 'http://one.wordpress.test/wp-content/plugins/swccg-tourny/api.php';
+
+  var DEFAULT_ENDPOINT = LOCAL_ENDPOINT;
+```
+
+8. Refresh the page and you'll see the website available now!
 
 
 ## Where Can I Ask Questions?
 The best place to ask questions about this project is on the Star Wars CCG Players Committee Forums. Specifically, the "Resources" Sub-Form: https://forum.starwarsccg.org/viewforum.php?f=188
 
-##How To Contribute?
+## How To Contribute?
 If you see bugs or have improvements, please contribute!
 
 Here's a brief overview of what you will need to do:
