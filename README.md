@@ -22,6 +22,38 @@ All of the data is stored in Files on the Server. Specifically:
 * /tournaments/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX.json:  Each of these files holds the data for a tournament. The entire thing is stored as JSON in that single file.
 * /users/users.json:  These are all of the users who have an account for creating tournaments
 
+## The API
+The Back-End API is a bit of a turd right now. All requests go through the following URL:
+http://www.starwarsccg.org/wp/wp-content/plugins/swccg-tourny/api.php
+
+Each of the API commands are implemented as QueryParams on that URL.  For example, getting a player-list cam be done using a GET of 
+http://www.starwarsccg.org/wp/wp-content/plugins/swccg-tourny/api.php?endpoint=users
+
+Likewise, submitting results uese a POST to:
+http://www.starwarsccg.org/wp/wp-content/plugins/swccg-tourny/api.php?endpoint=tournaments&tournamentId=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX
+
+Those endpoints simply read the JSON data from the server's filesystem and route the data to/from the client.
+
+The responses from the server often have a bunch of garbage that Wordpress inadveratantly outputs. Consequently, the client neeeds to "scrub" the data a bit. For example, the JSON data will often be returned like this:
+
+```bash
+garbage data
+more garbage
+====================JSON_RESPONSE_START====================
+{
+ // the real JSON content here
+}
+====================JSON_RESPONSE_END====================
+more garbage data
+...
+
+```
+
+
+It's not a true REST API, which is unfortunate, but it works. This would be a great opportunity for someone to come in and clean up.
+
+
+
 
 ## Where Can I Ask Questions?
 The best place to ask questions about this project is on the Star Wars CCG Players Committee Forums. Specifically, the "Resources" Sub-Form: https://forum.starwarsccg.org/viewforum.php?f=188
