@@ -14,6 +14,28 @@ The software has 2 main components:
 * AngularJS Front-End
 * PHP Back-End  (Installs as a Wordpress Plugin)
 
+## The Front-End
+The front-end is implemented using AngularJS. The code is split up as usual:
+* /js/controllers:   One controller for each of the components in the app
+* /js/services:    Services which perform the guts of the applications (pairings API Calls, etc)
+* /partials/XXXXXX.html:  These are all of the main HTML file
+* /gen/xxxxxxxHTML.js:  Ooof... this is a little ugly. See the section below
+
+The front-end is capable of running in 2 Modes:
+### Online Mode
+In Online mode, the front-end makes API calls directly to the SWCCG PC website.  Every time the user does a "Save", we make a POST to the tournament API endpoints.  We ALSO mirror those results into the user's Browser Cache.  We save this data into LocalStorage. The cool thing about this is that if you lose connectivity to the PC site (the hotel wifi goes down or something like that), you can still continue seemlessly. You just start operating in "offline" mode instead and the system reads from the JSON data in local storage.
+
+
+
+## What's up with the /gen/xxxxxxHTML.js files?
+Yeah, this is a big ugly and I can't remember exactly why I needed to do it this way. However, the basic gist of it is that the AngularJS app needs to have all of the data available as Javascript files. This means we don't need to fetch new HTML files from the server and that sort of thing. The "right" way to do this would have been to use something like GULP or another tool to convert those HTML files into JS files. But, this was done the poor-man's way.  Every time we you make an update to an HTML file, you'll have to run the script:
+
+```bash
+/scripts/buildHtmlJsFiles.sh
+```
+
+That goes through all of the files and outputs them into the /gen folder. Those files are included by the webpage when the page loads.
+
 ## The Back-End
 One the original goals was to install this software on the SWCCG Player's Committe website. To facilitate that, it was developed as a Wordpress Plugin (yuck...I know).  
 
