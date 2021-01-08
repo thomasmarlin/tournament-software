@@ -7,12 +7,18 @@ Running large SWCCG tournaments can be very complex and time consuming. This too
 - Saving tournament results (either locally in your browser OR on the SWCCG Website)
 
 For more information about Star Wars CCG, check out the SWCCG Players Committee website here: https://www.starwarsccg.org/
-* Website: https://www.starwarsccg.org/vkit/
+* Website: https://www.starwarsccg.org/v
+
+## Tutorial and FAQ:
+Video: https://www.starwarsccg.org/tournament-software-tutorial/
+FAQ: https://www.starwarsccg.org/tournament-software-faq/
 
 ## What Technology Does This Use?
 The software has 2 main components:
 * AngularJS Front-End
 * PHP Back-End  (Installs as a Wordpress Plugin)
+
+Note:  If you can write Javascript, you should be able to handle 99% of the software.
 
 ## The Front-End
 The front-end is implemented using AngularJS. The code is split up as usual:
@@ -21,10 +27,14 @@ The front-end is implemented using AngularJS. The code is split up as usual:
 * /partials/XXXXXX.html:  These are all of the main HTML file
 * /gen/xxxxxxxHTML.js:  Ooof... this is a little ugly. See the section below
 
-The front-end is capable of running in 2 Modes:
-### Online Mode
-In Online mode, the front-end makes API calls directly to the SWCCG PC website.  Every time the user does a "Save", we make a POST to the tournament API endpoints.  We ALSO mirror those results into the user's Browser Cache.  We save this data into LocalStorage. The cool thing about this is that if you lose connectivity to the PC site (the hotel wifi goes down or something like that), you can still continue seemlessly. You just start operating in "offline" mode instead and the system reads from the JSON data in local storage.
 
+### What is the difference between Online and Offline mode?
+In online mode, whenever you save your tournament data, that data is saved up to the Player’s Committee server.
+
+In offline mode, anyone can run a tournament, even without an active internet connection!  The user only needs to browse to the website once and then a copy of the site will be stored by your browser for offline use.
+
+#### Notes about Offline Mode:
+In Offline mode, all data is stored in 'LocalStorage' inside your browser.  Whenever you open/save a tournament, the JSON is read directly out of LocalStorage instead of reading that data from the main API.  Note that in Online mode, we STILL write into LocalStorage. However, dual-write so that it writes to the PC website AND LocalStorage.  This allows us to seamlessly switch from an Online mode to Offline mode if there is a wifi-outage or other issue.
 
 
 ## What's up with the /gen/xxxxxxHTML.js files?
