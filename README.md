@@ -9,6 +9,20 @@ Running large SWCCG tournaments can be very complex and time consuming. This too
 For more information about Star Wars CCG, check out the SWCCG Players Committee website here: https://www.starwarsccg.org/
 * Website: https://www.starwarsccg.org/vkit/
 
+## What Technology Does This Use?
+The software has 2 main components:
+* AngularJS Front-End
+* PHP Back-End  (Installs as a Wordpress Plugin)
+
+## The Back-End
+One the original goals was to install this software on the SWCCG Player's Committe website. To facilitate that, it was developed as a Wordpress Plugin (yuck...I know).  
+
+All of the data is stored in Files on the Server. Specifically:
+* /players/players.json:   This is a list of all players from all tournaments
+* /tournaments/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX.json:  Each of these files holds the data for a tournament. The entire thing is stored as JSON in that single file.
+* /users/users.json:  These are all of the users who have an account for creating tournaments
+
+
 ## Where Can I Ask Questions?
 The best place to ask questions about this project is on the Star Wars CCG Players Committee Forums. Specifically, the "Resources" Sub-Form: https://forum.starwarsccg.org/viewforum.php?f=188
 
